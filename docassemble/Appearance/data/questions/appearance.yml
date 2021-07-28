@@ -532,6 +532,9 @@ subquestion: |
 
   This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
 
+  ${ al_user_bundle.download_list_html() }
+
+
   % if delivery_parties.number() < 4:
   ${ docs_list([ { "label": 'Instructions', "doc": illinois_appearance_instructions["final"] }, {"label": 'Appearance', "doc": illinois_appearance_attachment["final"] } ]) }
   % elif delivery_parties.number() < 7:
@@ -607,14 +610,40 @@ buttons:
   - Exit: exit
 ---
 objects:
-  - illinois_appearance_attachment: ALDocument.using(title="Appearance", filename="appearance_acrobat_pro_edited.pdf", enabled=True, has_addendum=False)
-  - illinois_appearance_instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", enabled=True, has_addendum=False)
-  - illinois_appearance_additional: ALDocument.using(title="Additional", filename="appearance_additional_proof_delivery.pdf", enabled=True, has_addendum=False)
-  - illinois_appearance_additional_2: ALDocument.using(title="Second Additional", filename="appearance_additional_proof_delivery_2.pdf", enabled=True, has_addendum=False)
-  - illinois_appearance_additional_blank: ALDocument.using(title="Additional (blank)", filename="appearance_additional_proof_delivery_blank.pdf", enabled=True, has_addendum=False)
+  - illinois_appearance_attachment: ALDocument.using(title="Appearance", filename="appearance_acrobat_pro_edited.pdf", has_addendum=False)
+  - illinois_appearance_instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", has_addendum=False)
+  - illinois_appearance_additional: ALDocument.using(title="Additional", filename="appearance_additional_proof_delivery.pdf", has_addendum=False)
+  - illinois_appearance_additional_2: ALDocument.using(title="Second Additional", filename="appearance_additional_proof_delivery_2.pdf", has_addendum=False)
+  - illinois_appearance_additional_blank: ALDocument.using(title="Additional (blank)", filename="appearance_additional_proof_delivery_blank.pdf", has_addendum=False)
+---
+code: |
+  illinois_appearance_attachment.enabled = False
+  illinois_appearance_instructions.enabled = False
+  illinois_appearance_additional.enabled = False
+  illinois_appearance_additional_2.enabled = False
+  illinois_appearance_additional_blank.enabled = False
+
+  if delivery_parties.number() < 4:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
+  elif delivery_parties.number() < 7:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
+    illinois_appearance_additional.enabled = True
+  elif delivery_parties.number() < 10:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
+    illinois_appearance_additional.enabled = True
+    illinois_appearance_additional_2.enabled = True
+  else:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
+    illinois_appearance_additional.enabled = True
+    illinois_appearance_additional_2.enabled = True
+    illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2], filename="illinois_appearance.pdf", title="All forms to download")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_blank], filename="illinois_appearance.pdf", title="All forms to download")
   - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2], filename="illinois_appearance.pdf", title="Appearance")
 #---
 #objects:
