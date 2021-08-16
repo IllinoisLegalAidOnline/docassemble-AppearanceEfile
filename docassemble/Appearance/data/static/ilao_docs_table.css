@@ -1,0 +1,19 @@
+.al_table tr {
+    border-top: 1px solid #dee2e6;
+}
+.al_table tr:nth-child(odd) {
+    background: #f2f2f2;
+}
+.al_table tr:last-child {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.al_table td.al_buttons .btn {
+    margin: 5px;
+}
+
+.al_buttons {
+    width: 35%;
+    padding-left: 2em;
+    text-align: right;
+}

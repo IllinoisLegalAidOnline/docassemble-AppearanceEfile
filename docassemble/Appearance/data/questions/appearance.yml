@@ -8,6 +8,9 @@ metadata:
   short title: Appearance
   comment: This program helps you tell the court and the other parties that you are participating in a court case.
 ---
+features:
+  css: ilao_docs_table.css
+---
 objects:
   - users: ALPeopleList.using(there_are_any=True)
   - users[i].lawyer: ALIndividual
@@ -87,7 +90,7 @@ subquestion: |
 
   This program creates a form that tells the court and the other parties that you are participating in a court case.
   
-  Learn about [Responding to a lawsuit](https://www.illinoislegalaid.org/node/32236).
+  Learn about [responding to a lawsuit](https://www.illinoislegalaid.org/node/32236).
 field: sees_nav_bar
 ---
 id: instructions
@@ -534,17 +537,6 @@ subquestion: |
 
   ${ al_user_bundle.download_list_html() }
 
-
-  % if delivery_parties.number() < 4:
-  ${ docs_list([ { "label": 'Instructions', "doc": illinois_appearance_instructions["final"] }, {"label": 'Appearance', "doc": illinois_appearance_attachment["final"] } ]) }
-  % elif delivery_parties.number() < 7:
-  ${ docs_list([ { "label": 'Instructions', "doc": illinois_appearance_instructions["final"] }, {"label": 'Appearance', "doc": illinois_appearance_attachment["final"] }, {"label": 'Additional Proof of Delivery', "doc": illinois_appearance_additional["final"] } ]) }
-  % elif delivery_parties.number() < 10:
-  ${ docs_list([ { "label": 'Instructions', "doc": illinois_appearance_instructions["final"] }, {"label": 'Appearance', "doc": illinois_appearance_attachment["final"] }, {"label": 'Additional Proof of Delivery', "doc": illinois_appearance_additional["final"] }, {"label": 'Additional Proof of Delivery 2', "doc": illinois_appearance_additional_2["final"] } ]) }
-  % else:
-  ${ docs_list([ { "label": 'Instructions', "doc": illinois_appearance_instructions["final"] }, {"label": 'Appearance', "doc": illinois_appearance_attachment["final"] }, {"label": 'Additional Proof of Delivery', "doc": illinois_appearance_additional["final"] }, {"label": 'Additional Proof of Delivery 2', "doc": illinois_appearance_additional_2["final"] }, {"label": 'Additional Proof of Delivery (blank)', "doc": illinois_appearance_additional_blank["final"] } ]) }
-  % endif
-
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
 css: ${ docs_list_css() }
 field: get_docs_screen
@@ -555,7 +547,7 @@ under: |
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif
   
-  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color='primary', size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color='info', size="md", new_window=True) }
 ---
 id: email forms
 question: |
@@ -612,9 +604,9 @@ buttons:
 objects:
   - illinois_appearance_attachment: ALDocument.using(title="Appearance", filename="appearance_acrobat_pro_edited.pdf", has_addendum=False)
   - illinois_appearance_instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", has_addendum=False)
-  - illinois_appearance_additional: ALDocument.using(title="Additional", filename="appearance_additional_proof_delivery.pdf", has_addendum=False)
-  - illinois_appearance_additional_2: ALDocument.using(title="Second Additional", filename="appearance_additional_proof_delivery_2.pdf", has_addendum=False)
-  - illinois_appearance_additional_blank: ALDocument.using(title="Additional (blank)", filename="appearance_additional_proof_delivery_blank.pdf", has_addendum=False)
+  - illinois_appearance_additional: ALDocument.using(title="Additional Proof of Delivery", filename="appearance_additional_proof_delivery.pdf", has_addendum=False)
+  - illinois_appearance_additional_2: ALDocument.using(title="Additional Proof of Delivery 2", filename="appearance_additional_proof_delivery_2.pdf", has_addendum=False)
+  - illinois_appearance_additional_blank: ALDocument.using(title="Additional Proof of Delivery (blank)", filename="appearance_additional_proof_delivery_blank.pdf", has_addendum=False)
 ---
 code: |
   illinois_appearance_attachment.enabled = False
