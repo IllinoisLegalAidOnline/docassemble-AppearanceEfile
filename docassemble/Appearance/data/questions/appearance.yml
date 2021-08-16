@@ -1039,7 +1039,7 @@ review:
       ${ word(yesno(x.knows_delivery_method)) }
   - Edit: x.hand_delivery
     button: |
-      **Delivery by:**
+      **Delivery by: (Edit to view and change details)**
       
       % if x.hand_delivery == True:
         * Hand
