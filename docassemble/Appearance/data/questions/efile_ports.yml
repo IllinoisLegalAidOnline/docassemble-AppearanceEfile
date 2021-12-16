@@ -1,0 +1,89 @@
+---
+include: 
+  - docassemble.EFSPIntegration:codes_helper.yml
+---
+generic object: ALDocumentBundle
+code: |
+  x.filing_type
+  x.filing_description
+  x.reference_number
+  x.tyler_filing_type 
+  x.document_type
+  x.motion_type
+  x.filing_component
+  x.filing_parties
+  x.filing_action
+  x.has_courtesy_copies
+  x.optional_services.clear()
+  x.optional_services.gathered = True
+  x.as_pdf()
+  x.completed =True
+---
+generic object: DAObject
+id: eserve
+question: |
+  Would you like to e-file this document, or serve to the desginated party?
+fields:
+  - Efile or serve?: x.filing_action
+    choices:
+      - Efile: efile
+      - Efile and Serve: efile_and_serve
+      - Serve: serve
+---
+id: document type
+generic object: DAObject
+question: |
+  Document type - ${ x.title }
+subquestion: |
+  If a judge has ordered that this case is sealed, select
+  "Confidential". You should also attach a copy of the judge's order.
+fields:
+  - Document type: x.document_type_code
+    input type: radio
+    code: |
+      x.document_type_options
+    default: ${ matching_tuple_option('non-confidential', x.document_type_options) }
+---
+generic object: DAObject
+id: motion_type
+question: |
+  Motion Type
+fields:
+  - Motion Type: x.motion_type_code
+    datatype: dropdown
+    code: |
+      x.motion_type_options
+---
+generic object: ALDocument
+id: Parties resp for payment
+question: |
+  Parties responsible for payment
+fields: 
+  - Parties for payment: x.existing_parties_payment_dict
+    datatype: checkboxes
+    code: |
+      all_case_parties
+---
+############ Case Search filter ########
+code: |
+  def filter_fn(new_case):
+    """Used inside case_search.yml to not include criminal cases"""
+    return new_case.category not in ['76963', '76962', '76964', '76965']
+---
+############ Payments Stuff ############
+reconsider:
+  - tyler_payment_account_options
+id: payment account
+question: |
+  Payment Account
+subquestion: |
+  Select an existing account below, or add a payment account
+  using the 
+  [Admin Interface](${ interview_url(i=user_info().package + ":admin_interview.yml", reset=1) }){:target="_blank"}
+  
+  Refresh this page when you have finished adding the account.
+fields:
+  - Payment Account: tyler_payment_id
+    datatype: dropdown
+    code: |
+      tyler_payment_account_options
