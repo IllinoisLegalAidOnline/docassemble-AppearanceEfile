@@ -53,7 +53,7 @@ setup(name='docassemble.Appearance',
       url='https://www.illinoislegalaid.org',
       packages=find_packages(),
       namespace_packages=['docassemble'],
-      install_requires=['docassemble.AssemblyLine>=2.10.2', 'docassemble.ILAO'],
+      install_requires=['docassemble.AssemblyLine>=2.10.2', 'docassemble.EFSPIntegration', 'docassemble.ILAO'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/Appearance/', package='docassemble.Appearance'),
      )

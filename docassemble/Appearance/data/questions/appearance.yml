@@ -73,7 +73,6 @@ code: |
 
   set_progress(100)
   get_docs_screen
-
 ---
 id: welcome
 question: |
@@ -460,7 +459,7 @@ question: |
 subquestion: |  
   You may use US mail, a delivery company, or hand delivery if you or the other party **does not** have an email address.
   
-  ${ collapse_template(efiling_help) }  
+  ${ collapse_template(efiling_help) }
 fields:
   - E-filing system: users[i].efm_delivery
     datatype: yesnowide
@@ -497,7 +496,7 @@ question: |
 subquestion: |  
   You may use US mail, a delivery company, or hand delivery if you or the other party **does not** have an email address.
   
-  ${ collapse_template(efiling_help) }  
+  ${ collapse_template(efiling_help) }
 fields:
   - E-filing system: other_parties[i].efm_delivery
     datatype: yesnowide
