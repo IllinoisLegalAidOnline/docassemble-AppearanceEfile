@@ -483,7 +483,7 @@ template: efiling_help
 subject: |
   **What if I need help?**
 content: |  
-  If you need help delivering by email or using the e-filing service provider, you can visit a [Legal Self-Help Center](www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call or text [Illinois Court Help](www.ilcourthelp.gov) at 833-411-1121.
+  If you need help delivering by email or using the e-filing service provider, you can visit a [Legal Self-Help Center](https://www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call or text [Illinois Court Help](https://www.ilcourthelp.gov) at 833-411-1121.
 ---
 id: other party delivery method
 # generic object: ALIndividual
@@ -557,7 +557,7 @@ subquestion: |
   
   Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
 
-  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
+  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
 
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
   
@@ -567,7 +567,7 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
-  **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case.
+  **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -577,49 +577,6 @@ under: |
 
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
----
-# old email forms functionality
-#id: email forms
-#question: |
-#  Email your forms
-#subquestion: |
-#  Where should we email your forms?
-#  
-#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-#fields:
-#  - Email address: users[0].delivery_email
-#    datatype: email
-#continue button label: Send
-#---
-#template: forms_email
-#subject: |
-#  Appearance forms
-#content: |
-#  Your forms are attached.
-#  
-#  Thanks for using ILAO Easy Forms!
-#  
-#  [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
-#---
-#id: ending screen
-#event: ending_screen
-#question: |
-#  All done
-#subquestion: |
-#  Thank you for using ILAO Easy Forms!
-#  
-#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-##buttons:
-##  - Delete answers and restart: restart
-##  - Exit: exit
-#under: |
-#  % if not user_logged_in():
-#  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-#  % endif 
-#
-#  &nbsp;
-#  
-#  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 generic object: ALDocumentBundle
 template: x.send_email_template
@@ -918,7 +875,7 @@ attachment:
       - "is_delivery_party2_am_yes": ${ True if format_time(delivery_parties[7].delivery_time, format='a')=='AM' else '' }
       - "is_delivery_party2_am_no": ${ True if format_time(delivery_parties[7].delivery_time, format='a')=='PM' else '' }
       
-      - "user": ${ users[0] }
+      - "user": ${ users[0].name.full(middle="full") }
       - "user_mail_address_line_one": ${ users[0].address.line_one(bare=True) }
       - "user_mail_address_city_state_zip": ${ users[0].address.line_two() }
       - "user_phone_number": ${ phone_number_formatted(users[0].phone_number) }
@@ -952,14 +909,14 @@ review:
       % endif
   - Edit: users.revisit
     button: |
-      **Your party: (Edit to change names and delivery info)**
+      **Your party: (Edit to change names, lawyers, and delivery info)**
 
       % for my_var in users:
         * ${ my_var.name.full(middle="full") }
       % endfor
   - Edit: other_parties.revisit
     button: |
-      **The other party: (Edit to change names and delivery info)**
+      **The other party: (Edit to change names, lawyers, and delivery info)**
 
       % for my_var in other_parties:
         * ${ my_var.name.full(middle="full") }
@@ -1072,7 +1029,7 @@ rows: users
 columns:
   - Name: |
       row_item.name.full(middle="full") if defined("row_item.name.first") else ""
-  - Party and delivery info: |
+  - Party, lawyer, and delivery info: |
       action_button_html(url_action(row_item.attr_name("review_delivery")), label="Edit", icon="pencil-alt") #if not row_item == users[0] else ""
 #edit:
 #  - name.first
@@ -1096,7 +1053,7 @@ rows: other_parties
 columns:
   - Name: |
       row_item.name.full(middle="full") if defined("row_item.name.first") else ""
-  - Party and delivery info: |
+  - Party, lawyer, and delivery info: |
       action_button_html(url_action(row_item.attr_name("review_delivery")), label="Edit", icon="pencil-alt")
 delete buttons: True
 confirm: True
