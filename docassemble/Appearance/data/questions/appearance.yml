@@ -1,4 +1,5 @@
 include:
+  - docassemble.IlFeeWaiver:IL_fee_waiver_body.yml
   - docassemble.AssemblyLine:assembly_line.yml
   - docassemble.ILAO:ilao-interview-framework.yml
   - docassemble.ILAO:shared-basic-questions.yml
@@ -14,18 +15,26 @@ metadata:
 ---
 objects:
   - users: ALPeopleList.using(there_are_any=True)
-  - users[i].lawyer: ALIndividual
   - other_parties: ALPeopleList.using(there_are_any=True)
-  - other_parties[i].lawyer: ALIndividual
   - delivery_parties: ALPeopleList.using(there_are_any=True)
-  - delivery_parties[i].lawyer: ALIndividual
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
+---
+objects:
+  - users[i].lawyer: ALIndividual
+---
+objects:
+  - other_parties[i].lawyer: ALIndividual
+---
+objects:
+  - delivery_parties[i].lawyer: ALIndividual
 ---
 code: |
   al_form_type = 'existing_case'
   is_initial_filing = False
   efile_author_mode = True
-  jurisdiction_id = 'illinois'
+---
+code: |
+  proxy_conn = ProxyConnection(default_jurisdiction='illinois')
 ---
 # Road map
 sections:
@@ -35,6 +44,7 @@ code: |
   ilao_easy_form_title = "Appearance"
   ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/appearance"
   form_name = "Appearance"
+  filing_basis = 'filing_self'
 ---
 # interview order block
 mandatory: True
@@ -110,9 +120,14 @@ code: |
   lead_contact = users[0]
   
   set_progress(90)
+  
+  fee_waiver_introduction_screen
+  docket_number = case_number
+  interview_order_IL_fee_waiver
 
   if can_check_efile:
     illinois_appearance_single_pdf_bundle.completed
+    IL_fee_waiver_package.completed
     tyler_payment_id = get_config('efile proxy', {}).get('global waiver', '')
     ready_to_efile
 
@@ -130,6 +145,13 @@ subquestion: |
   
   % endfor
 continue button field: show_existing
+---
+question: |
+  Next Step: Fee Waiver
+subquestion: |
+  You will now be walked through the fee waiver, to see if you qualify. This interview can
+  only be e-filed by users who qualify for a fee waiver.
+continue button field: fee_waiver_introduction_screen
 ---
 code: |
   # NOTE(brycew): kinda hacky, but all of the courts allowed are just lowercase in Tyler.
@@ -389,6 +411,41 @@ fields:
   - no label: self_in_case
     datatype: yesnomaybe
 ---
+---
+id: is the user the plaintiff or defendant?
+comment: |
+  This question is asked if the interview can be used by both
+  a Plaintiff and a Defendant. It sets the value of `user_role`,
+  `plaintiffs`, `defendants`, `petitioners` and `respondents`.
+  
+  If you know your interview is exclusively
+  used by the Plaintiff or Defendant, set `user_role = 'plaintiff'` or 
+  `user_role='defendant'` in your code.
+question: |
+  Did you start this case, or are you responding to a case
+  that someone else started?
+subquestion: |
+  ${ collapse_template(help_user_ask_role_template) }
+fields: 
+  - no label: user_ask_role
+    datatype: radio
+    choices:
+      - Started this case: plaintiff
+      - Responding to this case: defendant
+  - note: |
+      Okay, you are the **Plaintiff** or Petitioner in this case. The other 
+      side is the **Defendant** or Respondent.
+    show if:
+      variable: user_ask_role
+      is: "plaintiff"
+  - note: |
+      Okay, you are the **Defendant** or Respondent in this case. The other 
+      side is the **Plaintiff** or Petitioner.
+    show if:
+      variable: user_ask_role
+      is: "defendant"
+---
+---
 question: |
   Which participant are you?
 fields:
@@ -448,7 +505,7 @@ fields:
 generic object: DAObject
 id: courtesy email
 question: |
-  Do you want anyone to recieve a courtesy email when you file this form?
+  Do you want anyone to recieve a courtesy email when you file the ${ x.title }?
 fields:
   - Add a courtesy email: x.has_courtesy_copies
     datatype: yesno
@@ -846,42 +903,31 @@ objects:
   - illinois_appearance_additional_blank: ALDocument.using(title="Additional Proof of Delivery (blank)", filename="appearance_additional_proof_delivery_blank.pdf", has_addendum=False)
 ---
 code: |
-  illinois_appearance_attachment.enabled = False
-  illinois_appearance_instructions.enabled = False
+  illinois_appearance_attachment.enabled = True
+  illinois_appearance_instructions.enabled = True
   illinois_appearance_additional.enabled = False
   illinois_appearance_additional_2.enabled = False
   illinois_appearance_additional_3.enabled = False
   illinois_appearance_additional_blank.enabled = False
 
-  if delivery_parties.number() < 3:
-    illinois_appearance_attachment.enabled = True
-    illinois_appearance_instructions.enabled = True
-  elif delivery_parties.number() < 5:
-    illinois_appearance_attachment.enabled = True
-    illinois_appearance_instructions.enabled = True
+  if delivery_parties.number() < 5:
     illinois_appearance_additional.enabled = True
   elif delivery_parties.number() < 7:
-    illinois_appearance_attachment.enabled = True
-    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
     illinois_appearance_additional_2.enabled = True
   elif delivery_parties.number() < 9:
-    illinois_appearance_attachment.enabled = True
-    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
     illinois_appearance_additional_2.enabled = True
     illinois_appearance_additional_3.enabled = True
   else:
-    illinois_appearance_attachment.enabled = True
-    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
     illinois_appearance_additional_2.enabled = True
     illinois_appearance_additional_3.enabled = True
     illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_single_pdf_bundle, illinois_appearance_additional_blank], filename="appearance.pdf", title="Download all forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_single_pdf_bundle], filename="appearance.pdf", title="Appearance")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_single_pdf_bundle, illinois_appearance_additional_blank, IL_fee_waiver_package], filename="appearance.pdf", title="Download all forms")
+  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_single_pdf_bundle, IL_fee_waiver_package], filename="appearance.pdf", title="Appearance")
 ---
 objects:
   - illinois_appearance_single_pdf_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)
