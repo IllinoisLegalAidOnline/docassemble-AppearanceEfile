@@ -31,12 +31,13 @@ objects:
 code: |
   al_form_type = 'existing_case'
   is_initial_filing = False
-  efile_author_mode = True
 ---
 code: |
   proxy_conn = ProxyConnection(default_jurisdiction='illinois')
 ---
 # Road map
+# TODO: to turn on/off the Fee Waiver section, will need to use
+# https://docassemble.org/docs/functions.html#DANav.set_sections
 sections:
   - review_answers: Review your answers
 ---
@@ -45,6 +46,19 @@ code: |
   ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/appearance"
   form_name = "Appearance"
   filing_basis = 'filing_self'
+---
+depends on: case_number
+code: |
+  # docket_number is used in the Fee Waiver interview, but case_number is
+  # used in e-filing
+  docket_number = case_number
+---
+depends on: found_case
+code: |
+  previous_case_id = found_case.tracking_id
+  case_number = found_case.docket_id
+  case_type = found_case.case_type
+  case_category = found_case.category
 ---
 # interview order block
 mandatory: True
@@ -64,22 +78,20 @@ code: |
     found_case
     if not case_was_found:
       # TODO(brycew): not going to work with non-indexed at the moment
-      # if not_can_file_non_indexed_case:
-      show_no_non_indexed
       can_check_efile = False
       needs_all_info = True
     else:
+      previous_case_id
+      case_number
+      case_type
+      case_category
+
       needs_all_info = False
       user_ask_role
-    
+
       add_existing_users
       users[0].name.first
 
-      previous_case_id = found_case.tracking_id
-      case_number = found_case.docket_id
-      case_type = found_case.case_type
-      case_category = found_case.category
-  
   user_ask_role
   # ask if whey want to add any more new parties to the case
   if can_check_efile:
@@ -115,23 +127,35 @@ code: |
      
   users[0].address.address
   users[0].phone_number
-  if can_check_efile or users[0].email_notice == True:
+  if can_check_efile:
+    users[0].email_notice = True
+  if users[0].email_notice:
     users[0].email
   lead_contact = users[0]
   
   set_progress(90)
-  
-  fee_waiver_introduction_screen
-  docket_number = case_number
-  interview_order_IL_fee_waiver
 
   if can_check_efile:
-    illinois_appearance_single_pdf_bundle.completed
+    users[0].has_email_address = True
+    e_signature = True
+    signature_choice = 'add name'
+
+    docket_number
+    fee_waiver_introduction_screen
+    interview_order_IL_fee_waiver
+    illinois_appearance_bundle.completed
+    IL_fee_waiver_package.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
+    if IL_fee_waiver_package.has_courtesy_copies:
+      IL_fee_waiver_package.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
+      IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
+    
     IL_fee_waiver_package.completed
     tyler_payment_id = get_config('efile proxy', {}).get('global waiver', '')
     ready_to_efile
-
-  e_signature
+    # if e-filing, just use the e-signature to keep things simple
+    inform_of_efile_e_signature
+  else:
+    e_signature
 
   set_progress(100)
   get_docs_screen
@@ -201,9 +225,9 @@ code: |
 code: |
   other_parties[i].name.first
   if user_ask_role == 'plaintiff':
-    users[i].party_type = '20646'
+    other_parties[i].party_type = '20646'
   else:
-    users[i].party_type = '20641'
+    other_parties[i].party_type = '20641'
   other_parties[i].is_new = True
 ---
 id: welcome
@@ -247,9 +271,16 @@ continue button field: whats_next
 question: |
   After you finish this program
 subquestion: |
+  % if not can_check_efile:
   After you download your ${ form_name }, you must file it with the court. This program does not file your ${ form_name } for you.
+ 
+  % else:
+  This program will e-file your ${ form_name } for you. You will get a confirmation email
+  when it does.
   
-  Read the "How to File an Appearance" instructions you can download at the end of this program. 
+  If you run into an unexpected error, you can also file it with the court yourself.
+  % endif
+  Read the "How to File an Appearance" instructions you can download at the end of this program.
 ---
 id: accept terms
 question: |
@@ -332,13 +363,15 @@ fields:
   - no label: users.there_is_another
     datatype: yesnoradio
 ---
+comment: |
+  Overrides a screen in EFSPIntegration:case_search.yml
 question: |
   You are not able to e-file this Appearance
 subquestion: |
   We could not find the case you wanted to file into. The case might still exist,
   but it hasn't been entered into the court's system electronically.
   You will have to print out and file this form on paper.
-continue button field: show_no_non_indexed
+continue button field: warn_no_results
 ---
 template: other_parties_help
 subject: |
@@ -634,6 +667,14 @@ fields:
   - "Add e-signature?": e_signature
     datatype: yesnoradio
 ---
+id: inform e-signature
+question: |
+  We'll add your e-signature to your ${ form_name }
+subquestion: |
+  Since you are e-filing, your name will be automatically added as 
+  an e-signature to the form
+continue button field: inform_of_efile_e_signature
+---
 reconsider: True
 code: |
   delivery_parties = DAList("delivery_parties", elements = other_parties + users[1:])
@@ -665,6 +706,13 @@ id: has lawyer
 generic object: ALIndividual
 question: |
   Does ${ x.name.full(middle="full") } have a lawyer in this case?
+subquestion: |
+  % if defined('found_case') and found_case and hasattr(x, 'tyler_id'):
+  % if not found_case.party_to_attorneys.get(x.tyler_id):
+  ${ x.name.familiar() } does not have a lawyer in the electronic system,
+  but they could have gotten one more recently.
+  % endif
+  % endif
 field: x.is_represented
 choices:
   - Yes: True
@@ -739,10 +787,13 @@ subquestion: |
   
   ${ collapse_template(efiling_help) }
 fields:
-  #- E-filing system: users[i].efm_delivery
-  #  datatype: yesnowide
-  #  help: |
-  #    The court's e-filing system could be an electronic filing manager (EFM) or an approved electronic filing service provider (EFSP).
+  - E-filing system: users[i].efm_delivery
+    datatype: yesnowide
+    help: |
+      The court's e-filing system could be an electronic filing manager (EFM) or an approved electronic filing service provider (EFSP).
+    show if:
+      code: |
+        not can_check_efile
   - Email: users[i].email_delivery
     datatype: yesnowide
   - Email address: users[i].delivery_email
@@ -776,10 +827,13 @@ subquestion: |
   
   ${ collapse_template(efiling_help) }
 fields:
-  #- E-filing system: other_parties[i].efm_delivery
-  #  datatype: yesnowide
-  #  help: |
-  #    The court's e-filing system could be an electronic filing manager (EFM) or an approved electronic filing service provider (EFSP).
+  - E-filing system: other_parties[i].efm_delivery
+    datatype: yesnowide
+    help: |
+      The court's e-filing system could be an electronic filing manager (EFM) or an approved electronic filing service provider (EFSP).
+    show if:
+      code: |
+        not can_check_efile
   - Email: other_parties[i].email_delivery
     datatype: yesnowide
   - Email address: other_parties[i].delivery_email
@@ -863,6 +917,49 @@ under: |
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
+# old email forms functionality
+#id: email forms
+#question: |
+#  Email your forms
+#subquestion: |
+#  Where should we email your forms?
+#  
+#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
+#fields:
+#  - Email address: users[0].delivery_email
+#    datatype: email
+#continue button label: Send
+#---
+#template: forms_email
+#subject: |
+#  Appearance forms
+#content: |
+#  Your forms are attached.
+#  
+#  Thanks for using ILAO Easy Forms!
+#  
+#  [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
+#---
+#id: ending screen
+#event: ending_screen
+#question: |
+#  All done
+#subquestion: |
+#  Thank you for using ILAO Easy Forms!
+#  
+#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
+##buttons:
+##  - Delete answers and restart: restart
+##  - Exit: exit
+#under: |
+#  % if not user_logged_in():
+#  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
+#  % endif 
+#
+#  &nbsp;
+#  
+#  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+---
 generic object: ALDocumentBundle
 template: x.send_email_template
 subject: |
@@ -926,11 +1023,11 @@ code: |
     illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_single_pdf_bundle, illinois_appearance_additional_blank, IL_fee_waiver_package], filename="appearance.pdf", title="Download all forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_single_pdf_bundle, IL_fee_waiver_package], filename="appearance.pdf", title="Appearance")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_package], filename="appearance.pdf", title="Download all forms")
+  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, IL_fee_waiver_package], filename="appearance.pdf", title="Appearance")
 ---
 objects:
-  - illinois_appearance_single_pdf_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)
+  - illinois_appearance_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)
 ---
 attachment:
   variable name: illinois_appearance_instructions[i]
@@ -1225,11 +1322,30 @@ review:
   - Edit: case_number
     button: |
       **Case number:**
-      ${ case_number }   
+      ${ case_number }
   - Edit: is_trial_by_jury
     button: |
       **Do you want a jury trial?**
       ${ word(yesno(is_trial_by_jury)) }
+  - label: Edit
+    fields:
+      - do_what_choice
+      - recompute:
+        - found_case
+    button: |
+      ** Court Case:**
+      ${ found_case.title } (${ found_case.date })
+    show if: can_check_efile
+  # TODO(brycew): we need to essentially retrigger the entire interview if they want to
+  # change this. Not sure how best to do that.
+  #- Edit: user_wants_efile
+  #  button: |
+  #    You said you **${ "did" if user_wants_efile else "did not" }** want to file a fee-waiver
+  #  show if: efile_setup
+  #  follow up:
+  #    - tyler_login
+  #    - found_case
+  #    -
   - Edit: users[0].address.address
     button: |
       **Your address:**
@@ -1251,6 +1367,7 @@ review:
     button: |
       **Do you want to add your e-signature?**
       ${ word(yesno(e_signature)) }
+    show if: not can_check_efile
 ---
 #needs: yes_no_unknown
 continue button field: x.review_delivery
