@@ -42,10 +42,10 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
                 out.setdefault(package, []).append(prefix+name)
     return out
 
-setup(name='docassemble.Appearance',
+setup(name='docassemble.AppearanceEfile',
       version='0.1.3a1',
       description=('Appearance'),
-      long_description='# docassemble.Appearance\n\nAppearance\n\n## Author\n\nMatt Newsted, mnewsted@illinoislegalaid.org\n\n',
+      long_description='# docassemble.AppearanceEfile\n\nAppearance\n\n## Author\n\nMatt Newsted, mnewsted@illinoislegalaid.org\n\n',
       long_description_content_type='text/markdown',
       author='Matt Newsted',
       author_email='66691956+mnewsted@users.noreply.github.com',
@@ -55,6 +55,6 @@ setup(name='docassemble.Appearance',
       namespace_packages=['docassemble'],
       install_requires=['docassemble.AssemblyLine>=2.11.3', 'docassemble.EFSPIntegration>=0.6.0', 'docassemble.ILAO'],
       zip_safe=False,
-      package_data=find_package_data(where='docassemble/Appearance/', package='docassemble.Appearance'),
+      package_data=find_package_data(where='docassemble/AppearanceEfile/', package='docassemble.AppearanceEfile'),
      )
 
