@@ -34,10 +34,10 @@ fields:
 id: document type
 generic object: DAObject
 question: |
-  Document type - ${ x.title }
+  Was this case ordered to be sealed by the judge?
 subquestion: |
-  If a judge has ordered that this case is sealed, select
-  "Confidential". You should also attach a copy of the judge's order.
+  In some cases, the filings and orders are sealed by the court. This means the records are not visible to the public.
+  If this happened in your case, you will have to upload a copy of the court order sealing the case.
 fields:
   - Document type: x.document_type_code
     input type: radio
@@ -69,20 +69,37 @@ question: |
   Are you paying for the Appearance filing with a Fee Waiver?
 subquestion: |
   If you are paying for this appearance with a fee waiver, you can fill out and
-  electronically-file (e-file) both forms at the same time in this interview.
-  This means you don't have to print out the document. The court
-  will communicate with you through your email or phone.
-
-  You will have to provide your email to e-file this document.
+  electronically file (e-file) both forms at the same time in this program.
+  This means you don’t have to print out the forms. The court will communicate
+  with you by email. You will have to provide your email to e-file your Appearance and Fee waiver.
 fields:
   - Do you want to file a fee waiver?: user_wants_efile
     datatype: yesnoradio
 ---
-############ Case Search filter ########
+id: eFile Login
+question: |
+  Log in to your e-filing account
+subquestion: |
+  To e-file with this program, you must have an e-filing account. Log in below or 
+  <a href="${ interview_url(i="docassemble.EFSPIntegration:unauthenticated_interview.yml", reset=1, jurisdiction_id=jurisdiction_id) }" target="_blank">create a new account</a>.
+fields:
+  - email/username: my_username
+  - password: my_password
+    datatype: password
+    hide if: user_forgot_password
+  - I forgot my password: user_forgot_password
+    datatype: yesno
+---
+############ Case Search ########
 code: |
   def filter_fn(new_case):
     """Used inside case_search.yml to not include criminal cases"""
     return new_case.category not in ['76963', '76962', '76964', '76965']
+---
+generic object: EFCaseSearch
+template: x.case_choice_label
+content: |
+  Which case do you want to file into?
 ---
 ############ Payments Stuff ############
 reconsider:

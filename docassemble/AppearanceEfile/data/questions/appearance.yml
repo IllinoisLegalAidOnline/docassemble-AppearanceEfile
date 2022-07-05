@@ -42,7 +42,7 @@ sections:
   - review_answers: Review your answers
 ---
 code: |
-  ilao_easy_form_title = "Appearance"
+  ilao_easy_form_title = "Appearance (E-file)"
   ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/appearance"
   form_name = "Appearance"
   filing_basis = 'filing_self'
@@ -170,11 +170,12 @@ subquestion: |
   % endfor
 continue button field: show_existing
 ---
+id: next-step-fee-waiver
 question: |
   Next Step: Fee Waiver
 subquestion: |
-  You will now be walked through the fee waiver, to see if you qualify. This interview can
-  only be e-filed by users who qualify for a fee waiver.
+  To e-file with this program, you must file a Fee waiver.
+  The next screens will help you make a Fee waiver.
 continue button field: fee_waiver_introduction_screen
 ---
 code: |
@@ -199,7 +200,7 @@ code: |
   for partip in to_add_participants:
     partip.is_new = False
     if partip.party_type == '20641' or \
-        (partip.party_type_name is not None and 'defendent' in partip.role_name.lower()):
+        (partip.party_type_name is not None and 'defendant' in partip.role_name.lower()):
       if user_ask_role == 'defendant':
         users.append(partip.copy_deep(f'users[{len(users.elements)}]'))
       else:
@@ -275,8 +276,9 @@ subquestion: |
   After you download your ${ form_name }, you must file it with the court. This program does not file your ${ form_name } for you.
  
   % else:
-  This program will e-file your ${ form_name } for you. You will get a confirmation email
-  when it does.
+  You can e-file your Appearance and Fee waiver at the end of this program. You will
+  get emailed when your forms are received and accepted by the circuit clerk. If they
+  are rejected, you will have to refile.
   
   If you run into an unexpected error, you can also file it with the court yourself.
   % endif
@@ -424,6 +426,7 @@ fields:
   - "Anyone else?": other_parties.there_is_another
     datatype: yesnoradio
 ---
+id: are you any of the participants?
 question: |
   % if len(filtered_case_partips) == 1:
   We found this participant in the existing case
@@ -443,7 +446,6 @@ subquestion: |
 fields:
   - no label: self_in_case
     datatype: yesnomaybe
----
 ---
 id: is the user the plaintiff or defendant?
 comment: |
@@ -477,7 +479,6 @@ fields:
     show if:
       variable: user_ask_role
       is: "defendant"
----
 ---
 question: |
   Which participant are you?
@@ -538,12 +539,13 @@ fields:
 generic object: DAObject
 id: courtesy email
 question: |
-  Do you want anyone to recieve a courtesy email when you file the ${ x.title }?
+  Do you want to send a courtesy copy of your Appearance to the judge?
+subquestion: |
+  The judge will receive a copy of your Appearance after it is filed. This is optional.
 fields:
-  - Add a courtesy email: x.has_courtesy_copies
+  - Add a courtesy email (optional): x.has_courtesy_copies
     datatype: yesno
-  - Courtesy emails (one per line): x.courtesy_copies_raw
-    datatype: area
+  - Email address: x.courtesy_copies_raw
     show if: x.has_courtesy_copies
 validation code: |
   if x.has_courtesy_copies:
@@ -669,10 +671,9 @@ fields:
 ---
 id: inform e-signature
 question: |
-  We'll add your e-signature to your ${ form_name }
+  Signing your forms
 subquestion: |
-  Since you are e-filing, your name will be automatically added as 
-  an e-signature to the form
+  Since you are e-filing, your name will be added as an e-signature to your forms.
 continue button field: inform_of_efile_e_signature
 ---
 reconsider: True
@@ -888,16 +889,16 @@ subquestion: |
   
   Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
 
-  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
-
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
+
+  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
   
   % if ready_to_efile and not (defined('efile') and efile):
+  Click the "E-File" button below to e-file your form with the ${ trial_court } clerk. You need to deliver your Appearance to other parties in your case.
   
-  Click the "E-File" button below to e-file your form at ${ trial_court }.
-  
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File', icon='file-export')}
-  
+  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export')}
+  % else:
+  This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
   % endif
   
   ${ al_user_bundle.download_list_html() }
@@ -906,7 +907,12 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
+  % if ready_to_efile and not (defined('efile') and efile):
+  **Note:** You may need to deliver your Appearance to other parties in your case.
+  % else:
   **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
+  % endif
+
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -1000,6 +1006,7 @@ objects:
   - illinois_appearance_additional_blank: ALDocument.using(title="Additional Proof of Delivery (blank)", filename="appearance_additional_proof_delivery_blank.pdf", has_addendum=False)
 ---
 code: |
+  illinois_appearance_bundle.enabled = True
   illinois_appearance_attachment.enabled = True
   illinois_appearance_instructions.enabled = True
   illinois_appearance_additional.enabled = False
@@ -1023,7 +1030,7 @@ code: |
     illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_package], filename="appearance.pdf", title="Download all forms")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_package], filename="appearance.pdf", title="Download all forms")
   - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, IL_fee_waiver_package], filename="appearance.pdf", title="Appearance")
 ---
 objects:
