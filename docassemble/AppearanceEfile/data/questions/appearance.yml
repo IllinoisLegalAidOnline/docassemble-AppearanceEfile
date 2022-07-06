@@ -1,6 +1,7 @@
 include:
   - docassemble.IlFeeWaiver:IL_fee_waiver_body.yml
   - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ALToolbox:phone-number-validation.yml
   - docassemble.ILAO:ilao-interview-framework.yml
   - docassemble.ILAO:shared-basic-questions.yml
   - docassemble.EFSPIntegration:efiling_integration.yml
@@ -32,8 +33,17 @@ code: |
   al_form_type = 'existing_case'
   is_initial_filing = False
 ---
+objects:
+  - case_search: EFCaseSearch.using(court_id=court_id)
+---
 code: |
-  proxy_conn = ProxyConnection(default_jurisdiction='illinois')
+  target_case = case_search
+---
+code: |
+  jurisdiction_id = 'illinois'
+---
+code: |
+  proxy_conn = ProxyConnection(default_jurisdiction=jurisdiction_id) 
 ---
 # Road map
 # TODO: to turn on/off the Fee Waiver section, will need to use
@@ -53,12 +63,12 @@ code: |
   # used in e-filing
   docket_number = case_number
 ---
-depends on: found_case
+depends on: case_search.found_case
 code: |
-  previous_case_id = found_case.tracking_id
-  case_number = found_case.docket_id
-  case_type = found_case.case_type
-  case_category = found_case.category
+  previous_case_id = case_search.found_case.tracking_id
+  case_number = case_search.found_case.docket_id
+  tyler_case_type = case_search.found_case.case_type
+  tyler_case_category = case_search.found_case.category
 ---
 # interview order block
 mandatory: True
@@ -75,16 +85,16 @@ code: |
   lawsuit_information
   # E-file specific
   if can_check_efile:
-    found_case
-    if not case_was_found:
+    case_search.found_case
+    if not case_search.case_was_found:
       # TODO(brycew): not going to work with non-indexed at the moment
       can_check_efile = False
       needs_all_info = True
     else:
       previous_case_id
       case_number
-      case_type
-      case_category
+      tyler_case_type
+      tyler_case_category
 
       needs_all_info = False
       user_ask_role
@@ -150,7 +160,7 @@ code: |
       IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
     
     IL_fee_waiver_package.completed
-    tyler_payment_id = get_config('efile proxy', {}).get('global waiver', '')
+    tyler_payment_id = default_jurisdiction_waiver
     ready_to_efile
     # if e-filing, just use the e-signature to keep things simple
     inform_of_efile_e_signature
@@ -164,7 +174,7 @@ code: |
 question: |
   Existing parties on the case
 subquestion: |
-  % for party in found_case.participants:
+  % for party in case_search.found_case.participants:
   * ${ party.full_name }
   
   % endfor
@@ -190,23 +200,23 @@ code: |
   if not self_in_case:
     users.appendObject()
     users[0].is_new = True
-    to_add_participants = found_case.participants
+    to_add_participants = case_search.found_case.participants
   else:
     self_partip_choice.is_new = False
     # Change where DA thinks this obj came from, so it says "you", and not "NAME"
     users.append(self_partip_choice.copy_deep('users[0]'))
-    to_add_participants = [p for p in found_case.participants if p.instanceName != self_partip_choice.instanceName]
+    to_add_participants = [p for p in case_search.found_case.participants if p.instanceName != self_partip_choice.instanceName]
 
   for partip in to_add_participants:
     partip.is_new = False
     if partip.party_type == '20641' or \
-        (partip.party_type_name is not None and 'defendant' in partip.role_name.lower()):
+        (partip.party_type_name is not None and 'defendant' in partip.party_type_name.lower()):
       if user_ask_role == 'defendant':
         users.append(partip.copy_deep(f'users[{len(users.elements)}]'))
       else:
         other_parties.append(partip.copy_deep(f'other_parties[{len(other_parties.elements)}]'))
     elif partip.party_type == '20646' or \
-        (partip.party_type_name is not None and 'plaintiff' in partip.role_name.lower()):
+        (partip.party_type_name is not None and 'plaintiff' in partip.party_type_name.lower()):
       if user_ask_role == 'plaintiff':
         users.append(partip.copy_deep(f'users[{len(users.elements)}]'))
       else:
@@ -486,10 +496,10 @@ fields:
   - I am: self_partip_choice
     datatype: object_radio
     choices: |
-      found_case.participants.filter(party_type= '20641' if user_ask_role=='defendant' else '20646')
+      case_search.found_case.participants.filter(party_type= '20641' if user_ask_role=='defendant' else '20646')
 ---
 code: |
-  filtered_case_partips = found_case.participants.filter(
+  filtered_case_partips = case_search.found_case.participants.filter(
       party_type='20641' if user_ask_role == 'defendant' else '20646')
 ---
 code: |
@@ -637,6 +647,7 @@ question: |
   What is your phone number?
 fields:
   - Phone: users[0].phone_number
+    datatype: al_international_phone
     required: False
 ---
 id: notice by email
@@ -708,8 +719,8 @@ generic object: ALIndividual
 question: |
   Does ${ x.name.full(middle="full") } have a lawyer in this case?
 subquestion: |
-  % if defined('found_case') and found_case and hasattr(x, 'tyler_id'):
-  % if not found_case.party_to_attorneys.get(x.tyler_id):
+  % if defined('case_search.found_case') and case_search.found_case and hasattr(x, 'tyler_id'):
+  % if not case_search.found_case.party_to_attorneys.get(x.tyler_id):
   ${ x.name.familiar() } does not have a lawyer in the electronic system,
   but they could have gotten one more recently.
   % endif
@@ -881,6 +892,7 @@ subquestion: |
   [FILE proof_of_delivery_snip.png, 100%, Proof of Delivery section of forms]
 
 ---
+if: ready_to_efile
 id: get docs screen
 event: get_docs_screen
 question: |
@@ -891,14 +903,18 @@ subquestion: |
 
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
 
+  % if not (defined('efile') and efile):
   This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
+  % else:
+  **Reminder**: You need to deliver your Appearance to other parties in your case.
+  % endif
   
-  % if ready_to_efile and not (defined('efile') and efile):
+  % if not (defined('efile') and efile):
   Click the "E-File" button below to e-file your form with the ${ trial_court } clerk. You need to deliver your Appearance to other parties in your case.
   
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export')}
+  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export', size="md")}
   % else:
-  This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
+  **Note:** you already e-filed your forms. Any changes you make will not appear in the e-filed forms.
   % endif
   
   ${ al_user_bundle.download_list_html() }
@@ -907,12 +923,37 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
-  % if ready_to_efile and not (defined('efile') and efile):
   **Note:** You may need to deliver your Appearance to other parties in your case.
-  % else:
-  **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
-  % endif
+  
+  Thank you for using ILAO Easy Forms!
+under: |
+  % if not user_logged_in():
+  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
+  % endif 
 
+  &nbsp;
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+---
+if: not ready_to_efile
+id: get docs screen
+event: get_docs_screen
+question: |
+  Download
+subquestion: |
+  
+  Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
+
+  ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
+
+  This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
+  
+  ${ al_user_bundle.download_list_html() }
+
+  &nbsp;
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+  **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -1336,12 +1377,12 @@ review:
       ${ word(yesno(is_trial_by_jury)) }
   - label: Edit
     fields:
-      - do_what_choice
+      - case_search.do_what_choice
       - recompute:
-        - found_case
+        - case_search.found_case
     button: |
       ** Court Case:**
-      ${ found_case.title } (${ found_case.date })
+      ${ case_search.found_case.title } (${ case_search.found_case.date })
     show if: can_check_efile
   # TODO(brycew): we need to essentially retrigger the entire interview if they want to
   # change this. Not sure how best to do that.

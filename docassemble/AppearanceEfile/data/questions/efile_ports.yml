@@ -101,6 +101,25 @@ template: x.case_choice_label
 content: |
   Which case do you want to file into?
 ---
+generic object: EFCaseSearch
+id: no cases found
+question: |
+  No cases found
+subquestion: |
+  We could not find the case you wanted to file into. The case might still exist, but
+  % if x.cms_connection_issue:
+  the court's electronic system isn't online.
+  % else:
+  it hasn't been entered into the court's sytem electronically.
+  % endif
+
+  % if x.can_file_non_indexed_case:
+  You will have to provide all of the information about the case.
+  % else:
+  You will have to print out and file your paper forms.
+  % endif
+continue button field: x.warn_no_results
+---
 ############ Payments Stuff ############
 reconsider:
   - tyler_payment_account_options
