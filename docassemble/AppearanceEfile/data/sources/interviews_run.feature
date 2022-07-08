@@ -16,21 +16,26 @@ Scenario: appearance.yml runs
 @appearance @efile
 Scenario: appearance runs to end with e-filing
   Given I start the interview at "appearance.yml"
-  And the maximum seconds for each Step in this Scenario is 50
+  And the maximum seconds for each Step in this Scenario is 60
   And I get to the question id "eFile Login" with this data:
     | var | value | trigger |
     | trial_court_index | 0 | |
     | user_wants_efile | True | |
   And I set the variable "my_username" to secret "TYLER_EMAIL"
   And I set the variable "my_password" to secret "TYLER_PASSWORD"
-  And I get to the question id "download forms" with this data:
+  And I get to the question id "party name" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
     | x.do_what_choice | party_search | case_search.do_what_choice |
-    | case_search.somebody.person_type | ALIndividual | case_search.somebody.name.first |
-    | case_search.somebody.name.first | John | case_search.somebody.name.first |
-    | case_search.somebody.name.last | Brown | case_search.somebody.name.last |
-    | x.case_choice | case_search.found_cases[0] | case_search.case_choice |
+  And I set the variable "case_search.somebody.person_type" to "ALIndividual"
+  And I set the variable "case_search.somebody.name.first" to "John"
+  And I set the variable "case_search.somebody.name.last" to "Brown"
+  And I tap to continue
+  And I wait 50 seconds
+  And I set the variable "x.case_choice" to "case_search.found_cases[0]"
+  And I tap to continue
+  And I get to the question id "get-docs-screen" with this data:
+    | var | value | trigger |
     | user_ask_role | defendant | |
     | self_in_case | True | |
     | users.target_number | 1 | |
@@ -42,19 +47,19 @@ Scenario: appearance runs to end with e-filing
     | x.address.state | IL | other_parties[0].address.address | 
     | x.address.zip | 02122 | other_parties[0].address.address |
     | x.knows_delivery_method | False | other_parties[0].knows_delivery_method |
-    | x.address.address | 234 Fake St | users[0].address.address |
-    | x.address.city | RADOM | users[0].address.address |
-    | x.address.state | IL | users[0].address.address |
-    | x.address.zip | 02122 | users[0].address.address |
+    | users[0].address.address | 234 Fake St | users[0].address.address |
+    | users[0].address.city | RADOM | users[0].address.address |
+    | users[0].address.state | IL | users[0].address.address |
+    | users[0].address.zip | 02122 | users[0].address.address |
     | users[0].phone_number | 4094567890 | |
     | users[0].email | example@example.com | |
     | user_benefits['TA'] | True | |
     | users[0].birth_year | 2000 | |
-    | x.document_type_code | 5766 | illinois_appearance_bundle.document_type_code |
-    | x.document_type_code | 5766 | IL_fee_waiver_package.document_type_code |
-
-
-
+    | x.document_type | 5766 | illinois_appearance_bundle.document_type |
+    | x.document_type | 5766 | IL_fee_waiver_package.document_type |
+  And I tap the "#efile" element
+  And I tap to continue
+  Then I should see the phrase "form was submitted"
 
 @appearance @no-efile
 Scenario: appearance.yml runs to end without e-filing
@@ -73,3 +78,23 @@ Scenario: appearance.yml runs to end without e-filing
     | is_trial_by_jury | False | |
     | users[0].phone_number | 4094567890 | |
     | users[0].email | example@example.com | |
+    | other_parties[0].person_type | ALIndividual | |
+    | other_parties[0].name.first | Tame | |
+    | other_parties[0].name.last | Impala | |
+    | x.is_represented | False | other_parties[0].is_represented |
+    | case_number | 2022AC123 | |
+    | x.is_represented | False | other_parties[0].is_represented |
+    | x.address.address | 123 Fake St | other_parties[0].address.address |
+    | x.address.city | Boston | other_parties[0].address.address |
+    | x.address.state | IL | other_parties[0].address.address | 
+    | x.address.zip | 02122 | other_parties[0].address.address |
+    | x.knows_delivery_method | False | other_parties[0].knows_delivery_method |
+    | users[0].address.address | 234 Fake St | users[0].address.address |
+    | users[0].address.city | RADOM | users[0].address.address |
+    | users[0].address.state | IL | users[0].address.address |
+    | users[0].address.zip | 02122 | users[0].address.address |
+    | users[0].phone_number | 4094567890 | |
+    | users[0].email | example@example.com | |
+    | user_benefits['TA'] | True | |
+    | users[0].birth_year | 2000 | |
+    | users[0].email_notice | True | |

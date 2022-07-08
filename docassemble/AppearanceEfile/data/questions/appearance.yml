@@ -158,6 +158,8 @@ code: |
     if IL_fee_waiver_package.has_courtesy_copies:
       IL_fee_waiver_package.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
       IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
+    if illinois_appearance_bundle.document_type in IL_fee_waiver_package.document_type_map.keys():
+      IL_fee_waiver_package.document_type = illinois_appearance_bundle.document_type
     
     IL_fee_waiver_package.completed
     tyler_payment_id = default_jurisdiction_waiver
@@ -537,16 +539,6 @@ fields:
       court_list._load_courts()['address_county'].items()
 ---
 generic object: DAObject
-id: filing type et al.
-question: |
-  What filing type will you be making?
-fields:
-  - Filing Type: x.filing_type
-    datatype: dropdown
-    code: |
-      appearance_filing_type_options
----
-generic object: DAObject
 id: courtesy email
 question: |
   Do you want to send a courtesy copy of your Appearance to the judge?
@@ -564,45 +556,6 @@ validation code: |
       if not '@' in copy:
         validation_error("Enter a valid email address.", field="x.courtesy_copies_raw")
         break
----
-code: |
-  appear_filings_tmp = []
-  if is_trial_by_jury:
-    appear_filings_tmp = list(filter(lambda opt: 'Appearance' in opt[1] and 'Jury' in opt[1], filing_type_options))
-
-  if not appear_filings_tmp:
-    # Code numbers explictily confirmed to be the right ones
-    appear_filings_tmp = list(filter(lambda opt: opt[0] == '142566', filing_type_options))
-
-  if not appear_filings_tmp:
-    appear_filings_tmp = list(filter(lambda opt: opt[1] == 'Appearance (No Fee: fee exempted by rule/statute)', filing_type_options))
-
-  if not appear_filings_tmp:
-    appear_filings_tmp = list(filter(lambda opt: 'Appearance' in opt[1] and 'No Fee' in opt[1], filing_type_options))
-
-  if not appear_filings_tmp:
-    appear_filings_tmp = list(filter(lambda opt: 'Appearance' in opt[1], filing_type_options))
-
-  if not appear_filings_tmp:
-    appear_filings_tmp = filing_type_options
-
-  appearance_filing_type_options = sorted(appear_filings_tmp, key=lambda option: option[1])
-  del appear_filings_tmp
----
-generic object: DAObject
-code: |
-  if len(appearance_filing_type_options) == 1:
-    x.filing_type = appearance_filing_type_options[0][0]
-  # TODO(brycew): choose the Filing type based on the Judge + Jury question and what's available.
----
-generic object: DAObject
-code: |
-  x.filing_description = f'The completed Illinois Appearance Form for {users[0].name}'
-  x.reference_number = None
-  if '332' in x.filing_component_map:
-    x.filing_component_code = '332'
-  x.filing_parties = ['users[0]']
-  x.filing_action = 'efile'
 ---
 depends on:
   - trial_court_index
@@ -912,7 +865,7 @@ subquestion: |
   % if not (defined('efile') and efile):
   Click the "E-File" button below to e-file your form with the ${ trial_court } clerk. You need to deliver your Appearance to other parties in your case.
   
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export', size="md")}
+  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export', size="md", id_tag="efile")}
   % else:
   **Note:** you already e-filed your forms. Any changes you make will not appear in the e-filed forms.
   % endif
@@ -1055,16 +1008,27 @@ code: |
   illinois_appearance_additional_3.enabled = False
   illinois_appearance_additional_blank.enabled = False
 
-  if delivery_parties.number() < 5:
+  if delivery_parties.number() < 3:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
+  elif delivery_parties.number() < 5:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
   elif delivery_parties.number() < 7:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
     illinois_appearance_additional_2.enabled = True
   elif delivery_parties.number() < 9:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
     illinois_appearance_additional_2.enabled = True
     illinois_appearance_additional_3.enabled = True
   else:
+    illinois_appearance_attachment.enabled = True
+    illinois_appearance_instructions.enabled = True
     illinois_appearance_additional.enabled = True
     illinois_appearance_additional_2.enabled = True
     illinois_appearance_additional_3.enabled = True

@@ -4,20 +4,40 @@ include:
 ---
 generic object: ALDocumentBundle
 code: |
-  x.filing_type
-  x.filing_description
-  x.reference_number
-  x.tyler_filing_type 
-  x.document_type
-  x.motion_type
-  x.filing_component
-  x.filing_parties
-  x.filing_action
-  x.has_courtesy_copies
-  x.optional_services.clear()
-  x.optional_services.gathered = True
-  x.as_pdf()
-  x.completed =True
+  x.optional_services.there_are_any = True
+---
+generic object: DAObject
+code: |
+  x.filing_description = f'Appearance and Fee waiver application for {users[0].name}'
+  x.reference_number = None
+  if '332' in x.filing_component_map:
+    x.filing_component = '332'
+  x.filing_parties = ['users[0]']
+  x.filing_action = 'efile'
+---
+code: |
+  filter_list = []
+  if is_trial_by_jury:
+    filter_list.append(lambda opt: 'Appearance' in opt[1] and 'Jury' in opt[1])
+  filter_list.extend([
+           lambda opt: opt[0] == '142566',
+           lambda opt: opt[1] == 'Appearance (No Fee: fee exempted by rule/statute)',
+           lambda opt: 'Appearance' in opt[1] and 'No Fee' in opt[1],
+           lambda opt: 'Appearance' in opt[1]])
+  illinois_appearance_bundle.filtered_filing_options, illinois_appearance_bundle.filing_type = \
+      filter_codes(filing_type_options, filter_list, '142566')
+  del filter_list
+  if illinois_appearance_bundle.filing_type is None:
+    illinois_appearance_bundle.filing_type = illinois_appearance_bundle.user_chosen_filing_type
+---
+id: filing type et al.
+question: |
+  What type of filing will you be making?
+fields:
+  - Filing Type: illinois_appearance_bundle.user_chosen_filing_type
+    datatype: dropdown
+    code: |
+      illinois_appearance_bundle.filtered_filing_options
 ---
 ############# Overide some wording #########
 generic object: DAObject
@@ -39,7 +59,7 @@ subquestion: |
   In some cases, the filings and orders are sealed by the court. This means the records are not visible to the public.
   If this happened in your case, you will have to upload a copy of the court order sealing the case.
 fields:
-  - Document type: x.document_type_code
+  - Document type: x.document_type
     input type: radio
     code: |
       x.document_type_options
@@ -119,22 +139,4 @@ subquestion: |
   You will have to print out and file your paper forms.
   % endif
 continue button field: x.warn_no_results
----
-############ Payments Stuff ############
-reconsider:
-  - tyler_payment_account_options
-id: payment account
-question: |
-  Payment Account
-subquestion: |
-  Select an existing account below, or add a payment account
-  using the 
-  [Admin Interface](${ interview_url(i=user_info().package + ":admin_interview.yml", reset=1) }){:target="_blank"}
-  
-  Refresh this page when you have finished adding the account.
-fields:
-  - Payment Account: tyler_payment_id
-    datatype: dropdown
-    code: |
-      tyler_payment_account_options
 ---
