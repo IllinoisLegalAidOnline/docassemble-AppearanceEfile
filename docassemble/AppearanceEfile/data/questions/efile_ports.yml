@@ -4,16 +4,25 @@ include:
 ---
 generic object: ALDocumentBundle
 code: |
-  x.optional_services.there_are_any = True
+  x.optional_services.there_are_any = False
 ---
-generic object: DAObject
 code: |
-  x.filing_description = f'Appearance and Fee waiver application for {users[0].name}'
-  x.reference_number = None
-  if '332' in x.filing_component_map:
-    x.filing_component = '332'
-  x.filing_parties = ['users[0]']
-  x.filing_action = 'efile'
+  illinois_appearance_bundle.filing_description = f'Appearance application for {users[0].name}'
+  illinois_appearance_bundle.reference_number = None
+  illinois_appearance_bundle.filing_parties = ['users[0]']
+  illinois_appearance_bundle.filing_action = 'efile'
+---
+code: |
+  illinois_appearance_attachment.filing_component_default = '332'
+  illinois_appearance_attachment.filing_component_filters = ['Lead Document']
+  illinois_appearance_additional.filing_component_default = '331'
+  illinois_appearance_additional.filing_component_filters = ['Attachment']
+  illinois_appearance_additional_2.filing_component_default = '331'
+  illinois_appearance_additional_2.filing_component_filters = ['Attachment']
+  illinois_appearance_additional_3.filing_component_default = '331'
+  illinois_appearance_additional_3.filing_component_filters = ['Attachment']
+  illinois_appearance_additional_blank.filing_component_default = '331'
+  illinois_appearance_additional_blank.filing_component_filters = ['Attachment']
 ---
 code: |
   filter_list = []
@@ -59,11 +68,55 @@ subquestion: |
   In some cases, the filings and orders are sealed by the court. This means the records are not visible to the public.
   If this happened in your case, you will have to upload a copy of the court order sealing the case.
 fields:
-  - Document type: x.document_type
+  - Was case ordered to be sealed?: x.document_type
     input type: radio
     code: |
-      x.document_type_options
+      list(reversed(yes_no_confidential(x.document_type_options)))
     default: ${ matching_tuple_option('non-confidential', x.document_type_options) }
+---
+id: ready to efile
+question: |
+  Final review before e-filing
+subquestion: |
+  
+  % if ready_to_efile:
+  Below is your ${comma_and_list(al_court_bundle.get_titles())} ${ noun_plural('form', al_court_bundle.get_titles()) } 
+  that we will deliver to the ${trial_court} County circuit clerk.
+
+  We will deliver it securely. Please allow up to 15 minutes for the filing to
+  arrive. We will email you a confirmation that it was delivered and additional
+  information about what's next.
+  
+  Click **Back** if you need to make any changes.
+  Click **Send to court** to deliver it.
+  
+  Here is what the ${trial_court} County circuit clerk will get:
+  % else:
+
+  We ran into some technical problems and there was a problem delivering this to the ${trial_court}.
+  You can download the form below to print and submit.
+
+  % endif
+
+  ${ al_court_bundle.as_pdf() }
+
+  % if ready_to_efile:
+  Your forms are not e-filed until you press **Send to court** below.
+  % endif
+continue button field: efile_user_reviewed
+continue button label: ":file-export: Send to court"
+---
+code: |
+  def yes_no_confidential(opts):
+    new_opts = []
+    for opt in opts:
+      if opt[0] == "5766":
+        new_opts.append([opt[0], "No"])
+      elif opt[0] == "5767":
+        new_opts.append([opt[0], "Yes"])
+      else:
+        new_opts.append([opt[0], f"Something else ({opt[1]})"])
+    return new_opts 
 ---
 generic object: DAObject
 id: motion_type
@@ -85,15 +138,16 @@ fields:
     code: |
       all_case_parties
 ---
+id: are-you-using-fee-waiver
 question: |
-  Are you paying for the Appearance filing with a Fee Waiver?
+  Are you paying for the *appearance* filing with a *fee waiver*?
 subquestion: |
   If you are paying for this appearance with a fee waiver, you can fill out and
   electronically file (e-file) both forms at the same time in this program.
   This means you don’t have to print out the forms. The court will communicate
-  with you by email. You will have to provide your email to e-file your Appearance and Fee waiver.
+  with you by email. You will have to provide your email to e-file your appearance and fee waiver.
 fields:
-  - Do you want to file a fee waiver?: user_wants_efile
+  - Do you want to file a *fee waiver*?: user_wants_efile
     datatype: yesnoradio
 ---
 id: eFile Login
@@ -103,8 +157,8 @@ subquestion: |
   To e-file with this program, you must have an e-filing account. Log in below or 
   <a href="${ interview_url(i="docassemble.EFSPIntegration:unauthenticated_interview.yml", reset=1, jurisdiction_id=jurisdiction_id) }" target="_blank">create a new account</a>.
 fields:
-  - email/username: my_username
-  - password: my_password
+  - Username or email: my_username
+  - Password: my_password
     datatype: password
     hide if: user_forgot_password
   - I forgot my password: user_forgot_password
