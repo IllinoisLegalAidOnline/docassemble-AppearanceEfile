@@ -46,10 +46,9 @@ code: |
   proxy_conn = ProxyConnection(default_jurisdiction=jurisdiction_id) 
 ---
 # Road map
-# TODO: to turn on/off the Fee Waiver section, will need to use
-# https://docassemble.org/docs/functions.html#DANav.set_sections
 sections:
   - review_answers: Review your answers
+  - review_IL_fee_waiver: Fee Waiver
 ---
 code: |
   ilao_easy_form_title = "Appearance (E-file)"
@@ -159,20 +158,17 @@ code: |
     docket_number
 
   if user_wants_efile:
+    nav.set_section('review_IL_fee_waiver')
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
+    nav.set_section('review_answers')
 
   if can_check_efile:
     illinois_appearance_bundle.completed
-    IL_fee_waiver_package.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
-    if IL_fee_waiver_package.has_courtesy_copies:
-      IL_fee_waiver_package.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
-      IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
-    if illinois_appearance_attachment.document_type in IL_fee_waiver_package.document_type_map.keys():
-      IL_fee_waiver_attachment.document_type = illinois_appearance_attachment.document_type
-      IL_fee_waiver_supplement.document_type = illinois_appearance_attachment.document_type
-      IL_fee_waiver_order.document_type = illinois_appearance_attachment.document_type
-
+    IL_fee_waiver_package.has_courtesy_copies
+    IL_fee_waiver_attachment.document_type
+    IL_fee_waiver_supplement.document_type
+    IL_fee_waiver_order.document_type
     IL_fee_waiver_package.completed
     tyler_payment_id = default_jurisdiction_waiver
     ready_to_efile
@@ -194,14 +190,22 @@ code: |
   get_docs_screen
   ending_screen
 ---
-question: |
-  Existing parties on the case
-subquestion: |
-  % for party in case_search.found_case.participants:
-  * ${ party.full_name }
-  
-  % endfor
-continue button field: show_existing
+depends on:
+ - illinois_appearance_bundle.has_courtesy_copies
+ - illinois_appearance_bundle.courtesy_copies
+code: |
+  IL_fee_waiver_package.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
+  if IL_fee_waiver_package.has_courtesy_copies:
+    IL_fee_waiver_package.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
+    IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
+---
+depends on:
+  - illinois_appearance_attachment.document_type
+code: |
+  if illinois_appearance_attachment.document_type in IL_fee_waiver_package.document_type_map.keys():
+    IL_fee_waiver_attachment.document_type = illinois_appearance_attachment.document_type
+    IL_fee_waiver_supplement.document_type = illinois_appearance_attachment.document_type
+    IL_fee_waiver_order.document_type = illinois_appearance_attachment.document_type
 ---
 id: next-step-fee-waiver
 question: |
@@ -1336,13 +1340,13 @@ review:
       % for my_var in other_parties:
         * ${ my_var.name.full(middle="full") }
       % endfor
-  - Edit: 
-      - trial_court_index
-      - recompute:
-        - trial_court
-    button: |
-      **County where this case is filed:**
-      ${ trial_court }
+  #- Edit: 
+  #    - trial_court_index
+  #    - recompute:
+  #      - trial_court
+  #  button: |
+  #    **County where this case is filed:**
+  #    ${ trial_court }
   - Edit: case_number
     button: |
       **Case number:**
@@ -1351,15 +1355,15 @@ review:
     button: |
       **Do you want a jury trial?**
       ${ word(yesno(is_trial_by_jury)) }
-  - label: Edit
-    fields:
-      - case_search.do_what_choice
-      - recompute:
-        - case_search.found_case
-    button: |
-      ** Court Case:**
-      ${ case_search.found_case.title } (${ case_search.found_case.date })
-    show if: can_check_efile
+  #- label: Edit
+  #  fields:
+  #    - case_search.do_what_choice
+  #    - recompute:
+  #      - case_search.found_case
+  #  button: |
+  #    ** Court Case:**
+  #    ${ case_search.found_case.title } (${ case_search.found_case.date })
+  #  show if: can_check_efile
   # TODO(brycew): we need to essentially retrigger the entire interview if they want to
   # change this. Not sure how best to do that.
   #- Edit: user_wants_efile
@@ -1387,11 +1391,32 @@ review:
       **Your email:**
       ${ users[0].email }
     show if: users[0].email_notice
+  - Edit: illinois_appearance_attachment.document_type
+    button: |
+      % if illinois_appearance_attachment.document_type == '5766':
+      The judge **did not order the case to be sealed**.
+      % else:
+      The judge **did order the case to be sealed**.
+      % endif
+  - Edit: illinois_appearance_bundle.has_courtesy_copies
+    button: |
+      % if illinois_appearance_bundle.has_courtesy_copies:
+      **Sending a copy** of your Appearance to ${ comma_and_list(illinois_appearance_bundle.courtesy_copies) }
+      % else:
+      **Not sending a copy** of your Appearance to the judge.
+      % endif
+    show if: can_check_efile
   - Edit: e_signature
     button: |
       **Do you want to add your e-signature?**
       ${ word(yesno(e_signature)) }
     show if: not can_check_efile
+  - note: |
+      If you want to change the court or case you are filing into, you will have to
+      restart the interview from the beginning.
+      
+      ${ action_button_html(url_of('new_session'), label='Start again', color='warning', size='md') }
+    show if: can_check_efile
 ---
 #needs: yes_no_unknown
 continue button field: x.review_delivery
@@ -1402,7 +1427,7 @@ review:
   - Edit: x.name.first
     button: |
       **Party name:**
-      ${ x.name.full(middle="full")  }
+      ${ x.name.full(middle="full") }
   - Edit: x.is_represented
     button: |
       **Does ${ x.name.full(middle="full") } have a lawyer?**
