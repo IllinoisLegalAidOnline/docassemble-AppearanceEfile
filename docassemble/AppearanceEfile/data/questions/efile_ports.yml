@@ -187,10 +187,21 @@ subquestion: |
   it hasn't been entered into the court's sytem electronically.
   % endif
 
-  % if x.can_file_non_indexed_case:
-  You will have to provide all of the information about the case.
-  % else:
   You will have to print out and file your paper forms.
-  % endif
 continue button field: x.warn_no_results
+---
+generic object: EFCaseSearch
+id: case-lookup-appearance
+question: |
+  Find your case
+subquestion: |
+  % if x.can_file_non_indexed_case:
+  ${ collapse_template(explain_case_search_choices_template) }
+  % endif
+fields:
+  - How do you want to find your case?: x.do_what_choice
+    datatype: radio
+    code: |
+      get_lookup_choices(False)
+# Won't do non-inedexed filings, so forcing it out
 ---

@@ -89,14 +89,17 @@ code: |
   # E-file specific
   if can_check_efile:
     case_search.found_case
-    if not case_search.case_was_found and not case_search.can_file_non_indexed_case:
+    # Keeping in the non_indexed stuff in case we want it back
+    if not case_search.case_was_found: # and not case_search.can_file_non_indexed_case:
       needs_all_info = True
       can_check_efile = False
-    elif not case_search.case_was_found and case_search.can_file_non_indexed_case:
-      needs_all_info = True
-      case_number
-      efile_case_type
-      efile_case_category
+      if case_search.do_what_choice == 'docket_lookup':
+        case_number = case_search.docket_number_from_user
+    #elif not case_search.case_was_found and case_search.can_file_non_indexed_case:
+    #  needs_all_info = True
+    #  case_number
+    #  efile_case_type
+    #  efile_case_category
     else:
       needs_all_info = False
       previous_case_id
@@ -198,6 +201,13 @@ code: |
   if IL_fee_waiver_package.has_courtesy_copies:
     IL_fee_waiver_package.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
     IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
+---
+depends on:
+  - illinois_appearance_attachment.document_type
+code: |
+  illinois_appearance_additional.document = illinois_appearance_attachment.document_type
+  illinois_appearance_additional_2.document = illinois_appearance_attachment.document_type
+  illinois_appearance_additional_3.document = illinois_appearance_attachment.document_type
 ---
 depends on:
   - illinois_appearance_attachment.document_type
@@ -977,7 +987,7 @@ if: can_check_efile and case_search.case_was_found
 depends on: case_search.found_case
 code: |
   previous_case_id = case_search.found_case.tracking_id
-  case_number = case_search.found_case.docket_id
+  case_number = case_search.found_case.docket_number
   efile_case_category = case_search.found_case.category
   efile_case_type = case_search.found_case.case_type
 ---
@@ -1391,7 +1401,12 @@ review:
       **Your email:**
       ${ users[0].email }
     show if: users[0].email_notice
-  - Edit: illinois_appearance_attachment.document_type
+  - Edit:
+      - illinois_appearance_attachment.document_type
+      - recompute:
+        - IL_fee_waiver_attachment.document_type
+        - IL_fee_waiver_supplement.document_type
+        - IL_fee_waiver_order.document_type
     button: |
       % if illinois_appearance_attachment.document_type == '5766':
       The judge **did not order the case to be sealed**.
