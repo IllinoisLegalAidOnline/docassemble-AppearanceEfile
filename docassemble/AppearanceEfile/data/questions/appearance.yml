@@ -244,22 +244,6 @@ code: |
   IL_fee_waiver_supplement.enabled = False
 ---
 code: |
-  def is_plaintiff_party(p):
-    return p.party_type == '20641' or \
-        (p.party_type_name is not None and 'defendant' in p.party_type_name.lower())
-
-  def is_defendant_party(p):
-    return p.party_type == '20646' or \
-        (p.party_type_name is not None and 'plaintiff' in p.party_type_name.lower())
-
-  if user_ask_role == 'plaintiff':
-    is_user_party = is_plaintiff_party
-    is_other_party = is_defendant_party
-  else:
-    is_user_party = is_defendant_party
-    is_other_party = is_plaintiff_party
----
-code: |
   users[i].name.first
   users[i].party_type
   users[i].is_new = True
@@ -270,19 +254,17 @@ code: |
   other_parties[i].is_new = True
 ---
 code: |
+  other_parties[i].party_type_filters = is_other_party_filters
   if user_ask_role == 'defendant':
-    other_parties[i].party_type_filters = ['Plaintiff']
     other_parties[i].party_type_default = '20646'
   else:
-    other_parties[i].party_type_filters = ['Defendant']
     other_parties[i].party_type_default = '20641'
 ---
 code: |
+  users[i].party_type_filters = is_user_filters
   if user_ask_role == 'defendant':
-    users[i].party_type_filters = ['Defendant']
     users[i].party_type_default = '20641'
   else:
-    users[i].party_type_filters = ['Plaintiff']
     users[i].party_type_default = '20646'
 ---
 id: welcome
@@ -412,27 +394,17 @@ question: |
   Is anyone else adding their name to this form with you?
   % endif
 subquestion: |
-  % if len(users.elements) > 1:  
+  % if len(users.elements) > 1:
   So far you have told us about ${comma_and_list(users.complete_elements().full_names())}.
   % endif  
 fields:
   - no label: users.there_is_another
     datatype: yesnoradio
 ---
-comment: |
-  Overrides a screen in EFSPIntegration:case_search.yml
-question: |
-  You are not able to e-file this Appearance
-subquestion: |
-  We could not find the case you wanted to file into. The case might still exist,
-  but it hasn't been entered into the court's system electronically.
-  You will have to print out and file this form on paper.
-continue button field: warn_no_results
----
 template: other_parties_help
 subject: |
   **How do I know if there are others?**
-content: |  
+content: |
     % if user_ask_role == 'plaintiff':
     You said you are the **Plaintiff** or the **Petitioner.** The other people on your side of the case would be co-plaintiffs or co-petitioners.
     % else:

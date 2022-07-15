@@ -48,7 +48,7 @@ Scenario: appearance.yml runs to end without e-filing
     | users[0].address.zip | 02122 | users[0].address.address |
     | users[0].email_notice | True | |
     | e_signature | True | |
-  Then I should not see the phrase "Fee Waiver"
+  Then I should not see the phrase "Fee Waiver Application"
 
 
 @appearance @no-efile @a2
