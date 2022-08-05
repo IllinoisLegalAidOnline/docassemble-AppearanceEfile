@@ -168,11 +168,9 @@ code: |
 
   if can_check_efile:
     illinois_appearance_bundle.completed
-    IL_fee_waiver_package.has_courtesy_copies
-    IL_fee_waiver_attachment.document_type
-    IL_fee_waiver_supplement.document_type
-    IL_fee_waiver_order.document_type
-    IL_fee_waiver_package.completed
+    IL_fee_waiver_full_attachment.has_courtesy_copies
+    IL_fee_waiver_full_attachment.completed
+    IL_fee_waiver_order.completed
     tyler_payment_id = default_jurisdiction_waiver
     ready_to_efile
   else:
@@ -197,10 +195,13 @@ depends on:
  - illinois_appearance_bundle.has_courtesy_copies
  - illinois_appearance_bundle.courtesy_copies
 code: |
-  IL_fee_waiver_package.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
-  if IL_fee_waiver_package.has_courtesy_copies:
-    IL_fee_waiver_package.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
-    IL_fee_waiver_package.courtesy_copies = illinois_appearance_bundle.courtesy_copies
+  IL_fee_waiver_full_attachment.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
+  IL_fee_waiver_order.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
+  if IL_fee_waiver_full_attachment.has_courtesy_copies:
+    IL_fee_waiver_full_attachment.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
+    IL_fee_waiver_full_attachment.courtesy_copies = illinois_appearance_bundle.courtesy_copies
+    IL_fee_waiver_order.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
+    IL_fee_waiver_order.courtesy_copies = illinois_appearance_bundle.courtesy_copies
 ---
 depends on:
   - illinois_appearance_attachment.document_type
@@ -212,7 +213,7 @@ code: |
 depends on:
   - illinois_appearance_attachment.document_type
 code: |
-  if illinois_appearance_attachment.document_type in IL_fee_waiver_package.document_type_map.keys():
+  if illinois_appearance_attachment.document_type in IL_fee_waiver_full_attachment.document_type_map.keys():
     IL_fee_waiver_attachment.document_type = illinois_appearance_attachment.document_type
     IL_fee_waiver_supplement.document_type = illinois_appearance_attachment.document_type
     IL_fee_waiver_order.document_type = illinois_appearance_attachment.document_type
@@ -225,7 +226,7 @@ subquestion: |
   The next screens will help you make a Fee waiver.
 continue button field: fee_waiver_introduction_screen
 ---
-if: user_wants_efile 
+if: user_wants_efile
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = True
   IL_fee_waiver_attachment.enabled = True
@@ -452,9 +453,14 @@ content: |
 #  - "Anyone else?": other_parties.there_is_another
 #    datatype: yesnoradio
 ---
+### NOTE(brycew): for now, not letting you add other parties on either side
 if: can_check_efile and case_search.case_was_found
 code: |
   other_parties.there_is_another = False
+---
+if: can_check_efile and case_search.case_was_found
+code: |
+  users.there_is_another = False
 ---
 id: is the user the plaintiff or defendant?
 comment: |
@@ -513,8 +519,8 @@ id: trial court county
 continue button field: case_county
 question: |
   In which county was this case filed?
-fields:
-  - no label: trial_court_index
+field: trial_court_index
+dropdown:
     code: |
       #court_list.filter_courts(allowed_courts, column='department')
       court_list._load_courts()['address_county'].items()
@@ -706,7 +712,7 @@ fields:
   - State: x.address.state
     code: |
       states_list()
-    default: IL      
+    default: IL
   - ZIP code: x.address.zip
 ---
 id: knows delivery method
@@ -1033,8 +1039,8 @@ code: |
     illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_package], filename="appearance.pdf", title="Download all forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, IL_fee_waiver_package], filename="appearance.pdf", title="Appearance")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Download all forms")
+  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Appearance")
 ---
 objects:
   - illinois_appearance_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)

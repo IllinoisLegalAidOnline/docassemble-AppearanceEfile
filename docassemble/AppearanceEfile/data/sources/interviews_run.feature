@@ -12,13 +12,14 @@ These tests are made to work with the ALKiln testing framework, an automated tes
 Want to disable the tests? Want to learn more? See ALKiln's docs: https://suffolklitlab.github.io/docassemble-AssemblyLine-documentation/docs/automated_integrated_testing
 
 @appearance @start @fast @a0
-Scenario: appearance.yml runs
+Scenario: appearance.yml just start
   Given I start the interview at "appearance.yml"
 
 @appearance @no-efile @a1
-Scenario: appearance.yml runs to end without e-filing
+Scenario: appearance.yml without e-filing
   Given I start the interview at "appearance.yml"
   And the maximum seconds for each Step in this Scenario is 40
+  And I check all pages for accessibility issues
   And I get to the question id "get-docs-screen" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
@@ -52,7 +53,7 @@ Scenario: appearance.yml runs to end without e-filing
 
 
 @appearance @no-efile @a2
-Scenario: appearance.yml runs to end, attempting but failing e-filing
+Scenario: appearance.yml attempting but failing e-filing
   Given I start the interview at "appearance.yml"
   And the maximum seconds for each Step in this Scenario is 50
   And I get to the question id "eFile Login" with this data:
@@ -103,9 +104,10 @@ Scenario: appearance.yml runs to end, attempting but failing e-filing
   Then I should see the phrase "Fee Waiver"
 
 @appearance @efile @a3
-Scenario: appearance runs to end with e-filing, search by party name
+Scenario: appearance.yml with e-filing, search by party name
   Given I start the interview at "appearance.yml"
   And the maximum seconds for each Step in this Scenario is 60
+  And I check all pages for accessibility issues
   And I get to the question id "eFile Login" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
@@ -126,7 +128,7 @@ Scenario: appearance runs to end with e-filing, search by party name
   And I get to the question id "get-docs-screen" with this data:
     | var | value | trigger |
     | user_ask_role | defendant | |
-    | x.self_in_case | True | case_search.self_in_case |
+    | x.self_in_case | is_filing | |
     | users.target_number | 1 | |
     | other_parties.target_number | 1 | |
     | is_trial_by_jury | False | |
@@ -151,7 +153,7 @@ Scenario: appearance runs to end with e-filing, search by party name
 
 # Non-indexed case isn't used
 #@appearance @efile @a4 @non-indexed
-#Scenario: appearance runs to end with e-filing a non-indexed case
+#Scenario: appearance.yml with e-filing a non-indexed case
 #  Given I start the interview at "appearance.yml"
 #  And the maximum seconds for each Step in this Scenario is 60
 #  # trial_court_index 81 is St. Clair
@@ -192,7 +194,7 @@ Scenario: appearance runs to end with e-filing, search by party name
 #    | user_benefits['TA'] | True | |
 #    | users[0].birth_year | 2000 | |
 #    | x.document_type | 5766 | illinois_appearance_bundle.document_type |
-#    | x.document_type | 5766 | IL_fee_waiver_package.document_type |
+#    | x.document_type | 5766 | IL_fee_waiver_full_attachment.document_type |
 #    | x.document_type | 5766 | IL_fee_waiver_attachment.document_type |
 #  And I tap the "#efile" element
 #  #And I tap to continue

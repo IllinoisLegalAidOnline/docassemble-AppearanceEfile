@@ -27,26 +27,14 @@ code: |
 code: |
   filter_list = []
   if is_trial_by_jury:
-    filter_list.append(lambda opt: 'Appearance' in opt[1] and 'Jury' in opt[1])
+    filter_list.append(['Appearance', 'Jury'])
   filter_list.extend([
-           lambda opt: opt[0] == '142566',
-           lambda opt: opt[1] == 'Appearance (No Fee: fee exempted by rule/statute)',
-           lambda opt: 'Appearance' in opt[1] and 'No Fee' in opt[1],
-           lambda opt: 'Appearance' in opt[1]])
-  illinois_appearance_bundle.filtered_filing_options, illinois_appearance_bundle.filing_type = \
-      filter_codes(filing_type_options, filter_list, '142566')
-  del filter_list
-  if illinois_appearance_bundle.filing_type is None:
-    illinois_appearance_bundle.filing_type = illinois_appearance_bundle.user_chosen_filing_type
----
-id: filing type et al.
-question: |
-  What type of filing will you be making?
-fields:
-  - Filing Type: illinois_appearance_bundle.user_chosen_filing_type
-    datatype: dropdown
-    code: |
-      illinois_appearance_bundle.filtered_filing_options
+           CodeType('142566'),
+           'Appearance (No Fee: fee exempted by rule/statute)',
+           ['Appearance', 'No Fee'],
+           'Appearance'])
+  illinois_appearance_bundle.filing_type_filters = filter_list
+  illinois_appearance_bundle.filing_type_default = '142566'
 ---
 ############# Overide some wording #########
 generic object: DAObject
@@ -81,7 +69,7 @@ subquestion: |
   
   % if ready_to_efile:
   Below is your ${comma_and_list(al_court_bundle.get_titles())} ${ noun_plural('form', al_court_bundle.get_titles()) } 
-  that we will deliver to the ${trial_court} County circuit clerk.
+  that we will deliver to the ${trial_court} circuit clerk.
 
   We will deliver it securely. Please allow up to 15 minutes for the filing to
   arrive. We will email you a confirmation that it was delivered and additional
@@ -90,10 +78,10 @@ subquestion: |
   Click **Back** if you need to make any changes.
   Click **Send to court** to deliver it.
   
-  Here is what the ${trial_court} County circuit clerk will get:
+  Here is what the ${trial_court} circuit clerk will get:
   % else:
 
-  We ran into some technical problems and there was a problem delivering this to the ${trial_court}.
+  We ran into some technical problems and there was a problem delivering this to the ${trial_court} clerk.
   You can download the form below to print and submit.
 
   % endif
@@ -142,7 +130,7 @@ id: are-you-using-fee-waiver
 question: |
   Are you paying for the Appearance filing with a Fee waiver?
 subquestion: |
-  If you are paying for this appearance with a ee waiver, you can fill out and
+  If you are paying for this appearance with a fee waiver, you can fill out and
   electronically file (e-file) both forms at the same time in this program.
   This means you don’t have to print out the forms. The court will communicate
   with you by email. You will have to provide your email to e-file your appearance and fee waiver.
@@ -210,3 +198,40 @@ fields:
 generic object: EFCaseSearch
 code: | 
   x.non_indexed_docket_number = None
+---
+id: not-in-case-kickout
+event: not_in_case_kickout
+question: |
+  You might have the wrong case
+subquestion: |
+  You said that you weren't ${ comma_and_list(target_case.maybe_user_partips, and_string='or') }. You need to already be a part
+  of the case to file an Appearance.
+
+  Press the **Back** button to go back and select a different case or chose the opposing side.
+---
+need:
+  - users
+  - is_user_party
+  - is_other_party
+  - other_parties
+  - target_case.found_case
+only sets: add_existing_users
+code: |
+  if target_case.self_in_case not in ['is_self', 'is_filing']:
+    not_in_case_kickout
+  else:
+    target_case.self_partip_choice.is_new = False
+    target_case.self_partip_choice.is_form_filler = target_case.self_in_case == 'is_self'
+    # Change where DA thinks this obj came from, so it says "you", and not "NAME"
+    users.append(target_case.self_partip_choice.copy_deep('users[0]'))
+    to_add_participants = [p for p in target_case.found_case.participants if p.instanceName != target_case.self_partip_choice.instanceName]
+
+  for partip in to_add_participants:
+    partip.is_new = False
+    if is_user_party(partip):
+      users.append(partip.copy_deep(f'users[{len(users.elements)}]'))
+    elif is_other_party(partip):
+      other_parties.append(partip.copy_deep(f'other_parties[{len(other_parties.elements)}]'))
+    else:
+      log(f'partip: ${partip} has weird role: ${partip.party_type}')
+  add_existing_users = True
