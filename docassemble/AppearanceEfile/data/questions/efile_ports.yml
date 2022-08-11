@@ -143,7 +143,11 @@ question: |
   Log in to your e-filing account
 subquestion: |
   To e-file with this program, you must have an e-filing account. Log in below or 
-  <a href="${ interview_url(i="docassemble.EFSPIntegration:unauthenticated_interview.yml", reset=1, jurisdiction_id=jurisdiction_id) }" target="_blank">create a new account</a>.
+  <a href="${ interview_url(i=logged_out_interview, reset=1, jurisdiction_id=jurisdiction_id) }" target="_blank">create a new account</a>.
+
+  % if hasattr(user_info(), 'email'):
+  This might **not** be the same login information for ${ get_config('external hostname') } (that you are currently logged into).
+  % endif
 fields:
   - Username or email: my_username
   - Password: my_password
@@ -193,7 +197,7 @@ fields:
   - How do you want to find your case?: x.do_what_choice
     datatype: radio
     code: |
-      get_lookup_choices(False)
+      x.get_lookup_choices(False)
 ---
 generic object: EFCaseSearch
 code: | 

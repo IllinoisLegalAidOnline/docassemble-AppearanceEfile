@@ -45,6 +45,9 @@ code: |
 code: |
   proxy_conn = ProxyConnection(default_jurisdiction=jurisdiction_id) 
 ---
+code: |
+  logged_out_interview = "docassemble.ILAO:efile-account-interview.yml"
+---
 # Road map
 sections:
   - review_answers: Review your answers
