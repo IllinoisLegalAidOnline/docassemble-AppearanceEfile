@@ -699,12 +699,12 @@ code: |
   if defined('case_search.found_case') and case_search.found_case and hasattr(x, 'tyler_id'):
     if case_search.found_case.party_to_attorneys.get(x.tyler_id):
       x.is_represented = True
-      # TODO(brycew): fill in the attorney information: we finally have an example
-      #x.lawyer
-      #lawyer_obj = chain_xml(case_search.found_case.case_details, ['value', 'rest', 1, value]
-      #x.lawyer.name.first = case_search.found_case.case_details['value']
-      #x.lawyer.name.last
-
+      tmp_lawyer =  case_search.found_case.attorneys.get(case_search.found_case.party_to_attorneys.get(x.tyler_id)):
+      if tmp_lawyer:
+        x.lawyer = tmp_lawyer.copy_deep(x.instanceName + '.lawyer')
+      else:
+        log(f"Something went wrong when parsing attorneys, party mapped to attoney that doesn't exist: {case_search.found_case}")
+        x.lawyer
 ---
 id: delivery party address
 sets:
