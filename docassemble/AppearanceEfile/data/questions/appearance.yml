@@ -699,7 +699,7 @@ code: |
   if defined('case_search.found_case') and case_search.found_case and hasattr(x, 'tyler_id'):
     if case_search.found_case.party_to_attorneys.get(x.tyler_id):
       x.is_represented = True
-      tmp_lawyer =  case_search.found_case.attorneys.get(case_search.found_case.party_to_attorneys.get(x.tyler_id)):
+      tmp_lawyer =  case_search.found_case.attorneys.get(case_search.found_case.party_to_attorneys.get(x.tyler_id))
       if tmp_lawyer:
         x.lawyer = tmp_lawyer.copy_deep(x.instanceName + '.lawyer')
       else:
