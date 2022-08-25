@@ -13,8 +13,12 @@ on:
   #schedule:
   #  - cron: '0 1 * * TUE'
 
-jobs:
 
+env:
+  TYLER_EMAIL: ${{ secrets.TYLER_EMAIL }}
+  TYLER_PASSWORD: ${{ secrets.TYLER_PASSWORD }}
+
+jobs:
   interview-testing:
     runs-on: ubuntu-latest
     name: Run interview tests
@@ -25,8 +29,6 @@ jobs:
         with:
           SERVER_URL: "${{ secrets.SERVER_URL }}"
           DOCASSEMBLE_DEVELOPER_API_KEY: "${{ secrets.DOCASSEMBLE_DEVELOPER_API_KEY }}"
-          TYLER_EMAIL: "${{ secrets.TYLER_EMAIL }}"
-          TYLER_PASSWORD: "${{ secrets.TYLER_PASSWORD }}"
       - run: echo "Finished running ALKiln tests"
 
       ## To make a new issue in your repository when a test fails,
