@@ -663,8 +663,18 @@ subquestion: |
   If someone in the case has a lawyer, you must send it to the lawyer.
 
   % if can_check_efile and case_search.found_case.attorneys:
-  Through e-filing information, we found that ${ comma_and_list([p.lawyer for p in delivery_parties if p.found_lawyer]) or 'none of these parties' } have lawyers.
+  % if len(lawyered_parties) > 1:
+  Through e-filing information, we know that ${ comma_and_list(lawyered_parties) } have lawyers.
+  % for p in lawyered_parties:
+  * ${ p }'s lawyer is ${ p.lawyer }
+  % endfor
+  % elif len(lawyered_parties) == 1:
+  Through e-filing information, we know that ${ comma_and_list(lawyered_parties) } has a lawyer, ${ lawyered_parties[0].lawyer }.
   % endif
+  % endif
+---
+code: |
+  lawyered_parties = [p for p in delivery_parties if p.found_lawyer]
 ---
 id: has lawyer
 generic object: ALIndividual
