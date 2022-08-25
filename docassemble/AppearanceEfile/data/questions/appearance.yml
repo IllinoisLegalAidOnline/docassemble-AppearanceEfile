@@ -699,7 +699,7 @@ generic object: ALIndividual
 question: |
   ${ x.name.full(middle='full') } has a lawyer
 subquestion: |
-  We found that ${ x.name.full(middle='full') } has a lawyer, ${ x.lawyer.name.full(middle='full' }. You will need to send your appearance to
+  We found that ${ x.name.full(middle='full') } has a lawyer, ${ x.lawyer.name.full(middle='full') }. You will need to send your appearance to
   ${ x.lawyer.name.full(middle='full') }.
 continue button field: x.show_found_lawyer
 ---
@@ -744,7 +744,7 @@ fields:
 ---
 generic object: ALIndividual
 code: |
-  if hasattr(x, 'lawyer') and hasattr(x.lawyer, 'address'):
+  if hasattr(x, 'lawyer'):
     if hasattr(x.lawyer.address, 'address'):
       x.address.address = x.lawyer.address.address
     if hasattr(x.lawyer.address, 'unit'):
