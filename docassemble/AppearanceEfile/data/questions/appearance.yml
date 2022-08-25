@@ -694,6 +694,15 @@ fields:
       name_suffix()
     required: False  
 ---
+id: show found lawyer
+generic object: ALIndividual
+question: |
+  ${ x.name.full(middle='full') } has a lawyer
+subquestion: |
+  We found that ${ x.name.full(middle='full') } has a lawyer, ${ x.lawyer.name.full(middle='full' }. You will need to send your appearance to
+  ${ x.lawyer.name.full(middle='full') }.
+continue button field: x.show_found_lawyer
+---
 generic object: ALIndividual
 code: |
   if defined('case_search.found_case') and case_search.found_case and hasattr(x, 'tyler_id'):
@@ -707,6 +716,7 @@ code: |
       else:
         log(f"Something went wrong when parsing attorneys, party mapped to attoney that doesn't exist: {case_search.found_case}")
         x.lawyer
+      x.show_found_lawyer
 ---
 id: delivery party address
 sets:
@@ -731,6 +741,20 @@ fields:
       states_list()
     default: IL
   - ZIP code: x.address.zip
+---
+generic object: ALIndividual
+code: |
+  if hasattr(x, 'lawyer') and hasattr(x.lawyer, 'address'):
+    if hasattr(x.lawyer.address, 'address'):
+      x.address.address = x.lawyer.address.address
+    if hasattr(x.lawyer.address, 'unit'):
+      x.address.unit = x.lawyer.address.unit
+    if hasattr(x.lawyer.address, 'city'):
+      x.address.city = x.lawyer.address.city
+    if hasattr(x.lawyer.address, 'state'):
+      x.address.state = x.lawyer.address.state
+    if hasattr(x.lawyer.address, 'zip'):
+      x.address.zip = x.lawyer.address.zip
 ---
 id: knows delivery method
 generic object: ALIndividual
@@ -811,6 +835,7 @@ fields:
   - Email: other_parties[i].email_delivery
     datatype: yesnowide
   - Email address: other_parties[i].delivery_email
+    default: ${ other_parties[i].lawyer.email if hasattr(other_parties[i], 'lawyer') and hasattr(other_parties[i].lawyer, 'email') else '' }
     datatype: email
     show if: 
       variable: other_parties[i].email_delivery
