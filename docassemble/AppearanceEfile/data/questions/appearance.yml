@@ -661,6 +661,10 @@ subquestion: |
   You must send a copy of your ${ form_name } to each of them.
 
   If someone in the case has a lawyer, you must send it to the lawyer.
+
+  % if can_check_efile and case_search.found_case.attorneys:
+  Through e-filing information, we found that ${ comma_and_list([p.lawyer for p in delivery_parties if p.found_lawyer]) or 'none of these parties' } have lawyers.
+  % endif
 ---
 id: has lawyer
 generic object: ALIndividual
@@ -694,15 +698,6 @@ fields:
       name_suffix()
     required: False  
 ---
-id: show found lawyer
-generic object: ALIndividual
-question: |
-  ${ x.name.full(middle='full') } has a lawyer
-subquestion: |
-  We found that ${ x.name.full(middle='full') } has a lawyer, ${ x.lawyer.name.full(middle='full') }. You will need to send your appearance to
-  ${ x.lawyer.name.full(middle='full') }.
-continue button field: x.show_found_lawyer
----
 generic object: ALIndividual
 code: |
   if defined('case_search.found_case') and case_search.found_case and hasattr(x, 'tyler_id'):
@@ -716,7 +711,11 @@ code: |
       else:
         log(f"Something went wrong when parsing attorneys, party mapped to attoney that doesn't exist: {case_search.found_case}")
         x.lawyer
-      x.show_found_lawyer
+      x.found_lawyer = True
+    else:
+      x.found_lawyer = False
+  else:
+    x.found_lawyer = False
 ---
 id: delivery party address
 sets:
