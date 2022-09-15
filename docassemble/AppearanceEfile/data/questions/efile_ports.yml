@@ -11,6 +11,7 @@ code: |
   illinois_appearance_bundle.reference_number = None
   illinois_appearance_bundle.filing_parties = ['users[0]']
   illinois_appearance_bundle.filing_action = 'efile'
+  illinois_appearance_bundle.has_courtesy_copies = False
 ---
 code: |
   illinois_appearance_attachment.filing_component_default = '332'
@@ -74,7 +75,7 @@ subquestion: |
   
   % if ready_to_efile:
   Below is your ${comma_and_list(al_court_bundle.get_titles())} ${ noun_plural('form', al_court_bundle.get_titles()) } 
-  that we will deliver to the ${trial_court} circuit clerk.
+  that we will deliver to the clerk of the ${trial_court}.
 
   We will deliver it securely. Please allow up to 15 minutes for the filing to
   arrive. We will email you a confirmation that it was delivered and additional
@@ -83,7 +84,7 @@ subquestion: |
   Click **Back** if you need to make any changes.
   Click **Send to court** to deliver it.
   
-  Here is what the ${trial_court} circuit clerk will get:
+  Here is what the clerk of the ${trial_court} will get:
   % else:
 
   We ran into some technical problems and there was a problem delivering this to the ${trial_court} clerk.
@@ -94,10 +95,40 @@ subquestion: |
   ${ al_court_bundle.as_pdf() }
 
   % if ready_to_efile:
-  Your forms are not e-filed until you press **Send to court** below.
+  Your forms are not e-filed until you click **Send to court** below.
   % endif
 continue button field: efile_user_reviewed
 continue button label: ":file-export: Send to court"
+---
+id: submitted form
+question: |
+  % if efile_resp.response_code == 200:
+  Your forms were submitted!
+  % else:
+  Something went wrong delivering your form
+  % endif
+subquestion: |
+  % if efile_resp.response_code == 200:
+  You should receive a confirmation email within 10-15 minutes, and
+  you should receive an update from the clerk of the ${ trial_court } on your filing 
+  within 48 hours.
+
+  You also will receive an email from our partners at Suffolk with important information
+  about your next steps.
+  
+  We recommend you continue down below to download the form for your own records.
+  Click **Back to download screen** to get a copy of your forms and instructions.
+
+  % endif
+  
+  Here are the forms that you submitted:
+  
+  ${ al_court_bundle.as_pdf() }
+
+  ${ collapse_template(debug_details) }
+
+continue button field: show_resp
+continue button label: Back to download screen
 ---
 code: |
   def yes_no_confidential(opts):
@@ -213,18 +244,21 @@ event: not_in_case_kickout
 question: |
   You might have the wrong case
 subquestion: |
-  You said that you weren't ${ comma_and_list(target_case.maybe_user_partips, and_string='or') }. You need to already be a part
-  of the case to file an Appearance.
+  % if len(target_case.maybe_user_partips) > 0:
+  You said that you weren't ${ comma_and_list(target_case.maybe_user_partips, and_string='or') }. 
+  % else:
+  There aren't any participants in this case that you can be.
+  % endif
+  You need to already be a part of the case to file an Appearance.
 
   Press the **Back** button to go back and select a different case or chose the opposing side.
 ---
 need:
   - users
-  - is_user_party
-  - is_other_party
-  - other_parties
+  - is_plaintiff_party
+  - is_defendant_party
   - target_case.found_case
-only sets: add_existing_users
+only sets: to_add_participants
 code: |
   if target_case.self_in_case not in ['is_self', 'is_filing']:
     not_in_case_kickout
@@ -233,14 +267,10 @@ code: |
     target_case.self_partip_choice.is_form_filler = target_case.self_in_case == 'is_self'
     # Change where DA thinks this obj came from, so it says "you", and not "NAME"
     users.append(target_case.self_partip_choice.copy_deep('users[0]'))
+    if is_plaintiff_party(users[0]):
+      user_ask_role = 'plaintiff'
+    elif is_defendant_party(users[0]):
+      user_ask_role = 'defendant'
+    user_ask_role
     to_add_participants = [p for p in target_case.found_case.participants if p.instanceName != target_case.self_partip_choice.instanceName]
-
-  for partip in to_add_participants:
-    partip.is_new = False
-    if is_user_party(partip):
-      users.append(partip.copy_deep(f'users[{len(users.elements)}]'))
-    elif is_other_party(partip):
-      other_parties.append(partip.copy_deep(f'other_parties[{len(other_parties.elements)}]'))
-    else:
-      log(f'partip: ${partip} has weird role: ${partip.party_type}')
-  add_existing_users = True
+---

@@ -50,8 +50,11 @@ code: |
 ---
 # Road map
 sections:
-  - review_answers: Review your answers
-  - review_IL_fee_waiver: Fee Waiver
+  - start: Start
+  - review_appearance: Appearance
+  - review_IL_fee_waiver: Fee waiver
+  - review_efiling: E-filing info
+  - download_and_efile: Download and e-file forms
 ---
 code: |
   ilao_easy_form_title = "Appearance (E-file)"
@@ -80,6 +83,7 @@ mandatory: True
 code: |
   sees_nav_bar
   set_progress(5)
+  nav.set_section('start')
   is_initial_filing
   instructions
   accept_terms
@@ -87,7 +91,7 @@ code: |
   if can_check_efile:
     tyler_login
   whats_next
-  nav.set_section('review_answers')
+  nav.set_section('review_appearance')
   set_progress(15)
   # E-file specific
   if can_check_efile:
@@ -110,12 +114,9 @@ code: |
       efile_case_type
       efile_case_category
 
-      user_ask_role
-
       add_existing_users
       users[0].name.first
 
-  user_ask_role
   # ask if whey want to add any more new parties to the case
   if can_check_efile:
     users.gather(complete_attribute='is_new')
@@ -125,6 +126,7 @@ code: |
     users.gather()
     set_progress(30)
     other_parties.gather()
+  user_ask_role
 
   set_progress(40)
   trial_court
@@ -167,11 +169,13 @@ code: |
     nav.set_section('review_IL_fee_waiver')
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
-    nav.set_section('review_answers')
 
   if can_check_efile:
+    nav.set_section('review_efiling')
+    illinois_appearance_bundle.has_courtesy_copies = False
     illinois_appearance_bundle.completed
-    IL_fee_waiver_full_attachment.has_courtesy_copies
+    IL_fee_waiver_order.has_courtesy_copies = False
+    IL_fee_waiver_full_attachment.has_courtesy_copies = False
     IL_fee_waiver_full_attachment.completed
     IL_fee_waiver_order.completed
     tyler_payment_id = default_jurisdiction_waiver
@@ -191,20 +195,9 @@ code: |
   else:
     e_signature
   set_progress(100)
+  nav.set_section('download_and_efile')
   get_docs_screen
   ending_screen
----
-depends on:
- - illinois_appearance_bundle.has_courtesy_copies
- - illinois_appearance_bundle.courtesy_copies
-code: |
-  IL_fee_waiver_full_attachment.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
-  IL_fee_waiver_order.has_courtesy_copies = illinois_appearance_bundle.has_courtesy_copies
-  if IL_fee_waiver_full_attachment.has_courtesy_copies:
-    IL_fee_waiver_full_attachment.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
-    IL_fee_waiver_full_attachment.courtesy_copies = illinois_appearance_bundle.courtesy_copies
-    IL_fee_waiver_order.courtesy_copies_raw = illinois_appearance_bundle.courtesy_copies_raw
-    IL_fee_waiver_order.courtesy_copies = illinois_appearance_bundle.courtesy_copies
 ---
 depends on:
   - illinois_appearance_attachment.document_type
@@ -528,25 +521,6 @@ dropdown:
       #court_list.filter_courts(allowed_courts, column='department')
       court_list._load_courts()['address_county'].items()
 ---
-generic object: DAObject
-id: courtesy email
-question: |
-  Do you want to send a courtesy copy of your Appearance to the judge?
-subquestion: |
-  The judge will receive a copy of your Appearance after it is filed. This is optional.
-fields:
-  - Add a courtesy email (optional): x.has_courtesy_copies
-    datatype: yesno
-  - Email address: x.courtesy_copies_raw
-    show if: x.has_courtesy_copies
-validation code: |
-  if x.has_courtesy_copies:
-    x.courtesy_copies = x.courtesy_copies_raw.splitlines()
-    for copy in x.courtesy_copies:
-      if not '@' in copy:
-        validation_error("Enter a valid email address.", field="x.courtesy_copies_raw")
-        break
----
 depends on:
   - trial_court_index
 code: |
@@ -579,7 +553,8 @@ id: trial by jury
 question: |
   Who do you want to decide your case?
 subquestion: |
-  Note: You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial.
+  Note: You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial
+  if you are not filing a fee waiver.
 field: is_trial_by_jury
 choices:
   - A judge: False
@@ -901,10 +876,10 @@ subquestion: |
   **Note:** you already e-filed your forms. Any changes you make will not appear in the e-filed forms.
   % endif
 
-  ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
+  ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
   % if not (defined('efile') and efile):
-  Click the "E-File" button below to e-file your form with the ${ trial_court } clerk. You need to deliver your Appearance to other parties in your case.
+  Click the "E-File" button below to e-file your form with the clerk of the ${ trial_court }. You need to deliver your Appearance to other parties in your case.
   
   ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export', size="md", id_tag="efile")}
   % else:
@@ -937,7 +912,7 @@ subquestion: |
   
   Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
 
-  ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
+  ${ action_button_html(url_action('review_appearence'), label=':edit: Make changes', color='success', size="md") }
 
   This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
   
@@ -1352,7 +1327,7 @@ attachment:
 ---
 ############### Review page
 id: review screen
-event: review_answers
+event: review_appearance
 question: |
   Review screen
 subquestion: |
@@ -1441,13 +1416,6 @@ review:
       The judge **did not order the case to be sealed**.
       % else:
       The judge **did order the case to be sealed**.
-      % endif
-  - Edit: illinois_appearance_bundle.has_courtesy_copies
-    button: |
-      % if illinois_appearance_bundle.has_courtesy_copies:
-      **Sending a copy** of your Appearance to ${ comma_and_list(illinois_appearance_bundle.courtesy_copies) }
-      % else:
-      **Not sending a copy** of your Appearance to the judge.
       % endif
     show if: can_check_efile
   - Edit: e_signature
@@ -1572,12 +1540,12 @@ content: |
 
   It's transaction ID is {{ transaction_id }} Please keep this for your records.
 
+  Contact the clerk at ${ trial_court.phone } if you have questions.
+
   You should receive more emails about your e-filing from Odyessey File soon.
 
   Illinois Legal Aid Online
-comment: |
-  Add this back when we get the phone numbers in the courts.
-  Contact the clerk at ${ trial_court.phone_number } if you have questions.
+
 ---
 template: response_email
 content: |
@@ -1589,8 +1557,7 @@ content: |
 
   {{ message_text }}
 
+  Contact the clerk at ${ trial_court.phone } if you have questions.
+
   Illinois Legal Aid Online
-comment: |
-  Add this back when we get the phone numbers in the courts.
-  Contact the clerk at ${ trial_court.phone_number } if you have questions.
 ---
