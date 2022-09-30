@@ -34,7 +34,7 @@ code: |
   # TODO(brycew): If there is a jury optional service, use It
   # otherwise, select the jury service
   filter_list = []
-  if is_trial_by_jury:
+  if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
     filter_list.append(['Appearance', 'Jury'])
   filter_list.extend([
            CodeType('142566'),
