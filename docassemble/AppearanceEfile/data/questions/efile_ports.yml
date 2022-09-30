@@ -232,14 +232,14 @@ subquestion: |
   You will have to print out and file your paper forms.
 continue button field: x.warn_no_results
 ---
-# Won't do non-inedexed filings, so forcing it out
+# Won't do non-indexed filings, so forcing it out
 generic object: EFCaseSearch
 id: case-lookup-appearance
 question: |
   Find your case
 subquestion: |
   % if x.can_file_non_indexed_case:
-  ${ collapse_template(explain_case_search_choices_template) }
+  ${ collapse_template(x.explain_case_search_choices_template) }
   % endif
 fields:
   - How do you want to find your case?: x.do_what_choice
