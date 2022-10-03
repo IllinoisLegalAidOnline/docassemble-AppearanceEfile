@@ -192,10 +192,14 @@ code: |
     e_signature = True
     # if e-filing, just use the e-signature to keep things simple
     inform_of_efile_e_signature
-    email_confirmation_contents = email_confirmation.content
-    acceptance_contents = response_email.content
-    rejected_contents = response_email.content
-    neutral_contents = response_email.content
+    email_confirmation_subject = email_confirmation.subject_as_html()
+    email_confirmation_contents = email_confirmation.content_as_html()
+    acceptance_subject = response_email.subject_as_html()
+    acceptance_contents = response_email.content_as_html()
+    rejected_subject = response_email.subject_as_html()
+    rejected_contents = response_email.content_as_html()
+    neutral_subject = response_email.subject_as_html()
+    neutral_contents = response_email.content_as_html()
   else:
     e_signature
   set_progress(100)
