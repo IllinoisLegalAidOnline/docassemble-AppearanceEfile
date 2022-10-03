@@ -1099,10 +1099,11 @@ code: |
 ---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Download all forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Appearance")
+  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, illinois_jury_demand_bundle, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Appearance")
 ---
 objects:
   - illinois_appearance_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)
+  - illinois_jury_demand_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="jury_demand.pdf", title="Jury Demand")
 ---
 attachment:
   variable name: illinois_appearance_instructions[i]

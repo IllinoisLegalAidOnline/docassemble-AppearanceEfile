@@ -14,6 +14,110 @@ code: |
   illinois_appearance_bundle.has_courtesy_copies = False
 ---
 code: |
+  # TODO(brycew): If there is a jury optional service, use It
+  # otherwise, select the jury service
+  illinois_appearance_bundle.filing_type_filters = [
+    CodeType('142566'),
+    'Appearance (No Fee: fee exempted by rule/statute)',
+    ['Appearance', 'No Fee'],
+    'Appearance'
+  ]
+  illinois_appearance_bundle.filing_type_default = None
+---
+code: |
+  if court_id == 'tazewell':
+    if trial_with == "judge_and_6_jury":
+      if efile_case_category == "117503": # small claims
+        default_list = [None]
+        filter_list = [[
+          CodeType("20774"),
+          "SC - Jury Demand - 6 Person",
+          ["SC", "Jury Demand", "6 Person"],
+          ["Jury Demand", "6 Person"]
+          "Jury Demand"
+        ]]
+      # if not probate or guardianship
+      elif efile_case_category != "7420" and efile_case_category != "200545":
+        default_list = [None]
+        filter_list = [[
+          CodeType("124679"),
+          "(Misc.) - Jury Demand - 6 person (Excluding SC, P, PR, & GR)",
+          "Jury Demand - 6 person",
+          ["Jury Demand", "6 person"]
+          "Jury Demand"
+        ]]
+      else:
+        # TODO(brycew): Can't actually have jury demand in tazewell?
+        default_list = []
+        filter_list = []
+    elif trial_with == "judge_and_12_jury":
+      if efile_case_category == "117503":
+        default_list = [None]
+        filter_list = [[
+          CodeType("20773"),
+          "SC - Jury Demand - 12 Person",
+          ["SC", "Jury Demand", "12 Person"],
+          ["Jury Demand", "12 Person"]
+          "Jury Demand"
+        ]]
+      # if not probate or guardianship
+      elif efile_case_category != "7420" and efile_case_category != "200545":
+        default_list = [None]
+        filter_list = [[
+          CodeType("124678"),
+          "(Misc.) - Jury Demand - 12 Person (Excluding SC, P, PR, & GR)",
+          "Jury Demand - 12 Person",
+          ["Jury Demand", "12 Person"],
+          "Jury Demand"
+        ]]
+    else:
+      default_list = []
+      filter_list = []
+  else:
+    default_list = []
+    filter_list = []
+  illinois_appearance_bundle.optional_services_defaults = default_list
+  illinois_appearance_bundle.optional_services_filters = filter_list
+---
+code: |
+  if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
+    if court_id != "tazewell":
+      illinois_jury_demand_bundle.enabled = True
+    else:
+      illinois_jury_demand_bundle.enabled = False
+  else:
+    illinois_jury_demand_bundle.enabled = False
+---
+if: illinois_jury_demand_bundle.enabled
+code: |
+  illinois_jury_demand_bundle.filing_description = ''
+  illinois_jury_demand_bundle.reference_number = None
+  illinois_jury_demand_bundle.filing_parties = ['users[0]']
+  illinois_jury_demand_bundle.filing_action = 'efile'
+  illinois_jury_demand_bundle.has_courtesy_copies = False
+---
+if: illinois_jury_demand_bundle.enabled
+code: |
+  jury_filters = []
+  if trial_with == "judge_and_6_jury"
+    jury_filters.extend([
+        "Jury Demand - 6 Person",
+        "Jury Demand 6 Person"
+        "Jury Demand (6)"
+    ])
+  elif trial_with == "judge_and_12_jury":
+    jury_filters.extend([
+        "Jury Demand - 12 Person",
+        "Jury Demand 12 Person",
+        "Jury Demand (12)"
+    ])
+  jury_filters.extend([
+    "Jury Demand"
+  ])
+  illinois_jury_demand_bundle.filing_type_filters = jury_filters
+  illinois_jury_demand_bundle.filing_type_default = None
+---
+code: |
   illinois_appearance_attachment.filing_component_default = '332'
   illinois_appearance_attachment.filing_component_filters = ['Lead Document']
   illinois_appearance_attachment.document_description = 'Appearance'
@@ -29,20 +133,6 @@ code: |
   illinois_appearance_additional_blank.filing_component_default = '331'
   illinois_appearance_additional_blank.filing_component_filters = ['Attachment']
   illinois_appearance_additional_blank.document_description = 'Appearance Additional Proof of Delivery'
----
-code: |
-  # TODO(brycew): If there is a jury optional service, use It
-  # otherwise, select the jury service
-  filter_list = []
-  if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
-    filter_list.append(['Appearance', 'Jury'])
-  filter_list.extend([
-           CodeType('142566'),
-           'Appearance (No Fee: fee exempted by rule/statute)',
-           ['Appearance', 'No Fee'],
-           'Appearance'])
-  illinois_appearance_bundle.filing_type_filters = filter_list
-  illinois_appearance_bundle.filing_type_default = '142566'
 ---
 ############# Overide some wording #########
 generic object: DAObject
