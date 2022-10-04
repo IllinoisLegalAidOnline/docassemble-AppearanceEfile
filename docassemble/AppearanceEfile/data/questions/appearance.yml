@@ -625,7 +625,7 @@ fields:
   - "Add e-signature?": e_signature
     datatype: yesnoradio
 ---
-template: (signature_help
+template: signature_help
 subject: |
   **What does it mean to sign the *Appearance*?**
 content: |
