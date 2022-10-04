@@ -33,7 +33,7 @@ code: |
           CodeType("20774"),
           "SC - Jury Demand - 6 Person",
           ["SC", "Jury Demand", "6 Person"],
-          ["Jury Demand", "6 Person"]
+          ["Jury Demand", "6 Person"],
           "Jury Demand"
         ]]
       # if not probate or guardianship
@@ -43,7 +43,7 @@ code: |
           CodeType("124679"),
           "(Misc.) - Jury Demand - 6 person (Excluding SC, P, PR, & GR)",
           "Jury Demand - 6 person",
-          ["Jury Demand", "6 person"]
+          ["Jury Demand", "6 person"],
           "Jury Demand"
         ]]
       else:
@@ -57,7 +57,7 @@ code: |
           CodeType("20773"),
           "SC - Jury Demand - 12 Person",
           ["SC", "Jury Demand", "12 Person"],
-          ["Jury Demand", "12 Person"]
+          ["Jury Demand", "12 Person"],
           "Jury Demand"
         ]]
       # if not probate or guardianship
@@ -99,7 +99,7 @@ code: |
 if: illinois_jury_demand_bundle.enabled
 code: |
   jury_filters = []
-  if trial_with == "judge_and_6_jury"
+  if trial_with == "judge_and_6_jury":
     jury_filters.extend([
         "Jury Demand - 6 Person",
         "Jury Demand 6 Person"

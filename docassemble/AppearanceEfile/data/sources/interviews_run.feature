@@ -30,7 +30,7 @@ Scenario: appearance.yml without e-filing
     | users[0].name.first | Bob | |
     | users[0].name.last | Ma | |
     | other_parties.target_number | 1 | |
-    | is_trial_by_jury | False | |
+    | trial_with | judge_only | |
     | case_number | 2022AC123 | |
     | users[0].phone_number | 4094567890 | |
     | users[0].email | example@example.com | |
@@ -79,7 +79,7 @@ Scenario: appearance.yml attempting but failing e-filing
     | users[0].name.first | Bob | |
     | users[0].name.last | Ma | |
     | other_parties.target_number | 1 | |
-    | is_trial_by_jury | False | |
+    | trial_with | judge_only | |
     | users[0].phone_number | 4094567890 | |
     | users[0].email | example@example.com | |
     | other_parties[0].person_type | ALIndividual | |
@@ -131,7 +131,7 @@ Scenario: appearance.yml with e-filing, search by party name
     | x.self_in_case | is_filing | |
     | users.target_number | 1 | |
     | other_parties.target_number | 1 | |
-    | is_trial_by_jury | False | |
+    | trial_with | judge_only | |
     | x.is_represented | False | other_parties[0].is_represented |
     | x.address.address | 123 Fake St | other_parties[0].address.address |
     | x.address.city | Boston | other_parties[0].address.address |
@@ -178,7 +178,7 @@ Scenario: appearance.yml with e-filing, search by party name
 #    | other_parties[0].person_type | ALIndividual | |
 #    | other_parties[0].name.first | Tame | |
 #    | other_parties[0].name.last | Impala | |
-#    | is_trial_by_jury | False | |
+#    | trial_with | judge_only | |
 #    | x.is_represented | False | other_parties[0].is_represented |
 #    | x.address.address | 123 Fake St | other_parties[0].address.address |
 #    | x.address.city | Boston | other_parties[0].address.address |
