@@ -178,6 +178,8 @@ code: |
     nav.set_section('review_efiling')
     illinois_appearance_bundle.has_courtesy_copies = False
     illinois_appearance_bundle.completed
+    illinois_jury_demand_bundle.has_courtesy_copies = False
+    illinois_jury_demand_bundle.completed
     IL_fee_waiver_order.has_courtesy_copies = False
     IL_fee_waiver_full_attachment.has_courtesy_copies = False
     IL_fee_waiver_full_attachment.completed
@@ -192,14 +194,15 @@ code: |
     e_signature = True
     # if e-filing, just use the e-signature to keep things simple
     inform_of_efile_e_signature
-    email_confirmation_subject = email_confirmation.subject_as_html()
-    email_confirmation_contents = email_confirmation.content_as_html()
-    acceptance_subject = response_email.subject_as_html()
-    acceptance_contents = response_email.content_as_html()
-    rejected_subject = response_email.subject_as_html()
-    rejected_contents = response_email.content_as_html()
-    neutral_subject = response_email.subject_as_html()
-    neutral_contents = response_email.content_as_html()
+    # TODO(brycew): figure out HTML emailing?!
+    email_confirmation_subject = email_confirmation.subject
+    email_confirmation_contents = email_confirmation.content
+    acceptance_subject = response_email.subject
+    acceptance_contents = response_email.content
+    rejected_subject = response_email.subject
+    rejected_contents = response_email.content
+    neutral_subject = response_email.subject
+    neutral_contents = response_email.content
   else:
     e_signature
   set_progress(100)
@@ -301,7 +304,7 @@ subquestion: |
   ${ collapse_template(help_example) }
 
   Click on **{green words}** to learn what they mean. Some questions have a
-  question mark in a circle {$ fa_icon("question-circle", color_css="#0dcaf0") } that also gives help.
+  question mark in a circle ${ fa_icon("question-circle", color_css="#0dcaf0") } that also gives help.
 ---
 template: help_example
 subject: |
@@ -334,7 +337,7 @@ subquestion: |
 
   Using this program does not create an attorney-client relationship between you and Illinois Legal Aid Online or its employees.
 
-  ${ collapse_template(get_legal_help) }  
+  ${ collapse_template(get_legal_help) }
 
 fields:
   - To continue, you must accept the [**terms of use**](https://www.illinoislegalaid.org/about/terms-of-use).: accept
@@ -1570,6 +1573,8 @@ columns:
 delete buttons: True
 confirm: True
 ---
+comment: |
+  TODO(brycew): turn this into an HTML email, with some descent styling
 template: email_confirmation
 subject: |
   Important Appearence and Fee waiver e-filing information
@@ -1602,14 +1607,14 @@ content: |
   * If you have a court date for your fee waiver,
   * and what's next in your case.
 
-  Use [Odyssey eFileIL](https://illinois.tylerhost.net/OfsWeb) if you need to e-file other forms into your case.
+  Use Odyssey eFileIL if you need to e-file other forms into your case. Click here to visit: https://illinois.tylerhost.net/OfsWeb
 
-  Visit [Illinois Court Help](https://www.ilcourthelp.gov) or call or text (833) 411-1121 to ask a trained court guide questions about
+  Visit Illinois Court Help (https://www.ilcourthelp.gov) or call or text (833) 411-1121 to ask a trained court guide questions about
   e-filing and other court processes, court forms, and going to court.
 
   Thanks you for using ILAO Easy Form
 
-  [Illinois Legal Aid Online](https://www.illinoislegalaid.org/)
+  Illinois Legal Aid Online: https://www.illinoislegalaid.org/
 ---
 template: response_email
 subject: |
@@ -1633,12 +1638,12 @@ content: |
   * If you have a court date for your fee waiver,
   * and what's next in your case.
 
-  Use [Odyssey eFileIL](https://illinois.tylerhost.net/OfsWeb) if you need to e-file other forms into your case.
+  Use Odyssey eFileIL if you need to e-file other forms into your case. Click here to visit: https://illinois.tylerhost.net/OfsWeb
 
-  Visit [Illinois Court Help](https://www.ilcourthelp.gov) or call or text (833) 411-1121 to ask a trained court guide questions about
+  Visit Illinois Court Help (https://www.ilcourthelp.gov) or call or text (833) 411-1121 to ask a trained court guide questions about
   e-filing and other court processes, court forms, and going to court.
 
   Thanks you for using ILAO Easy Form
 
-  [Illinois Legal Aid Online](https://www.illinoislegalaid.org/)
+  Illinois Legal Aid Online: https://www.illinoislegalaid.org/
 ---
