@@ -80,6 +80,13 @@ code: |
   illinois_appearance_bundle.optional_services_filters = filter_list
 ---
 code: |
+  if illinois_appearance_bundle.optional_services[i].code == "124679":
+    illinois_appearance_bundle.optional_services[i].multiplier = 1
+---
+code: |
+  illinois_appearance_bundle.optional_services.there_is_another = False
+---
+code: |
   if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
     if court_id != "tazewell":
       illinois_jury_demand_bundle.enabled = True
