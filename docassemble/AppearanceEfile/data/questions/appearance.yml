@@ -185,6 +185,7 @@ code: |
     IL_fee_waiver_full_attachment.completed
     IL_fee_waiver_order.completed
     tyler_payment_id = default_jurisdiction_waiver
+    all_required_screens_shown
     ready_to_efile
   else:
     ready_to_efile = False
@@ -571,12 +572,25 @@ content: |
   
   [FILE case_number_example.png, 100%, Summons form showing case number]
 ---
+if: not user_wants_efile
 id: trial by jury
 question: |
   Who do you want to decide your case?
 subquestion: |
   Note: You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial
   if you are not filing a fee waiver.
+field: trial_with
+choices:
+  - A judge: judge only
+  - A judge and a 6-person jury: judge_and_6_jury
+  - A judge and a 12-person jury: judge_and_12_jury
+---
+if: user_wants_efile
+id: trial by jury - already fee waiver
+question: |
+  Who do you want to decide your case?
+subquestion: |
+  Note: You do not have a right to a jury trial in every case.
 field: trial_with
 choices:
   - A judge: judge only
