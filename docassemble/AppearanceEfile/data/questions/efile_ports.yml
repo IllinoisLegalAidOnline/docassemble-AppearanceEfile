@@ -162,7 +162,7 @@ id: you-will-not-be-able-to-efile
 question: |
   You will *not* be able to e-file this document
 subquestion: |
-  Unfortunately, you won't be able to e-file this document at ${ trial_court } through this program.
+  Unfortunately, you won't be able to e-file this document at ${ trial_court if trial_court_index != -1 else "a Cook county courthouse" } through this program.
 
   However, you are still be able to continue and download a completed form, and e-file the form
   elsewhere.
@@ -338,7 +338,7 @@ continue button field: x.warn_no_results
 generic object: EFCaseSearch
 id: case-lookup-appearance
 question: |
-  Find your case
+  Find your case in ${ trial_court.address.county } County
 subquestion: |
   % if x.can_file_non_indexed_case:
   ${ collapse_template(x.explain_case_search_choices_template) }
@@ -385,5 +385,12 @@ code: |
       user_ask_role = 'plaintiff'
     elif is_defendant_party(users[0]):
       user_ask_role = 'defendant'
-    to_add_participants = [p for p in target_case.found_case.participants if p.instanceName != target_case.self_partip_choice.instanceName]
+    to_add_participants = [p for p in target_case.found_case.participants if p.instanceName != target_case.self_partip_choice.instanceName and not is_unused_party(p)]
+---
+code: |
+  is_unused_filters = [
+    CodeType('5615'),
+    'Decedent',
+    'Deceased'
+  ]
 ---

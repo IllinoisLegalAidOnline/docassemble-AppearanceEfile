@@ -111,6 +111,8 @@ code: |
     #  efile_case_type
     #  efile_case_category
     else:
+      if will_kickout(case_search.found_case):
+        kickout_case_type_screen
       needs_all_info = False
       previous_case_id
       case_number
@@ -210,6 +212,28 @@ code: |
   nav.set_section('download_and_efile')
   get_docs_screen
   ending_screen
+---
+code: |
+  def will_kickout(found_case):
+    if case_category_map[found_case.category]['name'] in ['Probate', 'Guardianship', 'Juvenile Abuse']:
+      return True
+    if 'Name Change' in case_type_map[found_case.case_type]['name']:
+      return True
+    return False
+---
+event: kickout_case_type_screen
+question: |
+  You cannot use this form in your case
+subquestion: |
+  This online form will not work work in certain cases. You will need to ask the circuit clerk at ${ trial_court }
+  which form to use and how to file it. You can call them at ${ trial_court.phone }.
+
+  Your case type, ${ case_category_map.disp(case_search.found_case.category, 'name') }, ${ case_type_map.disp(case_search.found_case.case_type, 'name') } is in:
+  
+  * Probate, or a case involving a will or an estate
+  * Juvenile abuse and neglect
+  * Name change fro an adult or child
+  * Guardianship for a minor or an adult
 ---
 depends on:
   - illinois_appearance_attachment.document_type
@@ -528,8 +552,9 @@ id: trial court county
 continue button field: case_county
 question: |
   In which county was this case filed?
-field: trial_court_index
-dropdown:
+fields:
+  - Which county?: trial_court_index
+    datatype: integer
     code: |
       court_county_lookup()
 ---
