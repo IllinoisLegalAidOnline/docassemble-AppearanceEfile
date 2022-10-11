@@ -248,9 +248,9 @@ code: |
   def yes_no_confidential(opts):
     new_opts = []
     for opt in opts:
-      if opt[0] == "5766": # non-confidential
+      if opt[0] == "5766" or opt[0] == '141579' or opt[1].lower() == 'non-confidential':
         new_opts.append([opt[0], "No"])
-      elif opt[0] == "5767": # confidential
+      elif opt[0] == "5767" or opt[1].lower() == 'confidential': # confidential
         new_opts.append([opt[0], "Yes"])
       else:
         new_opts.append([opt[0], f"Something else ({opt[1]})"])
@@ -382,9 +382,9 @@ code: |
     # Change where DA thinks this obj came from, so it says "you", and not "NAME"
     users.append(target_case.self_partip_choice.copy_deep('users[0]'))
     if is_plaintiff_party(users[0]):
-      user_ask_role = 'plaintiff'
+      user_role = 'plaintiff'
     elif is_defendant_party(users[0]):
-      user_ask_role = 'defendant'
+      user_role = 'defendant'
     to_add_participants = [p for p in target_case.found_case.participants if p.instanceName != target_case.self_partip_choice.instanceName and not is_unused_party(p)]
 ---
 code: |
@@ -393,4 +393,15 @@ code: |
     'Decedent',
     'Deceased'
   ]
+---
+code: |
+  # DuPage's Attorney/Firm Number / SRL Number. The SRL number is 99500.
+  if len(cross_ref_type_map) == 1:
+    cross_references.new_item_name = next(iter(cross_ref_type_map))
+    if cross_references.new_item_name == "136524":
+      cross_references.new_item_value = "99500"
+---
+code: |
+  if len(cross_ref_type_map) == 1:
+    cross_references.there_is_another = False
 ---
