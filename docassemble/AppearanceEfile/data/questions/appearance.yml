@@ -91,6 +91,8 @@ code: |
   how_to_use
   accept_terms
   lawsuit_information
+  if case_is_invalid_type:
+    kickout_self_reported_case_type
   if can_check_efile:
     tyler_login
   whats_next
@@ -132,7 +134,7 @@ code: |
     users.gather()
     set_progress(30)
     other_parties.gather()
-  user_ask_role
+  user_role
 
   set_progress(40)
   trial_court
@@ -214,18 +216,19 @@ code: |
   ending_screen
 ---
 code: |
-  def will_kickout(found_case):
-    if case_category_map[found_case.category]['name'] in ['Probate', 'Guardianship', 'Juvenile Abuse']:
+  def will_kickout(case):
+    if case_category_map[case.category]['name'] in ['Probate', 'Guardianship', 'Juvenile Abuse']:
       return True
-    if 'Name Change' in case_type_map[found_case.case_type]['name']:
+    if 'name change' in case_type_map[case.case_type]['name'].lower() or 'change of name' in case_type_map[case.case_type]['name'].lower():
       return True
     return False
 ---
+id: kickout_case_type_screen
 event: kickout_case_type_screen
 question: |
   You cannot use this form in your case
 subquestion: |
-  This online form will not work work in certain cases. You will need to ask the circuit clerk at ${ trial_court }
+  This online form will not work in certain cases. You will need to ask the circuit clerk at ${ trial_court }
   which form to use and how to file it. You can call them at ${ trial_court.phone }.
 
   Your case type, ${ case_category_map.disp(case_search.found_case.category, 'name') }, ${ case_type_map.disp(case_search.found_case.case_type, 'name') } is in:
@@ -234,6 +237,33 @@ subquestion: |
   * Juvenile abuse and neglect
   * Name change fro an adult or child
   * Guardianship for a minor or an adult
+---
+id: kickout_self_reported_case_type
+event: kickout_self_reported_case_type
+question: |
+  Sorrry
+subquestion: |
+  The Appearance form made by this program does not work with these case types.
+
+  * Name change for an adult or a child
+  * Guardianship for a minor or an adult
+  * Probate, or a case involving a will or an estate
+  * Juvenile abuse and neglect
+
+  Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
+---
+id: pre-screen case type
+question: |
+  Are you filing an Appearance into one these case types?
+subquestion: |
+  
+  * Name change for an adult or a child
+  * Guardianship for a minor or an adult
+  * Probate, or a case involving a will or an estate
+  * Juvenile abuse and neglect
+fields:
+  - no label: case_is_invalid_type
+    datatype: yesnoradio
 ---
 depends on:
   - illinois_appearance_attachment.document_type

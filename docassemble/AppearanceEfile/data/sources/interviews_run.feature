@@ -9,7 +9,19 @@ Those scenarios are:
 
 These tests are made to work with the ALKiln testing framework, an automated testing framework made under the Document Assembly Line Project.
 
-Want to disable the tests? Want to learn more? See ALKiln's docs: https://suffolklitlab.github.io/docassemble-AssemblyLine-documentation/docs/automated_integrated_testing
+See ALKiln's docs: https://suffolklitlab.github.io/docassemble-AssemblyLine-documentation/docs/automated_integrated_testing
+
+Some good stage cases to test with:
+* Dupage: JOHN SMITH -VS- MARY SMITH (October 15, 2014) Docket ID: 2014SC200000
+  * should be able to select either party, don't have to answer what side of the case we're on
+* Dupage: Mary Jane Smith Petition for a change of name Mary Anne Doe, 2018MR000007
+  * should filter out
+* Dupage: John Smith, 2020D000033
+  * should say we can't file, b/c no appearance option
+* Lake: 78D00000056
+* DuPage: Mary Smith: 2020D000033
+  * shouldn't see is_unused_party error
+
 
 @appearance @start @fast @a0
 Scenario: appearance.yml just start

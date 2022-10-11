@@ -22,7 +22,34 @@ code: |
     ['Appearance', 'No Fee'],
     'Appearance'
   ]
-  illinois_appearance_bundle.filing_type_default = None
+  illinois_appearance_bundle.filing_type_default = 'none available'
+---
+generic object: DAObject
+need:
+  - x.filing_type_default
+  - x.filing_type_filters
+only sets:
+  - x.filing_type
+  - x.filtered_filing_type_options
+code: |
+  x.filtered_filing_type_options, x.filing_type = \
+      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default)
+  if x.filing_type == 'none available':
+    can_check_efile = False
+    warning_no_appearance_type
+  if x.filing_type is None:
+    del x.filing_type
+    x.filing_type = x.user_chosen_filing_type
+---
+question: |
+  You cannot use this form in your case
+subquestion: |
+  This online form cannot file an appearance with a fee waiver into this case.
+  You will need to ask the circuit clerk at ${ trial_court }
+  which form to use and how to file it.
+
+  You can continue to download your forms and you can call the clerk at ${ trial_court.phone }.
+continue button field: warning_no_appearance_type
 ---
 code: |
   if court_id == 'tazewell':
@@ -123,6 +150,11 @@ code: |
   ])
   illinois_jury_demand_bundle.filing_type_filters = jury_filters
   illinois_jury_demand_bundle.filing_type_default = None
+---
+if: illinois_jury_demand_bundle.enabled
+code: |
+  illinois_jury_demand_bundle.optional_services_defaults = []
+  illinois_jury_demand_bundle.optional_services_filters = []
 ---
 code: |
   illinois_appearance_attachment.filing_component_default = '332'
@@ -320,18 +352,17 @@ content: |
 generic object: EFCaseSearch
 id: no cases found
 question: |
-  You are not able to e-file this Appearance
+  We can't e-file your Appearance
 subquestion: |
   We could not find the case you wanted to file into. The case might still exist, but
   % if x.cms_connection_issue:
   the court's electronic system isn't online.
-  % elif x.search_went_wrong():
-  something is wrong with the court's electronic system.
   % else:
-  it hasn't been entered into the court's sytem electronically.
+  we can't access the record through the court's system.
   % endif
 
-  You will have to print out and file your paper forms.
+  You will have to e-file your forms through another website.
+  Or you can print out and file your paper forms.
 continue button field: x.warn_no_results
 ---
 # Won't do non-indexed filings, so forcing it out
