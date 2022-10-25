@@ -5,7 +5,6 @@ include:
   - docassemble.ILAO:ilao-interview-framework.yml
   - docassemble.ILAO:shared-basic-questions.yml
   - docassemble.EFSPIntegration:efiling_integration.yml
-  - docassemble.EFSPIntegration:login_qs.yml
   - docassemble.EFSPIntegration:case_search.yml
   - efile_ports.yml
 ---
@@ -199,7 +198,7 @@ code: |
     e_signature = True
     # if e-filing, just use the e-signature to keep things simple
     inform_of_efile_e_signature
-    # TODO(brycew): figure out HTML emailing?!
+    # TODO(brycew): redo HTML emailing
     email_confirmation_subject = email_confirmation.subject
     email_confirmation_contents = email_confirmation.content
     acceptance_subject = response_email.subject
@@ -1645,77 +1644,70 @@ columns:
 delete buttons: True
 confirm: True
 ---
-comment: |
-  TODO(brycew): turn this into an HTML email, with some descent styling
 template: email_confirmation
 subject: |
   Important Appearence and Fee waiver e-filing information
 content: |
-  Hello ${ users[0].name },
-
-  # Your Appearance and Fee Waiver filings were sent to the circuit clerk. They will accept or reject your filing.
-
-  Your forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. A person in the clerk's office has
-  to accept the forms before they are officially filed.
-
-  ## What's next?
-
-  You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, which will be used to track your filing.
-
-  The clerk will review what you filed.
-
-  * If it looks good, they will accept it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted.
-    The email will include a link to a file-stamped copy of your court forms.
-  * If there is something wrong with the filing, they will reject it. You should receive another email from Odyssey eFileIL with an explanation of what needs to be fixed.
-
-  After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case.
-  Make sure you record how you delivered the Appearance to the other parties in the Proof of Delivery forms.
-
-  ## Where to go for help:
-
-  Contact the clerk at ${ trial_court.phone } to learn:
-
-  * If your filing is accepted,
-  * If you have a court date for your fee waiver,
-  * and what's next in your case.
-
-  Use Odyssey eFileIL if you need to e-file other forms into your case. Click here to visit: https://illinois.tylerhost.net/OfsWeb
-
-  Visit Illinois Court Help (https://www.ilcourthelp.gov) or call or text (833) 411-1121 to ask a trained court guide questions about
-  e-filing and other court processes, court forms, and going to court.
-
-  Thanks you for using ILAO Easy Form
-
-  Illinois Legal Aid Online: https://www.illinoislegalaid.org/
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Illinois Legal Aid Online</title>
+  </head>
+  <body>
+  <p>Hello ${ users[0].name },</p>
+  <p><strong>Your Appearance and Fee Waiver filings were sent to the circuit clerk. They will accept or reject your filing.</strong></p>
+  <p>Your forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. A person in the clerk's office has to accept the forms before they are officially filed.</p>
+  <p><strong>What's next?</strong></p>
+  <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, which will be used to track your filing.</p>
+  <p>The clerk will review what you filed.</p>
+  <ul>
+    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a file-stamped copy of your court forms.</li>
+    <li>If there is something wrong with the filing, they will <strong>reject</strong> it. You should receive another email from Odyssey eFileIL with an explanation of what needs to be fixed.</li>
+  </ul>
+  <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case.</p>
+  <p>Make sure you record how you delivered the Appearance to the other parties in the Proof of Delivery forms.</p>
+  <p><strong>Where to go for help</strong></p>
+  <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
+  <ul>
+    <li>If your filing is accepted,</li>
+    <li>If you have a court date for your fee waiver, and</li>
+  <li>What's next in your case.</li>
+  </ul>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
+  </body>
+  </html>
 ---
 template: response_email
 subject: |
   Clerk response to your e-filed Appearence and Fee waiver
 content: |
-  Hello ${ users[0].name },
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Illinois Legal Aid Online</title>
+  </head>
+  <body>
+  <p>Hello ${ users[0].name },</p>
+  <p><strong>The ${ trial_court } circuit clerk has sent a response to your filing in ${ case_type_map.get(efile_case_type, 'your case') }.</strong></p>
 
-  # The ${ trial_court } circuit clerk has sent a response to your filing in ${ case_type_map.get(efile_case_type, 'your case') }.
+  <p><q>{{ status }}</q></p>
 
-  "{{ status }}"
+  <p>{{ message_text }}</p>
 
-  {{ message_text }}
+  <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
-  Contact the clerk at ${ trial_court.phone } if you have questions.
-
-  ## Where to go for help:
-
-  Contact the clerk at ${ trial_court.phone } to learn:
-
-  * why the clerk gave the above response,
-  * If you have a court date for your fee waiver,
-  * and what's next in your case.
-
-  Use Odyssey eFileIL if you need to e-file other forms into your case. Click here to visit: https://illinois.tylerhost.net/OfsWeb
-
-  Visit Illinois Court Help (https://www.ilcourthelp.gov) or call or text (833) 411-1121 to ask a trained court guide questions about
-  e-filing and other court processes, court forms, and going to court.
-
-  Thanks you for using ILAO Easy Form
-
-  Illinois Legal Aid Online: https://www.illinoislegalaid.org/
+  <p><strong>Where to go for help</strong></p>
+  <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
+  <ul>
+    <li>If your filing is accepted,</li>
+    <li>If you have a court date for your fee waiver, and</li>
+  <li>What's next in your case.</li>
+  </ul>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
+  </body>
+  </html>
 ---
