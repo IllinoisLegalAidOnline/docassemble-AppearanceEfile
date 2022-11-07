@@ -317,14 +317,14 @@ code: |
 ---
 code: |
   other_parties[i].party_type_filters = is_other_party_filters
-  if user_role == 'defendant':
+  if not user_started_case: 
     other_parties[i].party_type_default = '20646'
   else:
     other_parties[i].party_type_default = '20641'
 ---
 code: |
   users[i].party_type_filters = is_user_filters
-  if user_role == 'defendant':
+  if not user_started_case:
     users[i].party_type_default = '20641'
   else:
     users[i].party_type_default = '20646'
@@ -468,7 +468,7 @@ template: other_parties_help
 subject: |
   **How do I know if there are others?**
 content: |
-    % if user_role == 'plaintiff':
+    % if user_started_case:
     You said you are the **Plaintiff** or the **Petitioner.** The other people on your side of the case would be co-plaintiffs or co-petitioners.
     % else:
     You said you are the **Defendant** or the **Respondent.** The other people on your side of the case would be co-defendants or co-respondents.
@@ -502,7 +502,7 @@ content: |
 # Turned off for now, awaiting AOIC reply
 #id: any other opposing parties
 #question: |
-#  % if user_role == "plaintiff":
+#  % if user_started_case:
 #  Is there another **defendant** or **respondent** in this case?
 #  % else:
 #  Is there another **plaintiff** or **petitioner** in this case?
@@ -563,7 +563,7 @@ sets:
   - other_parties[i].name.first
 id: names of opposing parties
 question: |
-  % if user_role == "plaintiff":
+  % if user_started_case:
   Name of ${ ordinal(i) } **defendant** or **respondent** in this case
   % else:
   Name of ${ ordinal(i) } **plaintiff** or **petitioner** in this case
@@ -1170,11 +1170,30 @@ code: |
 ---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Download all forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[illinois_appearance_bundle, illinois_jury_demand_bundle, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Appearance")
+  - al_court_bundle: ALDocumentBundle.using(elements=court_bundle_list, filename="appearance.pdf", title="Appearance")
 ---
 objects:
   - illinois_appearance_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)
   - illinois_jury_demand_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="jury_demand.pdf", title="Jury Demand")
+---
+code: |
+  if IL_fee_waiver_order.filing_type == 'none available':
+    court_bundle_list = [
+        illinois_appearance_bundle,
+        illinois_jury_demand_bundle,
+        IL_fee_waiver_full_attachment,
+    ]
+  else:
+    court_bundle_list = [
+        illinois_appearance_bundle,
+        illinois_jury_demand_bundle,
+        IL_fee_waiver_full_attachment,
+        IL_fee_waiver_order
+    ]
+
+
+
+
 ---
 attachment:
   variable name: illinois_appearance_instructions[i]
@@ -1195,8 +1214,8 @@ attachment:
   pdf template file: appearance_edited.pdf
   fields:
       - "trial_court_county": ${ trial_court.address.county.upper() }
-      - "plaintiffs": ${ users.full_names() if user_role == 'plaintiff' else other_parties.full_names() }
-      - "defendants": ${ other_parties.full_names() if user_role == 'plaintiff' else users.full_names() }
+      - "plaintiffs": ${ users.full_names() if user_started_case else other_parties.full_names() }
+      - "defendants": ${ other_parties.full_names() if user_started_case else users.full_names() }
       - "user__1": ${ users[0].name.full(middle="full") }
       - "user__2": ${ users[0].name.full(middle="full") }
       - "user__3": ${ users[0].name.full(middle="full") }
@@ -1264,8 +1283,8 @@ attachment:
       - "trial_court_county": ${ trial_court.address.county.upper() }
       - "case_number__1": ${ case_number }
       - "case_number__2": ${ case_number }
-      - "plaintiffs": ${ users.full_names() if user_role == 'plaintiff' else other_parties.full_names() }
-      - "defendants": ${ other_parties.full_names() if user_role == 'plaintiff' else users.full_names() }
+      - "plaintiffs": ${ users.full_names() if user_started_case else other_parties.full_names() }
+      - "defendants": ${ other_parties.full_names() if user_started_case else users.full_names() }
       - "form_to_be_delivered": ${ form_name }
       - "delivery_party1_name_full": | 
           % if delivery_parties[2].is_represented:
@@ -1319,8 +1338,8 @@ attachment:
       - "trial_court_county": ${ trial_court.address.county.upper() }
       - "case_number__1": ${ case_number }
       - "case_number__2": ${ case_number }
-      - "plaintiffs": ${ users.full_names() if user_role == 'plaintiff' else other_parties.full_names() }
-      - "defendants": ${ other_parties.full_names() if user_role == 'plaintiff' else users.full_names() }
+      - "plaintiffs": ${ users.full_names() if user_started_case else other_parties.full_names() }
+      - "defendants": ${ other_parties.full_names() if user_started_case else users.full_names() }
       - "form_to_be_delivered": ${ form_name }
 
       - "delivery_party1_name_full": | 
@@ -1375,8 +1394,8 @@ attachment:
       - "trial_court_county": ${ trial_court.address.county.upper() }
       - "case_number__1": ${ case_number }
       - "case_number__2": ${ case_number }
-      - "plaintiffs": ${ users.full_names() if user_role == 'plaintiff' else other_parties.full_names() }
-      - "defendants": ${ other_parties.full_names() if user_role == 'plaintiff' else users.full_names() }
+      - "plaintiffs": ${ users.full_names() if user_started_case else other_parties.full_names() }
+      - "defendants": ${ other_parties.full_names() if user_started_case else users.full_names() }
       - "form_to_be_delivered": ${ form_name }
 
       - "delivery_party1_name_full": | 
@@ -1443,7 +1462,7 @@ review:
       - recompute:
         - user_role
     button: |
-      % if user_role == "plaintiff":
+      % if user_started_case:
         **Your role:** plaintiff or petitioner
       % else:
         **Your role:** defendant or respondent
@@ -1526,7 +1545,7 @@ review:
         - IL_fee_waiver_supplement.document_type
         - IL_fee_waiver_order.document_type
     button: |
-      % if illinois_appearance_attachment.document_type == '5766':
+      % if illinois_appearance_attachment.document_type == '5766' or illinois_appearance_attachment.document_type == '141579' or illinois_appearance_attachment.document_type == '133166':
       The judge **did not order the case to be sealed**.
       % else:
       The judge **did order the case to be sealed**.
@@ -1604,7 +1623,7 @@ review:
 ---
 continue button field: users.revisit
 question: |
-  Edit the ${ user_role }s
+  Edit the ${ user_ask_role }s
 subquestion: |
   ${ users.table }
 
@@ -1624,7 +1643,7 @@ confirm: True
 ---
 continue button field: other_parties.revisit
 question: |
-  % if user_role == "plaintiff":
+  % if user_started_case:
     Edit the defendants
   % else:
     Edit the plaintiffs

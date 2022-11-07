@@ -34,12 +34,31 @@ only sets:
 code: |
   x.filtered_filing_type_options, x.filing_type = \
       filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default)
+  if x.filing_type is None and check_duplicate_codes(x.filtered_filing_type_options):
+    # choices are the same from the user's view
+    x.filing_type = x.filtered_filing_type_options[0][0]
   if x.filing_type == 'none available':
     can_check_efile = False
     warning_no_appearance_type
   if x.filing_type is None:
     del x.filing_type
     x.filing_type = x.user_chosen_filing_type
+---
+need:
+  - IL_fee_waiver_order.filing_type_default
+  - IL_fee_waiver_order.filing_type_filters
+only sets:
+  - IL_fee_waiver_order.filing_type
+  - IL_fee_waiver_order.filtered_filing_type_options
+code: |
+  IL_fee_waiver_order.filtered_filing_type_options, IL_fee_waiver_order.filing_type = \
+      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default)
+  if IL_fee_waiver_order.filing_type is None and check_duplicate_codes(IL_fee_waiver_order.filtered_filing_type_options):
+    # choices are the same from the user's view
+    IL_fee_waiver_order.filing_type = IL_fee_waiver_order.filtered_filing_type_options[0][0]
+  if IL_fee_waiver_order.filing_type is None:
+    del IL_fee_waiver_order.filing_type
+    IL_fee_waiver_order.filing_type = IL_fee_waiver_order.user_chosen_filing_type
 ---
 question: |
   You cannot use this form in your case
@@ -160,23 +179,28 @@ code: |
   illinois_appearance_attachment.filing_component_default = '332'
   illinois_appearance_attachment.filing_component_filters = ['Lead Document']
   illinois_appearance_attachment.document_description = 'Appearance'
-  illinois_appearance_attachment.document_type = '5766' # non-confidential
+  illinois_appearance_attachment.document_type_default = '5766' # non-confidential
+  illinois_appearance_attachment.document_type_filters = ['non-confidential']
   illinois_appearance_additional.filing_component_default = '331'
   illinois_appearance_additional.filing_component_filters = ['Attachment']
   illinois_appearance_additional.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional.document_type = '5766' # non-confidential
+  illinois_appearance_additional.document_type_default = '5766' # non-confidential
+  illinois_appearance_additional.document_type_filters = ['non-confidential']
   illinois_appearance_additional_2.filing_component_default = '331'
   illinois_appearance_additional_2.filing_component_filters = ['Attachment']
-  illinois_appearance_additional_2.document_type = '5766' # non-confidential
+  illinois_appearance_additional_2.document_type_default = '5766' # non-confidential
+  illinois_appearance_additional_2.document_type_filters = ['non-confidential']
   illinois_appearance_additional_2.document_description = 'Appearance Additional Proof of Delivery'
   illinois_appearance_additional_3.filing_component_default = '331'
   illinois_appearance_additional_3.filing_component_filters = ['Attachment']
   illinois_appearance_additional_3.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_3.document_type = '5766' # non-confidential
+  illinois_appearance_additional_3.document_type_default = '5766' # non-confidential
+  illinois_appearance_additional_3.document_type_filters = ['non-confidential']
   illinois_appearance_additional_blank.filing_component_default = '331'
   illinois_appearance_additional_blank.filing_component_filters = ['Attachment']
   illinois_appearance_additional_blank.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_blank.document_type = '5766' # non-confidential
+  illinois_appearance_additional_blank.document_type_default = '5766' # non-confidential
+  illinois_appearance_additional_blank.document_type_filters = ['non-confidential']
 ---
 ############# Overide some wording #########
 generic object: DAObject
@@ -200,6 +224,10 @@ subquestion: |
   elsewhere.
 continue button field: show_no_efile
 ---
+## User already knows there are no fees, so as long as there are, show no fees
+code: |
+  review_fees_screen = True
+---
 id: document type
 generic object: DAObject
 question: |
@@ -208,11 +236,11 @@ subquestion: |
   In some cases, the filings and orders are sealed by the court. This means the records are not visible to the public.
   If this happened in your case, you will have to upload a copy of the court order sealing the case.
 fields:
-  - Was case ordered to be sealed?: x.document_type
+  - Was case ordered to be sealed?: x.user_chosen_document_type
     input type: radio
     code: |
-      list(reversed(yes_no_confidential(x.document_type_options)))
-    default: ${ matching_tuple_option('non-confidential', x.document_type_options) }
+      list(reversed(yes_no_confidential(x.filtered_document_type_options)))
+    default: ${ matching_tuple_option('non-confidential', x.filtered_document_type_options) }
 ---
 id: ready to efile
 question: |
@@ -280,7 +308,7 @@ code: |
   def yes_no_confidential(opts):
     new_opts = []
     for opt in opts:
-      if opt[0] == "5766" or opt[0] == '141579' or opt[1].lower() == 'non-confidential':
+      if opt[0] == "5766" or opt[0] == '141579' or opt[0] == '133166' or opt[1].lower() == 'non-confidential':
         new_opts.append([opt[0], "No"])
       elif opt[0] == "5767" or opt[1].lower() == 'confidential': # confidential
         new_opts.append([opt[0], "Yes"])
@@ -413,9 +441,9 @@ code: |
     # Change where DA thinks this obj came from, so it says "you", and not "NAME"
     users.append(target_case.self_partip_choice.copy_deep('users[0]'))
     if is_plaintiff_party(users[0]):
-      user_role = 'plaintiff'
+      user_ask_role = 'plaintiff'
     elif is_defendant_party(users[0]):
-      user_role = 'defendant'
+      user_ask_role = 'defendant'
     to_add_participants = [p for p in target_case.found_case.participants if p.instanceName != target_case.self_partip_choice.instanceName and not is_unused_party(p)]
 ---
 code: |
