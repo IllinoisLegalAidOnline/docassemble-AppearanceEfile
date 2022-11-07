@@ -19,6 +19,7 @@ code: |
   illinois_appearance_bundle.filing_type_filters = [
     CodeType('142566'),
     'Appearance (No Fee: fee exempted by rule/statute)',
+    'Appearance [Schedule 1]',
     ['Appearance', 'No Fee'],
     'Appearance'
   ]
