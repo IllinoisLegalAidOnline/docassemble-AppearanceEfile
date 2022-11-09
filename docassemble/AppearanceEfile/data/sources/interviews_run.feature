@@ -24,7 +24,7 @@ Some good stage cases to test with:
 
 
 @appearance @start @fast @a0
-Scenario: appearance.yml just start
+Scenario: appearance.yml just starts
   Given I start the interview at "appearance.yml"
 
 @appearance @no-efile @a1
@@ -35,6 +35,7 @@ Scenario: appearance.yml without e-filing
   And I get to the question id "get-docs-screen" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
+    | case_is_invalid_type | False | |
     | trial_court_index | 0 | |
     | user_wants_efile | False | |
     | user_ask_role | defendant | |
@@ -71,6 +72,7 @@ Scenario: appearance.yml attempting but failing e-filing
   And I get to the question id "eFile Login" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
+    | case_is_invalid_type | False | |
     | trial_court_index | 81 | |
     | user_wants_efile | True | |
   And I set the variable "my_username" to secret "TYLER_EMAIL"
@@ -123,6 +125,7 @@ Scenario: appearance.yml with e-filing, search by party name
   And I get to the question id "eFile Login" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
+    | case_is_invalid_type | False | |
     | trial_court_index | 0 | |
     | user_wants_efile | True | |
   And I set the variable "my_username" to secret "TYLER_EMAIL"
@@ -172,6 +175,7 @@ Scenario: appearance.yml with e-filing, search by party name
 #  And I get to the question id "eFile Login" with this data:
 #    | var | value | trigger |
 #    | trial_court_index | 81 | |
+#    | case_is_invalid_type | False | |
 #    | accept["I accept the terms of use."] | True | |
 #    | user_wants_efile | True | |
 #  And I set the variable "my_username" to secret "TYLER_EMAIL"
