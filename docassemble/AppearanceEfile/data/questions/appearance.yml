@@ -675,7 +675,7 @@ question: |
 subquestion: |
   If you do not want to enter your personal email address, you can create a new email account to get email about your case.
   
-  Be sure to check this email daily, otherwise you may miss important information about your case.
+  **Be sure to check this email daily, otherwise you may miss important information about your case.**
 fields:
   - Email address: users[0].email
     datatype: email
@@ -1674,13 +1674,13 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>Your Appearance and Fee Waiver filings were sent to the circuit clerk. They will accept or reject your filing.</strong></p>
-  <p>Your forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. A person in the clerk's office has to accept the forms before they are officially filed.</p>
+  <p><strong>Your Appearance and Fee Waiver forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  <p>A person in the clerk's office has to accept the forms before they are officially filed.</p>
   <p><strong>What's next?</strong></p>
   <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, which will be used to track your filing.</p>
   <p>The clerk will review what you filed.</p>
   <ul>
-    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a file-stamped copy of your court forms.</li>
+    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a copy of your court forms with the clerk's stamp.</li>
     <li>If there is something wrong with the filing, they will <strong>reject</strong> it. You should receive another email from Odyssey eFileIL with an explanation of what needs to be fixed.</li>
   </ul>
   <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case.</p>
@@ -1692,7 +1692,7 @@ content: |
     <li>If you have a court date for your fee waiver, and</li>
   <li>What's next in your case.</li>
   </ul>
-  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case.</p>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
@@ -1709,7 +1709,7 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The ${ trial_court } circuit clerk has sent a response to your filing in ${ case_type_map.get(efile_case_type, 'your case') }.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in ${ case_type_map.get(efile_case_type, 'your case') }.</strong></p>
 
   <p><q>{{ status }}</q></p>
 
@@ -1724,7 +1724,7 @@ content: |
     <li>If you have a court date for your fee waiver, and</li>
   <li>What's next in your case.</li>
   </ul>
-  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case.</p>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>

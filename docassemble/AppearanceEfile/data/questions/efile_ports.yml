@@ -256,7 +256,12 @@ subquestion: |
   arrive. We will email you a confirmation that it was delivered and additional
   information about what's next.
   
-  Click **Back** if you need to make any changes.
+  Click **Make changes** if you need to make any change.
+  
+  &nbsp;
+
+  ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
+
   Click **Send to court** to deliver it.
   
   Here is what the clerk of the ${trial_court} will get:
@@ -355,6 +360,8 @@ question: |
 subquestion: |
   To e-file with this program, you must have an e-filing account. Log in below or 
   <a href="${ interview_url(i=logged_out_interview, reset=1, jurisdiction_id=jurisdiction_id) }" target="_blank">create a new account</a>.
+
+  **Keep track of this e-filing account.** You can use it to e-file other forms or make corrections.
 
   % if hasattr(user_info(), 'email'):
   This might **not** be the same login information for ${ get_config('external hostname') } (that you are currently logged into).
