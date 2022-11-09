@@ -262,6 +262,8 @@ subquestion: |
 
   ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
+  &nbsp;
+
   Click **Send to court** to deliver it.
   
   Here is what the clerk of the ${trial_court} will get:
