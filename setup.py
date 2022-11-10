@@ -43,7 +43,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.AppearanceEfile',
-      version='0.1.3b1',
+      version='1.0.0rc1',
       description=('Appearance'),
       long_description='# docassemble.AppearanceEfile\n\nAppearance\n\n## Author\n\nMatt Newsted, mnewsted@illinoislegalaid.org\n\n',
       long_description_content_type='text/markdown',
@@ -53,7 +53,7 @@ setup(name='docassemble.AppearanceEfile',
       url='https://www.illinoislegalaid.org',
       packages=find_packages(),
       namespace_packages=['docassemble'],
-      install_requires=['docassemble.AssemblyLine>=2.11.3', 'docassemble.EFSPIntegration>=0.6.0'],
+      install_requires=['docassemble.AssemblyLine>=2.18.0', 'docassemble.EFSPIntegration>=1.0.0rc1', 'docassemble.ILAOEfile>=1.0.0rc1'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/AppearanceEfile/', package='docassemble.AppearanceEfile'),
      )
