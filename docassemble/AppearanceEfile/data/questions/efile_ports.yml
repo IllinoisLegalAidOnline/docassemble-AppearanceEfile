@@ -167,6 +167,7 @@ code: |
     ])
   jury_filters.extend([
     "Jury Demand",
+    'Other Document Not Listed (Non-confidential)',
     "Other Document Not Listed"
   ])
   illinois_jury_demand_bundle.filing_type_filters = jury_filters
@@ -244,6 +245,8 @@ fields:
       list(reversed(yes_no_confidential(x.filtered_document_type_options)))
     default: ${ matching_tuple_option('non-confidential', x.filtered_document_type_options) }
 ---
+needs:
+  - ready_to_efile
 id: ready to efile
 question: |
   Final review before e-filing
