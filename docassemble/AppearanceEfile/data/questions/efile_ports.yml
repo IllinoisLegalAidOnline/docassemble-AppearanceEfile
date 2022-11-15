@@ -157,16 +157,17 @@ code: |
     jury_filters.extend([
         "Jury Demand - 6 Person",
         "Jury Demand 6 Person"
-        "Jury Demand (6)"
+        "Jury Demand (6)",
     ])
   elif trial_with == "judge_and_12_jury":
     jury_filters.extend([
         "Jury Demand - 12 Person",
         "Jury Demand 12 Person",
-        "Jury Demand (12)"
+        "Jury Demand (12)",
     ])
   jury_filters.extend([
-    "Jury Demand"
+    "Jury Demand",
+    "Other Document Not Listed"
   ])
   illinois_jury_demand_bundle.filing_type_filters = jury_filters
   illinois_jury_demand_bundle.filing_type_default = None
@@ -256,7 +257,7 @@ subquestion: |
   arrive. We will email you a confirmation that it was delivered and additional
   information about what's next.
   
-  Click **Make changes** if you need to make any change.
+  Click **Make changes** if you need to make any changes.
   
   ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
