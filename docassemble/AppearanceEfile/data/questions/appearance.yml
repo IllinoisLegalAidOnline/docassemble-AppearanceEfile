@@ -671,7 +671,7 @@ fields:
 if: not users[0].is_form_filler
 id: email address
 question: |
-  What email address do you want to list on your court forms?
+  What email address do you want to use for this case?
 subquestion: |
   If you do not want to enter your personal email address, you can create a new email account to get email about your case.
   
@@ -983,7 +983,7 @@ subquestion: |
   ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
   % if not (defined('efile') and efile):
-  Click the "E-File" button below to e-file your form with the clerk of the ${ trial_court }. You need to deliver your Appearance to other parties in your case.
+  Click **E-File your forms** below to e-file your form with the clerk of the ${ trial_court }. You need to deliver your Appearance to other parties in your case.
   
   ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export', size="md", id_tag="efile")}
   % else:

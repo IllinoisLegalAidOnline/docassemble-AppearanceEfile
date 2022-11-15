@@ -258,11 +258,7 @@ subquestion: |
   
   Click **Make changes** if you need to make any change.
   
-  &nbsp;
-
   ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
-
-  &nbsp;
 
   Click **Send to court** to deliver it.
   
