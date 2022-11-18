@@ -240,7 +240,7 @@ subquestion: |
 id: kickout_self_reported_case_type
 event: kickout_self_reported_case_type
 question: |
-  Sorrry
+  Sorry
 subquestion: |
   The Appearance form made by this program does not work with these case types.
 
