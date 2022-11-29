@@ -9,8 +9,8 @@ include:
   - efile_ports.yml
 ---
 metadata:
-  title: Appearance
-  short title: Appearance
+  title: Appearance e-filing
+  short title: Appearance e-filing
   comment: This program helps you tell the court and the other parties that you are participating in a court case.
   authors:
     - Matt Newsted
@@ -331,11 +331,13 @@ code: |
 ---
 id: welcome
 question: |
-  Appearance
+  Appearance e-filing
 subquestion: |
-  Welcome to Illinois Legal Aid Online's **Appearance** Easy Form.
+  Welcome to Illinois Legal Aid Online's **Appearance e-filing** Easy Form.
 
   This program creates a form that tells the court and the other parties that you are participating in a court case.
+  
+  If you are also filing a Fee waiver, you can use this program to e-file both forms.
   
   Learn about [**responding to a lawsuit**](https://www.illinoislegalaid.org/node/32236).
 field: sees_nav_bar
