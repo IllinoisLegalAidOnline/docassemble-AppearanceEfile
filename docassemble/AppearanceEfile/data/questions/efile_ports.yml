@@ -295,8 +295,8 @@ subquestion: |
   you should receive an update from the clerk of the ${ trial_court } on your filing 
   within 48 hours.
 
-  You also will receive an email from our partners at Suffolk with important information
-  about your next steps.
+  You also will receive an email from massaccess@suffolk.edu with important information
+  about your next steps. [Mass Access at Suffolk University](https://courtformsonline.org/) is our technology partner with this e-filing program.
   
   We recommend you continue down below to download the form for your own records.
   Click **Back to download screen** to get a copy of your forms and instructions.
@@ -402,6 +402,14 @@ subquestion: |
   You will have to e-file your forms through another website.
   Or you can print out and file your paper forms.
 continue button field: x.warn_no_results
+---
+generic object: EFCaseSearch
+template: x.not_actually_case
+subject: |
+  This isn't my case!
+content: |
+  If we found the wrong case, you can press the **${ all_variables(special="titles").get("back button label", "back") }** button to go back and find a different case
+---
 ---
 # Won't do non-indexed filings, so forcing it out
 generic object: EFCaseSearch
