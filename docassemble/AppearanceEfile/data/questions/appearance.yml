@@ -1018,7 +1018,7 @@ subquestion: |
   
   Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
 
-  ${ action_button_html(url_action('review_appearence'), label=':edit: Make changes', color='success', size="md") }
+  ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
   This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/efileil/).
   
@@ -1667,7 +1667,7 @@ confirm: True
 ---
 template: email_confirmation
 subject: |
-  Important Appearence and Fee waiver e-filing information
+  Important Appearance and Fee waiver e-filing information
 content: |
   <!DOCTYPE html>
   <html>
@@ -1702,7 +1702,7 @@ content: |
 ---
 template: response_email
 subject: |
-  Clerk response to your e-filed Appearence and Fee waiver
+  Clerk response to your e-filed Appearance and Fee waiver
 content: |
   <!DOCTYPE html>
   <html>
