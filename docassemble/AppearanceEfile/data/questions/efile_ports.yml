@@ -221,7 +221,7 @@ id: you-will-not-be-able-to-efile
 question: |
   You will *not* be able to e-file this document
 subquestion: |
-  Unfortunately, you cannot e-file the forms ${ "at " + str(trial_court) if trial_court_index != -1 else "in Cook county" } from this program.
+  Unfortunately, you cannot e-file ${ "at " + str(trial_court) if trial_court_index != -1 else "in Cook county" } through this program.
 
   However, you are still be able to continue and download a completed form, and e-file the form
   elsewhere.
