@@ -1539,7 +1539,7 @@ review:
     button: |
       **Your email:**
       ${ users[0].email }
-    show if: users[0].email_notice
+    show if: users[0].email_notice and not users[0].is_form_filler
   - Edit:
       - illinois_appearance_attachment.document_type
       - recompute:
