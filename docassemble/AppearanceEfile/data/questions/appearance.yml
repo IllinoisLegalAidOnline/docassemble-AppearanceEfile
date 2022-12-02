@@ -845,8 +845,8 @@ code: |
       x.address.city = x.lawyer.address.city
     if hasattr(x.lawyer.address, 'state'):
       x.address.state = x.lawyer.address.state
-    if hasattr(x.lawyer.address, 'zip'):
-      x.address.zip = x.lawyer.address.zip
+    if hasattr(x.lawyer.address, 'zip_code'):
+      x.address.zip = x.lawyer.address.zip_code
 ---
 id: knows delivery method
 generic object: ALIndividual
