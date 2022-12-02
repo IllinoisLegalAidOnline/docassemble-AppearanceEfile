@@ -207,6 +207,8 @@ code: |
     rejected_contents = response_email.content
     neutral_subject = response_email.subject
     neutral_contents = response_email.content
+    # Don't show the review screen to the user before efiling
+    efile_user_reviewed = True
   else:
     e_signature
   set_progress(100)
