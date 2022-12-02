@@ -291,19 +291,23 @@ question: |
   % endif
 subquestion: |
   % if efile_resp.response_code == 200:
-  You should receive a confirmation email within 10-15 minutes, and
-  you should receive an update from the clerk of the ${ trial_court } on your filing 
-  within 48 hours.
-
-  You also will receive an email from massaccess@suffolk.edu with important information
+  You will receive an email from massaccess@suffolk.edu with important information
   about your next steps. [Mass Access at Suffolk University](https://courtformsonline.org/) is our technology partner with this e-filing program.
   
-  We recommend you continue down below to download the form for your own records.
+  Within 15 minutes, you should receive confirmation email from Odyssey eFileIL.
+  Within 48 hours, you should receive an update from the clerk of the ${ trial_court } on your filing.
+
+  We recommend you download the forms for your own records.
   Click **Back to download screen** to get a copy of your forms and instructions.
 
-  % endif
-  
   Here are the forms that you submitted:
+
+  % else:
+
+  Here are the forms that we could not deliver. You should save and e-file them elsewhere.
+  Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/efileil/).
+
+  % endif
   
   ${ al_court_bundle.as_pdf() }
 
