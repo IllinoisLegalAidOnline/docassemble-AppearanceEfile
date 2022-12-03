@@ -43,7 +43,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.AppearanceEfile',
-      version='1.0.0rc3',
+      version='1.0.0',
       description=('Appearance'),
       long_description='# docassemble.AppearanceEfile\n\nAppearance\n\n## Author\n\nMatt Newsted, mnewsted@illinoislegalaid.org\n\n',
       long_description_content_type='text/markdown',

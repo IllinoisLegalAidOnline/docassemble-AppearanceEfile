@@ -292,7 +292,7 @@ question: |
 subquestion: |
   % if efile_resp.response_code == 200:
   You will receive an email from massaccess@suffolk.edu with important information
-  about your next steps. [Mass Access at Suffolk University](https://courtformsonline.org/) is our technology partner with this e-filing program.
+  about your next steps. [**Mass Access at Suffolk University**](https://courtformsonline.org/) is our technology partner with this e-filing program.
   
   Within 15 minutes, you should receive confirmation email from Odyssey eFileIL.
   Within 48 hours, you should receive an update from the clerk of the ${ trial_court } on your filing.
