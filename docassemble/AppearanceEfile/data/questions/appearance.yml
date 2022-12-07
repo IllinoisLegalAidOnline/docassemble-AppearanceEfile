@@ -9,8 +9,8 @@ include:
   - efile_ports.yml
 ---
 metadata:
-  title: Appearance e-filing
-  short title: Appearance e-filing
+  title: Appearance with e-filing
+  short title: Appearance with e-filing
   comment: This program helps you tell the court and the other parties that you are participating in a court case.
   authors:
     - Matt Newsted
@@ -59,8 +59,8 @@ sections:
   - download_and_efile: Download and e-file forms
 ---
 code: |
-  ilao_easy_form_title = "Appearance (E-file)"
-  ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/appearance"
+  ilao_easy_form_title = "Appearance with e-filing"
+  ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/appearance-e-filing"
   form_name = "Appearance"
   filing_basis = 'filing_self'
 ---
@@ -333,9 +333,9 @@ code: |
 ---
 id: welcome
 question: |
-  Appearance e-filing
+  Appearance with e-filing
 subquestion: |
-  Welcome to Illinois Legal Aid Online's **Appearance e-filing** Easy Form.
+  Welcome to Illinois Legal Aid Online's **Appearance with e-filing** Easy Form.
 
   This program creates a form that tells the court and the other parties that you are participating in a court case.
   
@@ -975,32 +975,37 @@ if: ready_to_efile
 id: get docs screen
 event: get_docs_screen
 question: |
+  % if not (defined('efile') and efile):
+  Download and e-file
+  % else:
   Download
+  % endif
 subquestion: |
   
   View and download your forms below. Click **Make changes** to fix any mistakes.
 
-  % if (defined('efile') and efile):
-  **Note:** you already e-filed your forms. Any changes you make will not appear in the e-filed forms.
-  % endif
+  **You need to deliver your Appearance to the other parties in your case.**
 
+  % if (defined('efile') and efile):
+  **Note:** You already e-filed your forms. Any changes you make will not appear in the e-filed forms.
+  
+  % endif
   ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
-  % if not (defined('efile') and efile):
-  Click **E-File your forms** below to e-file your form with the clerk of the ${ trial_court }. You need to deliver your Appearance to other parties in your case.
-  
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-File your forms', icon='file-export', size="md", id_tag="efile")}
-  % else:
-  **Reminder**: You need to deliver your Appearance to other parties in your case.
-  % endif
-  
   ${ al_user_bundle.download_list_html() }
+  % if not (defined('efile') and efile):
+  &nbsp;
+  
+  ##### E-file
 
+  Click **E-file your forms** to e-file your form with the clerk of the ${ trial_court }.
+  
+  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-file your forms', icon='file-export', size="md", id_tag="efile")}
+  % endif
   &nbsp;
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-
-  **Note:** You need to deliver your Appearance to other parties in your case.
+  &nbsp;
   
   Thank you for using ILAO Easy Forms!
 under: |
