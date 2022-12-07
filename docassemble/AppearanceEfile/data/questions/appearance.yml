@@ -834,6 +834,30 @@ fields:
     default: IL
   - ZIP code: x.address.zip
 ---
+id: users delivery party address
+sets:
+  - users[i].address.address
+  - users[i].address.city
+  - users[i].address.zip
+generic object: ALIndividual
+question: |
+  % if users[i].is_represented:
+  What is ${ users[i].lawyer.name.full(middle="full") }'s address?
+  % else:
+  What is ${ users[i].name.full(middle="full") }'s address?
+  % endif
+fields:
+  - Street address: users[i].address.address
+    address autocomplete: True
+  - Address line 2: users[i].address.unit
+    required: False
+  - City: users[i].address.city
+  - State: users[i].address.state
+    code: |
+      states_list()
+    default: IL      
+  - ZIP code: users[i].address.zip
+---
 generic object: ALIndividual
 code: |
   if hasattr(x, 'lawyer'):
