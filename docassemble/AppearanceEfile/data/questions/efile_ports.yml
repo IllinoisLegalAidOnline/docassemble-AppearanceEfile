@@ -125,6 +125,8 @@ code: |
     filter_list = []
   illinois_appearance_bundle.optional_services_defaults = default_list
   illinois_appearance_bundle.optional_services_filters = filter_list
+  illinois_appearance_bundle.document_type_filters = ['non-confidential']
+  illinois_appearance_bundle.document_type_default = "5766"
 ---
 code: |
   if illinois_appearance_bundle.optional_services[i].code in ["124679", "20774", "20773"]:

@@ -276,10 +276,14 @@ code: |
 depends on:
   - illinois_appearance_attachment.document_type
 code: |
-  if illinois_appearance_attachment.document_type in IL_fee_waiver_full_attachment.document_type_map.keys():
+  if hasattr(illinois_appearance_attachment, 'document_type') and illinois_appearance_attachment.document_type in IL_fee_waiver_full_attachment.document_type_map.keys():
     IL_fee_waiver_attachment.document_type = illinois_appearance_attachment.document_type
     IL_fee_waiver_supplement.document_type = illinois_appearance_attachment.document_type
     IL_fee_waiver_order.document_type = illinois_appearance_attachment.document_type
+  elif hasattr(illinois_appearance_bundle, 'document_type') and illinois_appearance_bundle.document_type in IL_fee_waiver_full_attachment.document_type_map.keys():
+    IL_fee_waiver_attachment.document_type = illinois_appearance_bundle.document_type
+    IL_fee_waiver_supplement.document_type = illinois_appearance_bundle.document_type
+    IL_fee_waiver_order.document_type = illinois_appearance_bundle.document_type
 ---
 id: next-step-fee-waiver
 question: |
