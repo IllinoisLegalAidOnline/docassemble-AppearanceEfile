@@ -161,6 +161,8 @@ code: |
   users[0].phone_number
   if can_check_efile:
     users[0].email_notice = True
+    if defined("users[0].email"):
+      email_alert
   if users[0].email_notice:
     users[0].email
   lead_contact = users[0]
@@ -688,6 +690,15 @@ fields:
   - Email address: users[0].email
     datatype: email
     #required: False
+---
+id: email alert
+question: |
+  Important email information
+subquestion: |
+  This email address will be used on your Appearance: ${ users[0].email }
+
+  **Be sure to check this email daily, otherwise you may miss important information about your case.**
+continue button field: email_alert
 ---
 if: not can_check_efile
 code: |
