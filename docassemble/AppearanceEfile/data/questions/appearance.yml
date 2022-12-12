@@ -203,12 +203,12 @@ code: |
     # TODO(brycew): redo HTML emailing
     email_confirmation_subject = email_confirmation.subject
     email_confirmation_contents = email_confirmation.content
-    acceptance_subject = response_email.subject
-    acceptance_contents = response_email.content
-    rejected_subject = response_email.subject
-    rejected_contents = response_email.content
-    neutral_subject = response_email.subject
-    neutral_contents = response_email.content
+    acceptance_subject = acceptance_email.subject
+    acceptance_contents = acceptance_email.content
+    rejected_subject = rejection_email.subject
+    rejected_contents = rejection_email.content
+    neutral_subject = neutral_email.subject
+    neutral_contents = neutral_email.content
     # Don't show the review screen to the user before efiling
     efile_user_reviewed = True
   else:
@@ -1738,7 +1738,7 @@ content: |
   <ul>
     <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
-  <li>What's next in your case.</li>
+    <li>What's next in your case.</li>
   </ul>
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
@@ -1746,7 +1746,7 @@ content: |
   </body>
   </html>
 ---
-template: response_email
+template: neutral_email
 subject: |
   Clerk response to your e-filed Appearance and Fee waiver
 content: |
@@ -1757,7 +1757,7 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in ${ case_type_map.get(efile_case_type, 'your case') }.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
 
   <p><q>{{ status }}</q></p>
 
@@ -1768,9 +1768,71 @@ content: |
   <p><strong>Where to go for help</strong></p>
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
-    <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
-  <li>What's next in your case.</li>
+    <li>What's next in your case.</li>
+  </ul>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
+  </body>
+  </html>
+---
+template: acceptance_email
+subject: |
+  Clerk response to your e-filed Appearance and Fee waiver
+content: |
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Illinois Legal Aid Online</title>
+  </head>
+  <body>
+  <p>Hello ${ users[0].name },</p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+
+  <p><q>{{ status }}</q></p>
+
+  <p>{{ message_text }}</p>
+
+  <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
+
+  <p><strong>Where to go for help</strong></p>
+  <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
+  <ul>
+    <li>If you have a court date for your fee waiver, and</li>
+    <li>What's next in your case.</li>
+  </ul>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
+  </body>
+  </html>
+---
+template: rejection_email
+subject: |
+  Clerk response to your e-filed Appearance and Fee waiver
+content: |
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Illinois Legal Aid Online</title>
+  </head>
+  <body>
+  <p>Hello ${ users[0].name },</p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+
+  <p><q>{{ status }}</q></p>
+
+  <p>{{ message_text }}</p>
+
+  <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
+
+  <p><strong>Where to go for help</strong></p>
+  <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
+  <ul>
+    <li>How to fix your filing?</li>
+    <li>If you have a court date for your fee waiver, and</li>
+    <li>What's next in your case.</li>
   </ul>
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
