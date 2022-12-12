@@ -695,7 +695,7 @@ id: email alert
 question: |
   Important email information
 subquestion: |
-  This email address will be used on your Appearance: ${ users[0].email }
+  This email address will be used on your Appearance: **${ users[0].email }**
 
   **Be sure to check this email daily, otherwise you may miss important information about your case.**
 continue button field: email_alert
