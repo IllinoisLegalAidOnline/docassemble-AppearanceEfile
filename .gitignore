@@ -3,3 +3,4 @@ alkiln_tests_output*
 cucumber-report.txt
 debug_log.txt
 runtime_config.json
+__pycache__

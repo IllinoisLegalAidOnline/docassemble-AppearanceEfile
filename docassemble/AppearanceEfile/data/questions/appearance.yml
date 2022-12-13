@@ -220,7 +220,7 @@ code: |
 ---
 code: |
   def will_kickout(case):
-    if case_category_map[case.category]['name'] in ['Probate', 'Guardianship', 'Juvenile Abuse']:
+    if case_category_map[case.category]['name'].lower() in ['probate', 'guardianship', 'juvenile abuse', 'criminal misdemeanor', 'quasi-criminal', 'criminal felony']:
       return True
     if 'name change' in case_type_map[case.case_type]['name'].lower() or 'change of name' in case_type_map[case.case_type]['name'].lower():
       return True
@@ -236,10 +236,11 @@ subquestion: |
 
   Your case type, ${ case_category_map.disp(case_search.found_case.category, 'name') }, ${ case_type_map.disp(case_search.found_case.case_type, 'name') } is in:
   
+  * Name change for an adult or child
+  * Guardianship for a minor or an adult
   * Probate, or a case involving a will or an estate
   * Juvenile abuse and neglect
-  * Name change fro an adult or child
-  * Guardianship for a minor or an adult
+  * Criminal (misdemeanor or felony)
 ---
 id: kickout_self_reported_case_type
 event: kickout_self_reported_case_type
@@ -252,6 +253,7 @@ subquestion: |
   * Guardianship for a minor or an adult
   * Probate, or a case involving a will or an estate
   * Juvenile abuse and neglect
+  * Criminal (misdemeanor or felony)
 
   Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
 ---
@@ -264,6 +266,8 @@ subquestion: |
   * Guardianship for a minor or an adult
   * Probate, or a case involving a will or an estate
   * Juvenile abuse and neglect
+  * Criminal (misdemeanor or felony)
+
 fields:
   - no label: case_is_invalid_type
     datatype: yesnoradio
@@ -1143,6 +1147,7 @@ if: can_check_efile and case_search.case_was_found
 depends on: case_search.found_case
 code: |
   previous_case_id = case_search.found_case.tracking_id
+  court_id = case_search.found_case.court_id
   case_number = case_search.found_case.docket_number
   efile_case_category = case_search.found_case.category
   efile_case_type = case_search.found_case.case_type
