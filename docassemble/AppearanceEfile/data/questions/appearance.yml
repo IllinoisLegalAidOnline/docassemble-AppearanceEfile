@@ -1143,6 +1143,11 @@ content: |
   
   [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
 ---
+only sets:
+  - previous_case_id
+  - case_number
+  - efile_case_category
+  - efile_case_type
 if: can_check_efile and case_search.case_was_found
 depends on: case_search.found_case
 code: |
