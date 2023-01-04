@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use ALKiln to run tests
-        uses: SuffolkLITLab/ALKiln@releases/v4
+        uses: SuffolkLITLab/ALKiln@v4
         with:
           SERVER_URL: "${{ secrets.SERVER_URL }}"
           DOCASSEMBLE_DEVELOPER_API_KEY: "${{ secrets.DOCASSEMBLE_DEVELOPER_API_KEY }}"
