@@ -247,7 +247,7 @@ fields:
       list(reversed(yes_no_confidential(x.filtered_document_type_options)))
     default: ${ matching_tuple_option('non-confidential', x.filtered_document_type_options) }
 ---
-needs:
+need:
   - ready_to_efile
 id: ready to efile
 question: |
