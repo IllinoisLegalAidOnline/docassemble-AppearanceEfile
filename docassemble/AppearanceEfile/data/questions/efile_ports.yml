@@ -384,7 +384,7 @@ subquestion: |
 fields:
   - Username or email: my_username
   - Password: my_password
-    datatype: VisiblePassword
+    datatype: ALVisiblePassword
     hide if: user_forgot_password
   - I forgot my password: user_forgot_password
     datatype: yesno
