@@ -129,7 +129,7 @@ code: |
   illinois_appearance_bundle.document_type_default = "5766"
 ---
 code: |
-  if illinois_appearance_bundle.optional_services[i].code in ["124679", "20774", "20773"]:
+  if illinois_appearance_bundle.optional_services[i].code in ["124679", "20774", "20773", "257784"]:
     illinois_appearance_bundle.optional_services[i].multiplier = 1
 ---
 code: |
