@@ -210,7 +210,7 @@ Scenario: appearance.yml with e-filing, search by party name
 #    | user_benefits['TA'] | True | |
 #    | users[0].birth_year | 2000 | |
 #    | x.document_type | 5766 | illinois_appearance_bundle.document_type |
-#    | x.document_type | 5766 | IL_fee_waiver_full_attachment.document_type |
+#    | x.document_type | 5766 | IL_fee_waiver_full_for_court.document_type |
 #    | x.document_type | 5766 | IL_fee_waiver_attachment.document_type |
 #  And I tap the "#efile" element
 #  #And I tap to continue

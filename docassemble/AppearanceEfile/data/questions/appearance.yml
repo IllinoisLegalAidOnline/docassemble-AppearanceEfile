@@ -186,8 +186,10 @@ code: |
     illinois_jury_demand_bundle.has_courtesy_copies = False
     illinois_jury_demand_bundle.completed
     IL_fee_waiver_order.has_courtesy_copies = False
-    IL_fee_waiver_full_attachment.has_courtesy_copies = False
-    IL_fee_waiver_full_attachment.completed
+    IL_fee_waiver_full_for_court.has_courtesy_copies = False
+    IL_fee_waiver_supplement.has_courtesy_copies = False
+    IL_fee_waiver_supplement.completed
+    IL_fee_waiver_full_for_court.completed
     IL_fee_waiver_order.completed
     tyler_payment_id = default_jurisdiction_waiver
     all_required_screens_shown
@@ -291,11 +293,11 @@ code: |
 depends on:
   - illinois_appearance_attachment.document_type
 code: |
-  if hasattr(illinois_appearance_attachment, 'document_type') and illinois_appearance_attachment.document_type in IL_fee_waiver_full_attachment.document_type_map.keys():
+  if hasattr(illinois_appearance_attachment, 'document_type') and illinois_appearance_attachment.document_type in IL_fee_waiver_full_for_court.document_type_map.keys():
     IL_fee_waiver_attachment.document_type = illinois_appearance_attachment.document_type
     IL_fee_waiver_supplement.document_type = illinois_appearance_attachment.document_type
     IL_fee_waiver_order.document_type = illinois_appearance_attachment.document_type
-  elif hasattr(illinois_appearance_bundle, 'document_type') and illinois_appearance_bundle.document_type in IL_fee_waiver_full_attachment.document_type_map.keys():
+  elif hasattr(illinois_appearance_bundle, 'document_type') and illinois_appearance_bundle.document_type in IL_fee_waiver_full_for_court.document_type_map.keys():
     IL_fee_waiver_attachment.document_type = illinois_appearance_bundle.document_type
     IL_fee_waiver_supplement.document_type = illinois_appearance_bundle.document_type
     IL_fee_waiver_order.document_type = illinois_appearance_bundle.document_type
@@ -1236,7 +1238,7 @@ code: |
     illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_attachment, IL_fee_waiver_order], filename="appearance.pdf", title="Download all forms")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_for_user, IL_fee_waiver_order], filename="appearance.pdf", title="Download all forms")
   - al_court_bundle: ALDocumentBundle.using(elements=court_bundle_list, filename="appearance.pdf", title="Appearance")
 ---
 objects:
@@ -1248,19 +1250,17 @@ code: |
     court_bundle_list = [
         illinois_appearance_bundle,
         illinois_jury_demand_bundle,
-        IL_fee_waiver_full_attachment,
+        IL_fee_waiver_full_for_court,
+        IL_fee_waiver_supplement,
     ]
   else:
     court_bundle_list = [
         illinois_appearance_bundle,
         illinois_jury_demand_bundle,
-        IL_fee_waiver_full_attachment,
-        IL_fee_waiver_order
+        IL_fee_waiver_full_for_court,
+        IL_fee_waiver_supplement,
+        IL_fee_waiver_order,
     ]
-
-
-
-
 ---
 attachment:
   variable name: illinois_appearance_instructions[i]
