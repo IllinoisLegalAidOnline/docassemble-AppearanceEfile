@@ -915,11 +915,29 @@ question: |
   Do you know **how** and **when** you will send your ${ form_name } to ${ x.name.full(middle="full") }?
   % endif
 subquestion: |
+  ${ collapse_template(delivery_method_help) }
+
   If you do not know this now, you can add it to the Proof of Delivery section of your forms later.
 field: x.knows_delivery_method
 choices:
   - Yes: True
   - No: False
+---
+template: delivery_method_help
+subject: |
+  **What are my delivery options?**
+content: |
+  You can deliver the forms by:
+  
+  * The court's **{e-filing system}**,
+  * Email,
+  * US mail or a delivery company (like UPS or FedEx), or
+  * Hand delivery.
+  You may use US mail, a delivery company, or hand delivery if you or the other party **does not** have an email address.
+terms:
+  - e-filing system: |
+      The court's e-filing system could be an electronic filing manager (EFM) or an approved electronic filing service provider (EFSP).
+      This form does not currently handle delivery through the e-filing system.
 ---
 id: user party delivery method
 #changed from generic object to users to allow for changing answers via Back
