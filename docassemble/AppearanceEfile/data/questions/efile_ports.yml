@@ -179,6 +179,8 @@ if: illinois_jury_demand_bundle.enabled
 code: |
   illinois_jury_demand_bundle.optional_services_defaults = []
   illinois_jury_demand_bundle.optional_services_filters = []
+  illinois_jury_demand_bundle.document_type_filters = ['non-confidential']
+  illinois_jury_demand_bundle.document_type_default = "5766"
 ---
 code: |
   illinois_appearance_attachment.filing_component_default = '332'

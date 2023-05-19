@@ -1,4 +1,6 @@
 .env
+.envrc
+alkiln-*
 alkiln_tests_output*
 cucumber-report.txt
 debug_log.txt
