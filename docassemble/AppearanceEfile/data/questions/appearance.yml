@@ -206,7 +206,7 @@ code: |
 ---
 if: user_wants_fee_waiver
 code: |
-  tyler_payment_id = jurisdiction_waiver
+  tyler_payment_id = default_jurisdiction_waiver
 ---
 if: can_check_efile and user_wants_efile
 id: setup e-signature
