@@ -363,14 +363,14 @@ fields:
 ---
 id: are-you-using-fee-waiver
 question: |
-  Are you paying for the Appearance filing with a Fee waiver?
+  Do you want to e-file this document directly with the court?
 subquestion: |
-  If you are paying for this appearance with a fee waiver, you can fill out and
+  You can fill out and
   electronically file (e-file) both forms at the same time in this program.
   This means you don’t have to print out the forms. The court will communicate
   with you by email. You will have to provide your email to e-file your Appearance and Fee waiver.
 fields:
-  - Do you want to file a fee waiver?: user_wants_efile
+  - Do you want to e-file?: user_wants_efile
     datatype: yesnoradio
 ---
 id: eFile Login

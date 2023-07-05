@@ -182,46 +182,53 @@ code: |
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
 
-  if can_check_efile:
-    nav.set_section('review_efiling')
-    illinois_appearance_bundle.has_courtesy_copies = False
-    illinois_appearance_bundle.completed
-    illinois_jury_demand_bundle.has_courtesy_copies = False
-    illinois_jury_demand_bundle.completed
-    IL_fee_waiver_order.has_courtesy_copies = False
-    IL_fee_waiver_full_for_court.has_courtesy_copies = False
-    IL_fee_waiver_supplement.has_courtesy_copies = False
-    IL_fee_waiver_supplement.completed
-    IL_fee_waiver_full_for_court.completed
-    IL_fee_waiver_order.completed
-    tyler_payment_id = default_jurisdiction_waiver
-    all_required_screens_shown
-    ready_to_efile
-  else:
-    ready_to_efile = False
-
-  if ready_to_efile:
-    signature_choice = 'add name'
-    e_signature = True
-    # if e-filing, just use the e-signature to keep things simple
-    inform_of_efile_e_signature
-    # TODO(brycew): redo HTML emailing
-    email_confirmation_subject = email_confirmation.subject
-    email_confirmation_contents = email_confirmation.content
-    acceptance_subject = acceptance_email.subject
-    acceptance_contents = acceptance_email.content
-    rejected_subject = rejection_email.subject
-    rejected_contents = rejection_email.content
-    neutral_subject = neutral_email.subject
-    neutral_contents = neutral_email.content
-    # Don't show the review screen to the user before efiling
-    efile_user_reviewed = True
-  else:
-    e_signature
+  setup_esignature
   set_progress(100)
   nav.set_section('download_and_efile')
   get_docs_screen
   ending_screen
+---
+if: can_check_efile
+code: |
+  nav.set_section('review_efiling')
+  illinois_appearance_bundle.has_courtesy_copies = False
+  illinois_appearance_bundle.completed
+  illinois_jury_demand_bundle.has_courtesy_copies = False
+  illinois_jury_demand_bundle.completed
+  IL_fee_waiver_order.has_courtesy_copies = False
+  IL_fee_waiver_full_for_court.has_courtesy_copies = False
+  IL_fee_waiver_supplement.has_courtesy_copies = False
+  IL_fee_waiver_supplement.completed
+  IL_fee_waiver_full_for_court.completed
+  IL_fee_waiver_order.completed
+  tyler_payment_id
+  all_required_screens_shown
+  ready_to_efile_user_hook = True
+---
+if: can_check_efile and user_wants_efile
+id: setup e-signature
+code: |
+  signature_choice = 'add name'
+  e_signature = True
+  # if e-filing, just use the e-signature to keep things simple
+  inform_of_efile_e_signature
+  # TODO(brycew): redo HTML emailing
+  email_confirmation_subject = email_confirmation.subject
+  email_confirmation_contents = email_confirmation.content
+  acceptance_subject = acceptance_email.subject
+  acceptance_contents = acceptance_email.content
+  rejected_subject = rejection_email.subject
+  rejected_contents = rejection_email.content
+  neutral_subject = neutral_email.subject
+  neutral_contents = neutral_email.content
+  # Don't show the review screen to the user before efiling
+  # efile_user_reviewed = True
+  setup_esignature = True
+---
+if: not (can_check_efile and user_wants_efile)
+code: |
+  e_signature
+  setup_esignature = True
 ---
 code: |
   def will_kickout(case):
@@ -1069,7 +1076,7 @@ subquestion: |
   * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
 
 ---
-if: ready_to_efile
+if: can_check_efile and user_wants_efile
 id: get docs screen
 event: get_docs_screen
 question: |
@@ -1114,7 +1121,7 @@ under: |
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
-if: not ready_to_efile
+if: not (can_check_efile and user_wants_efile)
 id: get docs screen
 event: get_docs_screen
 question: |
