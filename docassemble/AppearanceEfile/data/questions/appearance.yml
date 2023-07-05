@@ -159,7 +159,7 @@ code: |
   for person in delivery_parties[:8]:
     if person.knows_delivery_method == False or person.hand_delivery == True:
       hand_delivery_info
-     
+
   users[0].address.address
   users[0].phone_number
   if can_check_efile:
@@ -177,9 +177,8 @@ code: |
   if can_check_efile:
     docket_number
 
-  if user_wants_efile:
-    nav.set_section('review_IL_fee_waiver')
-    fee_waiver_introduction_screen
+  nav.set_section('review_IL_fee_waiver')
+  if user_wants_fee_waiver:
     interview_order_IL_fee_waiver
 
   setup_esignature
@@ -204,6 +203,10 @@ code: |
   tyler_payment_id
   all_required_screens_shown
   ready_to_efile_user_hook = True
+---
+if: user_wants_fee_waiver
+code: |
+  tyler_payment_id = jurisdiction_waiver
 ---
 if: can_check_efile and user_wants_efile
 id: setup e-signature
@@ -316,13 +319,15 @@ code: |
 ---
 id: next-step-fee-waiver
 question: |
-  Next Step: Fee Waiver
+  Are you paying for the Appearance filing with a Fee waiver?
 subquestion: |
-  To e-file with this program, you must file a Fee waiver.
-  The next screens will help you make a Fee waiver.
-continue button field: fee_waiver_introduction_screen
+  If you are paying for this appearance with a fee waiver,
+  the next screens will help you make a Fee waiver.
+fields:
+  - Do you want to file a fee waiver?: user_wants_fee_waiver
+    datatype: yesnoradio
 ---
-if: user_wants_efile
+if: user_wants_fee_waiver
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = True
   IL_fee_waiver_attachment.enabled = True
@@ -333,7 +338,7 @@ code: |
   else:
     IL_fee_waiver_supplement.enabled = False
 ---
-if: not user_wants_efile
+if: not user_wants_fee_waiver
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = False
   IL_fee_waiver_attachment.enabled = False
@@ -665,7 +670,7 @@ content: |
   
   [FILE case_number_example.png, 100%, Summons form showing case number]
 ---
-if: not user_wants_efile
+if: not user_wants_fee_waiver
 id: trial by jury
 question: |
   Who do you want to decide your case?
@@ -680,7 +685,7 @@ choices:
   - A judge and a 6-person jury: judge_and_6_jury
   - A judge and a 12-person jury: judge_and_12_jury
 ---
-if: user_wants_efile
+if: user_wants_fee_waiver
 id: trial by jury - already fee waiver
 question: |
   Who do you want to decide your case?
@@ -1629,11 +1634,10 @@ review:
   #    ** Court Case:**
   #    ${ case_search.found_case.title } (${ case_search.found_case.date })
   #  show if: can_check_efile
-  # TODO(brycew): we need to essentially retrigger the entire interview if they want to
-  # change this. Not sure how best to do that.
-  #- Edit: user_wants_efile
+  # TODO(brycew): we might be able to re-trigger just the affidavit stuff, need to test
+  #- Edit: user_wants_fee_waiver
   #  button: |
-  #    You said you **${ "did" if user_wants_efile else "did not" }** want to file a fee-waiver
+  #    You said you **${ "did" if user_wants_fee_waiver else "did not" }** want to file a fee-waiver
   #  show if: efile_setup
   #  follow up:
   #    - tyler_login
