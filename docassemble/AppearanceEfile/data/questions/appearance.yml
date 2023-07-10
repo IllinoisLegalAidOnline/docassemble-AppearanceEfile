@@ -55,8 +55,8 @@ code: |
 sections:
   - start: Start
   - review_appearance: Appearance
-  - review_IL_fee_waiver: Fee waiver
-  - review_efiling: E-filing info
+  - review_IL_fee_waiver: Fee waiver (optional)
+  - review_efiling: E-filing info (optional)
   - download_and_efile: Download and e-file forms
 ---
 code: |
@@ -211,6 +211,7 @@ code: |
 if: can_check_efile and user_wants_efile
 id: setup e-signature
 code: |
+  nav.set_section('review_efiling')
   signature_choice = 'add name'
   e_signature = True
   # if e-filing, just use the e-signature to keep things simple
@@ -426,36 +427,6 @@ subquestion: |
   If you run into an unexpected error, you can also file it with the court yourself.
   % endif
   Read the "How to File an Appearance" instructions you can download at the end of this program.
----
-id: accept terms
-question: |
-  Terms of use
-subquestion: |
-  This program does not provide legal advice. It does not take the place of advice from a lawyer.
-
-  Using this program does not create an attorney-client relationship between you and Illinois Legal Aid Online or its employees.
-
-  ${ collapse_template(get_legal_help) }
-
-fields:
-  - To continue, you must accept the [**terms of use**](https://www.illinoislegalaid.org/about/terms-of-use).: accept
-    datatype: checkboxes
-    none of the above: False
-    minlength: 1
-    choices:
-      - I accept the terms of use.
-    validation messages:
-      minlength: |
-        You cannot continue unless you agree to the terms of use. 
-continue button field: accept_terms
----
-template: get_legal_help
-subject: |
-  **What if I need legal advice?**
-content: |  
-  If you have questions or concerns about your legal problem and want legal advice you should talk to a lawyer.
-  
-  Use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help) to find free or low-cost legal services in your area.
 ---
 id: not legal advice
 event: not_legal_advice
@@ -925,6 +896,7 @@ code: |
     if hasattr(x.lawyer.address, 'zip'):
       x.address.zip = x.lawyer.address.zip
 ---
+if: not user_wants_efile
 id: knows delivery method
 generic object: ALIndividual
 question: |
@@ -941,6 +913,11 @@ field: x.knows_delivery_method
 choices:
   - Yes: True
   - No: False
+---
+generic object: ALIndividual
+if: user_wants_efile
+code: |
+  x.knows_delivery_date = True
 ---
 template: delivery_method_help
 subject: |
@@ -1037,6 +1014,7 @@ fields:
   - Hand delivery: other_parties[i].hand_delivery
     datatype: yesnowide
 ---
+if: not user_wants_efile
 id: delivery time
 generic object: ALIndividual
 question: |
@@ -1065,6 +1043,23 @@ validation code: |
   else:
     x.knows_delivery_time = True
 ---
+if: user_wants_efile
+id: delivery time
+generic object: ALIndividual
+question: |
+  % if x.is_represented:
+  When will you send your ${ form_name } to ${ x.lawyer.name.full(middle="full") }?
+  % else:
+  When will you send your ${ form_name } to ${ x.name.full(middle="full") }?
+  % endif
+fields:
+  - Date: x.delivery_date
+    datatype: date
+    min: ${ today().format("yyyy-MM-dd") }
+  - Time: x.delivery_time
+    datatype: time
+---
+if: not user_wants_efile
 id: hand delivery info
 continue button field: hand_delivery_info
 #generic object: ALIndividual
@@ -1077,6 +1072,16 @@ subquestion: |
 
   **Instructions when delivering your forms by hand:**
 
+  * If a party in your case does not have a lawyer, you can hand-deliver the forms to them or to a family member who is 13 or older at their home.
+  * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
+---
+if: user_wants_efile
+id: hand delivery info
+continue button field: hand_delivery_info
+#generic object: ALIndividual
+question: |
+  Instructions when delivering your forms by hand
+subquestion: |
   * If a party in your case does not have a lawyer, you can hand-deliver the forms to them or to a family member who is 13 or older at their home.
   * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
 
@@ -1294,7 +1299,7 @@ code: |
     illinois_appearance_additional_blank.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_for_user, IL_fee_waiver_order], filename="appearance.pdf", title="Download all forms")
+  - al_user_bundle: ALDocumentBundle.using(elements=[illinois_appearance_instructions, illinois_appearance_bundle, illinois_appearance_additional_blank, IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_full_for_user, IL_fee_waiver_order], filename="appearance.pdf", title="All forms")
   - al_court_bundle: ALDocumentBundle.using(elements=court_bundle_list, filename="appearance.pdf", title="Appearance")
 ---
 objects:
