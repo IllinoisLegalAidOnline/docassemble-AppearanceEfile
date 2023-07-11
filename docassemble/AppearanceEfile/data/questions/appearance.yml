@@ -641,27 +641,11 @@ content: |
   
   [FILE case_number_example.png, 100%, Summons form showing case number]
 ---
-if: not user_wants_fee_waiver
-id: trial by jury
-question: |
-  Who do you want to decide your case?
-subquestion: |
-  Note: You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial
-  if you are not filing a fee waiver.
-
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
-field: trial_with
-choices:
-  - A judge: judge_only
-  - A judge and a 6-person jury: judge_and_6_jury
-  - A judge and a 12-person jury: judge_and_12_jury
----
-if: user_wants_fee_waiver
 id: trial by jury - already fee waiver
 question: |
   Who do you want to decide your case?
 subquestion: |
-  Note: You do not have a right to a jury trial in every case.
+  Note: You do not have a right to a jury trial in every case. If you aren't filing with a fee waiver, there can be an additional fee for a jury trial.
 
   To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
@@ -917,7 +901,7 @@ choices:
 generic object: ALIndividual
 if: user_wants_efile
 code: |
-  x.knows_delivery_date = True
+  x.knows_delivery_method = True
 ---
 template: delivery_method_help
 subject: |
@@ -1058,6 +1042,9 @@ fields:
     min: ${ today().format("yyyy-MM-dd") }
   - Time: x.delivery_time
     datatype: time
+validation code: |
+  x.knows_delivery_time = True
+  x.knows_delivery_date = True
 ---
 if: not user_wants_efile
 id: hand delivery info
