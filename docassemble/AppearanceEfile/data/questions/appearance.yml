@@ -185,6 +185,8 @@ code: |
   set_progress(100)
   nav.set_section('download_and_efile')
   get_docs_screen
+  if user_wants_efile:
+    efile
   ending_screen
 ---
 if: can_check_efile
@@ -1075,7 +1077,8 @@ subquestion: |
 ---
 if: can_check_efile and user_wants_efile
 id: get docs screen
-event: get_docs_screen
+continue button field: get_docs_screen
+continue button label: ":file-export: E-file your forms"
 question: |
   % if not (defined('efile') and efile):
   Download and e-file
@@ -1102,7 +1105,6 @@ subquestion: |
 
   Click **E-file your forms** to e-file your form with the clerk of the ${ trial_court }.
   
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-file your forms', icon='file-export', size="md", id_tag="efile")}
   % endif
   &nbsp;
 
@@ -1143,7 +1145,7 @@ subquestion: |
 under: |
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} **Sign-in**](${url_of('login', next=interview_url())}) or [**create**](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-  % endif 
+  % endif
 
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
@@ -1788,26 +1790,45 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
+  % if user_wants_fee_waiver:
   <p><strong>Your Appearance and Fee Waiver forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  % else:
+  <p><strong>Your Appearance form was sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  % endif
   <p>A person in the clerk's office has to accept the forms before they are officially filed.</p>
   <p><strong>What's next?</strong></p>
   <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, which will be used to track your filing.</p>
   <p>The clerk will review what you filed.</p>
   <ul>
-    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a copy of your court forms with the clerk's stamp.</li>
+    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a copy of your court forms with the clerk's stamp. Read this email closely. It might contain important information from the clerk.</li>
     <li>If there is something wrong with the filing, they will <strong>reject</strong> it. You should receive another email from Odyssey eFileIL with an explanation of what needs to be fixed.</li>
   </ul>
-  <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case.</p>
-  <p>Make sure you record how you delivered the Appearance to the other parties in the Proof of Delivery forms.</p>
+  <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case. Make sure you deliver the Appearance by the method, date, and time you listed in your Proof of Delivery.</p>
   <p><strong>Where to go for help</strong></p>
+  % if not user_wants_fee_waiver:
+  <p>You may see a temporary charge on your account while the clerk reviews your filing. The account will be changed only if your filing is accepted. If the filing is not accepted it can take up to 10 business days for the temporary charge to be removed.</p>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
     <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
@@ -1838,7 +1859,7 @@ content: |
     <li>What's next in your case.</li>
   </ul>
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
@@ -1869,7 +1890,7 @@ content: |
     <li>What's next in your case.</li>
   </ul>
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
@@ -1901,7 +1922,7 @@ content: |
     <li>What's next in your case.</li>
   </ul>
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
