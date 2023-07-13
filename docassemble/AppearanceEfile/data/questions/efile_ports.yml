@@ -361,14 +361,16 @@ fields:
     code: |
       all_case_parties
 ---
-id: are-you-using-fee-waiver
+id: do-you-want-efile
 question: |
-  Do you want to e-file this document directly with the court?
+  Do you want to e-file your forms directly with the court?
 subquestion: |
-  You can fill out and
-  electronically file (e-file) all forms at the same time in this program.
-  This means you don’t have to print out the forms. The court will communicate
-  with you by email. You will have to provide your email to e-file your Appearance and Fee waiver.
+  You can fill out your forms and electronically file (e-file) them at the same time with this program.
+  This means you don’t have to print out the forms.
+  
+  You will need an email address and an eFileIL account to e-file. This program can help you make an eFileIL account if needed.
+  
+  If you do not want to e-file your forms now, you can still use this program to make your forms.
 fields:
   - Do you want to e-file?: user_wants_efile
     datatype: yesnoradio
@@ -513,3 +515,17 @@ fields:
     code: |
       sorted(x.filtered_filing_type_options, key=lambda y: y[1])
 ---
+####################### Payments stuff
+id: new payment method
+question: |
+  What type of payment method do you want to make?
+subquestion: |
+fields:
+  - Name of payment method: new_account_name
+  - Type: new_account_type_code
+    datatype: radio
+    choices:
+      - eCheck: BankAccount
+      - Credit Card: CC
+  - note: |
+      On the next screen, you'll be sent to a secure payments site to enter your information.

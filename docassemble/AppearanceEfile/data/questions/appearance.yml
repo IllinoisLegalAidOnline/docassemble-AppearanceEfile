@@ -185,7 +185,7 @@ code: |
   set_progress(100)
   nav.set_section('download_and_efile')
   get_docs_screen
-  if user_wants_efile:
+  if can_check_efile:
     efile
   ending_screen
 ---
@@ -210,7 +210,7 @@ if: user_wants_fee_waiver
 code: |
   tyler_payment_id = default_jurisdiction_waiver
 ---
-if: can_check_efile and user_wants_efile
+if: can_check_efile
 id: setup e-signature
 code: |
   nav.set_section('review_efiling')
@@ -231,7 +231,7 @@ code: |
   # efile_user_reviewed = True
   setup_esignature = True
 ---
-if: not (can_check_efile and user_wants_efile)
+if: not can_check_efile
 code: |
   e_signature
   setup_esignature = True
@@ -420,14 +420,12 @@ question: |
 subquestion: |
   % if not can_check_efile:
   After you download your **{Appearance}**, you must file it with the court. This program does not file your ${ form_name } for you.
- 
   % else:
-  You can e-file your appearance and fee waiver at the end of this program. You will
+  You can e-file your forms at the end of this program. You will
   get email when your forms are received and accepted by the circuit clerk. If they
-  are rejected, you will have to refile.
-  
-  If you run into an unexpected error, you can also file it with the court yourself.
+  are rejected, you will have to refile. If you run into an unexpected error, you can also file it with the court yourself.
   % endif
+
   Read the "How to File an Appearance" instructions you can download at the end of this program.
 ---
 id: not legal advice
@@ -882,7 +880,7 @@ code: |
     if hasattr(x.lawyer.address, 'zip'):
       x.address.zip = x.lawyer.address.zip
 ---
-if: not user_wants_efile
+if: not can_check_efile
 id: knows delivery method
 generic object: ALIndividual
 question: |
@@ -901,7 +899,7 @@ choices:
   - No: False
 ---
 generic object: ALIndividual
-if: user_wants_efile
+if: can_check_efile
 code: |
   x.knows_delivery_method = True
 ---
@@ -931,10 +929,16 @@ question: |
   How will you send your ${ form_name } to ${ users[i].name.full(middle="full") }?
   % endif
 subquestion: |
+  % if can_check_efile:
+  If you do not know this now, take your best guess.
+
+  You must use e-mail unless the other party does not have an email address. If they do not, select US mail or a delivery company, or hand delivery.
+  % else:
   **Note:** If you do not know this now, be sure to add to to the Proof of Delivery section of your forms later.
 
   You may use US mail, a delivery company, or hand delivery if you or the other party **does not** have an email address.
-  
+  % endif
+
   ${ collapse_template(efiling_help) }
 fields:
   - E-filing system: users[i].efm_delivery
@@ -951,17 +955,15 @@ fields:
     show if: 
       variable: users[i].email_delivery
       is: True
-    required: False
+    required: can_check_efile
   - US mail or a delivery company (like UPS or FedEx): users[i].mail_delivery
     datatype: yesnowide
   - Hand delivery: users[i].hand_delivery
     datatype: yesnowide
----
-template: efiling_help
-subject: |
-  **What if I need help?**
-content: |  
-  If you need help delivering by email or using the e-filing service provider, you can visit a [**Legal Self-Help Center**](https://www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call or text [Illinois Court Help](https://www.ilcourthelp.gov) at 833-411-1121.
+validation code: |
+  if can_check_efile:
+    if not (users[i].email_delivery or users[i].mail_delivery or users[i].hand_delivery):
+      validation_error(f"You need to say how you will deliver your {form_name}")
 ---
 id: other party delivery method
 # generic object: ALIndividual
@@ -973,9 +975,15 @@ question: |
   How will you send your ${ form_name } to ${ other_parties[i].name.full(middle="full") }?
   % endif
 subquestion: |
+  % if can_check_efile:
+  If you do not know this now, take your best guess.
+
+  You must use e-mail unless the other party does not have an email address. If they do not, select US mail or a delivery company, or hand delivery.
+  % else:
   **Note:** If you do not know this now, be sure to add to to the Proof of Delivery section of your forms later.
 
   You may use US mail, a delivery company, or hand delivery if you or the other party **does not** have an email address.
+  % endif
   
   ${ collapse_template(efiling_help) }
 fields:
@@ -994,13 +1002,23 @@ fields:
     show if: 
       variable: other_parties[i].email_delivery
       is: True
-    required: False
+    required: can_check_efile
   - US mail or a delivery company (like UPS or FedEx): other_parties[i].mail_delivery
     datatype: yesnowide
   - Hand delivery: other_parties[i].hand_delivery
     datatype: yesnowide
+validation code: |
+  if can_check_efile:
+    if not (other_parties[i].email_delivery or other_parties[i].mail_delivery or other_parties[i].hand_delivery):
+      validation_error(f"You need to say how you will deliver your {form_name}")
 ---
-if: not user_wants_efile
+template: efiling_help
+subject: |
+  **What if I need help?**
+content: |  
+  If you need help delivering by email or using the e-filing service provider, you can visit a [**Legal Self-Help Center**](https://www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call or text [Illinois Court Help](https://www.ilcourthelp.gov) at 833-411-1121.
+---
+if: not can_check_efile
 id: delivery time
 generic object: ALIndividual
 question: |
@@ -1029,7 +1047,7 @@ validation code: |
   else:
     x.knows_delivery_time = True
 ---
-if: user_wants_efile
+if: can_check_efile
 id: delivery time
 generic object: ALIndividual
 question: |
@@ -1038,6 +1056,8 @@ question: |
   % else:
   When will you send your ${ form_name } to ${ x.name.full(middle="full") }?
   % endif
+subquestion: |
+  If you do not know this now, take your best guess. Make sure to give yourself enough time to deliver your forms.
 fields:
   - Date: x.delivery_date
     datatype: date
@@ -1048,7 +1068,7 @@ validation code: |
   x.knows_delivery_time = True
   x.knows_delivery_date = True
 ---
-if: not user_wants_efile
+if: not can_check_efile
 id: hand delivery info
 continue button field: hand_delivery_info
 #generic object: ALIndividual
@@ -1064,7 +1084,7 @@ subquestion: |
   * If a party in your case does not have a lawyer, you can hand-deliver the forms to them or to a family member who is 13 or older at their home.
   * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
 ---
-if: user_wants_efile
+if: can_check_efile
 id: hand delivery info
 continue button field: hand_delivery_info
 #generic object: ALIndividual
@@ -1075,7 +1095,7 @@ subquestion: |
   * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
 
 ---
-if: can_check_efile and user_wants_efile
+if: can_check_efile
 id: get docs screen
 continue button field: get_docs_screen
 continue button label: ":file-export: E-file your forms"
@@ -1100,19 +1120,19 @@ subquestion: |
   ${ al_user_bundle.download_list_html() }
   % if not (defined('efile') and efile):
   &nbsp;
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+  &nbsp;
   
   ##### E-file
 
   Click **E-file your forms** to e-file your form with the clerk of the ${ trial_court }.
   
   % endif
-  &nbsp;
 
-  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-  &nbsp;
-  
-  Thank you for using ILAO Easy Forms!
 under: |
+  Thank you for using ILAO Easy Forms!
+
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif 
@@ -1120,7 +1140,7 @@ under: |
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
-if: not (can_check_efile and user_wants_efile)
+if: not can_check_efile
 id: get docs screen
 event: get_docs_screen
 question: |
@@ -1781,7 +1801,11 @@ confirm: True
 ---
 template: email_confirmation
 subject: |
+  % if user_wants_fee_waiver:
   Important Appearance and Fee waiver e-filing information
+  % else:
+  Important Appearance e-filing information
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -1835,7 +1859,11 @@ content: |
 ---
 template: neutral_email
 subject: |
+  % if user_wants_fee_waiver:
   Clerk response to your e-filed Appearance and Fee waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -1866,7 +1894,11 @@ content: |
 ---
 template: acceptance_email
 subject: |
+  % if user_wants_fee_waiver:
   Clerk response to your e-filed Appearance and Fee waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -1897,7 +1929,11 @@ content: |
 ---
 template: rejection_email
 subject: |
-  Clerk response to your e-filed Appearance and Fee waiver
+  % if user_wants_fee_waiver:
+  Clerk response to your e-filed Appearance and Fee Waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
