@@ -1068,7 +1068,6 @@ validation code: |
   x.knows_delivery_time = True
   x.knows_delivery_date = True
 ---
-if: not can_check_efile
 id: hand delivery info
 continue button field: hand_delivery_info
 #generic object: ALIndividual
@@ -1083,17 +1082,6 @@ subquestion: |
 
   * If a party in your case does not have a lawyer, you can hand-deliver the forms to them or to a family member who is 13 or older at their home.
   * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
----
-if: can_check_efile
-id: hand delivery info
-continue button field: hand_delivery_info
-#generic object: ALIndividual
-question: |
-  Instructions when delivering your forms by hand
-subquestion: |
-  * If a party in your case does not have a lawyer, you can hand-deliver the forms to them or to a family member who is 13 or older at their home.
-  * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
-
 ---
 if: can_check_efile
 id: get docs screen
