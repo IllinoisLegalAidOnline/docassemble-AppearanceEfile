@@ -199,12 +199,12 @@ Scenario: appearance.yml with party name e-filing
     | users[0].address.zip | 02122 | users[0].address.address |
     | users[0].phone_number | 4094567890 | |
     | users[0].email | example@example.com | |
+    | user_wants_fee_waiver | True | |
     | user_benefits['TA'] | True | |
     | users[0].birth_year | 2000 | |
     | x.document_type | 5766 | illinois_appearance_bundle.document_type |
   And I tap to continue
   # TODO: see something?
-  #And I tap to continue
   #Then I should see the phrase "form was submitted"
 
 @appearance @efile @a5 @no-waiver
@@ -255,7 +255,6 @@ Scenario: appearance.yml with party name e-filing without fee waiver
     | x.document_type | 5766 | illinois_appearance_bundle.document_type |
   And I tap to continue
   # TODO: see something?
-  #And I tap to continue
   #Then I should see the phrase "form was submitted"
 
 

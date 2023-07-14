@@ -1107,10 +1107,8 @@ subquestion: |
 
   ${ al_user_bundle.download_list_html() }
   % if not (defined('efile') and efile):
-  &nbsp;
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-  &nbsp;
   
   ##### E-file
 
@@ -1181,26 +1179,6 @@ under: |
 #  
 #  [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
 #---
-#id: ending screen
-#event: ending_screen
-#question: |
-#  All done
-#subquestion: |
-#  Thank you for using ILAO Easy Forms!
-#  
-#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-##buttons:
-##  - Delete answers and restart: restart
-##  - Exit: exit
-#under: |
-#  % if not user_logged_in():
-#  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-#  % endif 
-#
-#  &nbsp;
-#  
-#  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
----
 generic object: ALDocumentBundle
 template: x.send_email_template
 subject: |
@@ -1235,21 +1213,29 @@ code: |
 id: ending screen
 event: ending_screen
 question: |
-  All done
+  Download
 subquestion: |
-  Thank you for using ILAO Easy Forms!
   
-  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-#buttons:
-#  - Delete answers and restart: restart
-#  - Exit: exit
+  View and download your forms below. Click **Make changes** to fix any mistakes.
+
+  **You need to deliver your Appearance to the other parties in your case.**
+
+  **Note:** You already e-filed your forms. Any changes you make will not appear in the e-filed forms.
+  
+  ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
+
+  ${ al_user_bundle.download_list_html() }
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
 under: |
+  Thank you for using ILAO Easy Forms!
+
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif 
 
   &nbsp;
-  
   ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 objects:
