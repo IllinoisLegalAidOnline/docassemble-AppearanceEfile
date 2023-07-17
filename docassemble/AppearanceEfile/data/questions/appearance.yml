@@ -93,13 +93,14 @@ code: |
   how_to_use
   accept_terms
   lawsuit_information
-  if case_is_invalid_type:
-    kickout_self_reported_case_type
   if can_check_efile:
     tyler_login
   whats_next
   nav.set_section('review_appearance')
   set_progress(15)
+  if case_is_invalid_type:
+    can_check_efile = False
+    kickout_self_reported_case_type
   # E-file specific
   if can_check_efile:
     case_search.found_case
@@ -272,18 +273,21 @@ subquestion: |
   Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
 ---
 id: kickout_self_reported_case_type
-event: kickout_self_reported_case_type
+continue button field: kickout_self_reported_case_type
 question: |
   Sorry
 subquestion: |
-  The Appearance form made by this program does not work with these case types.
-
+  Unfortunately, you cannot e-file an Appearance into these case types through this program.
+  
   * Name change for an adult or a child
   * Guardianship for a minor or an adult
   * Probate, or a case involving a will or an estate
   * Juvenile abuse and neglect
-  * Criminal (misdemeanor or felony)
 
+  You can still make and download a completed Appearance, and file or e-file the form elsewhere.
+
+  This Appearance form is not for use in criminal cases.
+ 
   Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
 ---
 id: pre-screen case type
