@@ -1799,7 +1799,7 @@ content: |
   % endif
   <p>A person in the clerk's office has to accept the forms before they are officially filed.</p>
   <p><strong>What's next?</strong></p>
-  <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, which will be used to track your filing.</p>
+  <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, {{ envelope_id }}, which will be used to track your filing.</p>
   <p>The clerk will review what you filed.</p>
   <ul>
     <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a copy of your court forms with the clerk's stamp. Read this email closely. It might contain important information from the clerk.</li>
