@@ -93,14 +93,14 @@ code: |
   how_to_use
   accept_terms
   lawsuit_information
+  if user_wants_efile and case_is_invalid_type:
+    can_check_efile = False
+    kickout_self_reported_case_type
   if can_check_efile:
     tyler_login
   whats_next
   nav.set_section('review_appearance')
   set_progress(15)
-  if case_is_invalid_type:
-    can_check_efile = False
-    kickout_self_reported_case_type
   # E-file specific
   if can_check_efile:
     case_search.found_case
