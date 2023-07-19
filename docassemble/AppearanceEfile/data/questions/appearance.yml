@@ -1828,7 +1828,7 @@ content: |
   % if user_wants_fee_waiver:
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
   % else:
-  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
   % endif
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
@@ -1850,21 +1850,39 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}, envelope {{ envelope_id }}.</strong></p>
 
-  <p><q>{{ status }}</q></p>
+  <hr>
 
-  <p>{{ message_text }}</p>
+  <p><q>Status: {{ status }}</q></p>
+
+  <p>Message through efileIL: {{ message_text }}</p>
+
+  <hr>
 
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
   <p><strong>Where to go for help</strong></p>
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
+    <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  % else:
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
@@ -1885,11 +1903,15 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}, envelope {{ envelope_id }}.</strong></p>
 
-  <p><q>{{ status }}</q></p>
+  <hr>
 
-  <p>{{ message_text }}</p>
+  <p><q>Status: {{ status }}</q></p>
+
+  <p>Message through efileIL: {{ message_text }}</p>
+
+  <hr>
 
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
@@ -1899,7 +1921,11 @@ content: |
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  % else:
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
@@ -1920,11 +1946,15 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}, envelope {{ envelope_id }}.</strong></p>
 
-  <p><q>{{ status }}</q></p>
+  <hr>
 
-  <p>{{ message_text }}</p>
+  <p><q>Status: {{ status }}</q></p>
+
+  <p>Message through efileIL: {{ message_text }}</p>
+
+  <hr>
 
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
@@ -1935,7 +1965,11 @@ content: |
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
+  % else:
+  <p>Use <a href="https://illinois.tylerhost.net/OfsWeb" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
   <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
