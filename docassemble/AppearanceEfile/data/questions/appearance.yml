@@ -275,7 +275,7 @@ subquestion: |
 id: kickout_self_reported_case_type
 continue button field: kickout_self_reported_case_type
 question: |
-  Sorry
+  You will not be able to e-file this document
 subquestion: |
   Unfortunately, you cannot e-file an Appearance into these case types through this program.
   
