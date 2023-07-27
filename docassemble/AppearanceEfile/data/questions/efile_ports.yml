@@ -72,7 +72,7 @@ subquestion: |
 continue button field: warning_no_appearance_type
 ---
 code: |
-  if court_id == 'tazewell' or court_id == 'kane':
+  if court_id == 'tazewell' or court_id == 'kane' or court_id == 'stephenson':
     if trial_with == "judge_and_6_jury":
       if efile_case_category == "117503": # small claims
         default_list = [None]
@@ -94,7 +94,7 @@ code: |
           "Jury Demand"
         ]]
       else:
-        # TODO(brycew): Can't actually have jury demand in tazewell or kane?
+        # TODO(brycew): Can't actually have jury demand in tazewell/kane/stephenson?
         default_list = []
         filter_list = []
     elif trial_with == "judge_and_12_jury":
@@ -137,7 +137,7 @@ code: |
 ---
 code: |
   if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
-    if court_id != "tazewell" and court_id != "kane":
+    if court_id != "tazewell" and court_id != "kane" and court_id != "stephenson":
       illinois_jury_demand_bundle.enabled = True
     else:
       illinois_jury_demand_bundle.enabled = False
