@@ -36,7 +36,7 @@ code: |
   is_initial_filing = False
 ---
 objects:
-  - case_search: EFCaseSearch.using(court_id=court_id)
+  - case_search: EFCaseSearch.using(court_id=court_id, do_what_choice="docket_lookup")
 ---
 code: |
   target_case = case_search
