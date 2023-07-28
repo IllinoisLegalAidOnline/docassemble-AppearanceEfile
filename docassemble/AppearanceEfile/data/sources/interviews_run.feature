@@ -80,7 +80,7 @@ Scenario: appearance.yml attempting but failing e-filing
   And I set the variable "my_password" to secret "TYLER_PASSWORD"
   And I tap to continue
   And I tap to continue
-  And I set the variable "case_search.docket_number_from_user" to "BBBBBBB"
+  And I set the variable "x.docket_number_from_user" to "BBBBBBB"
   And I tap to continue
   And I wait 30 seconds
   And I tap to continue
@@ -130,7 +130,7 @@ Scenario: appearance.yml with e-filing, search by party name
   And I set the variable "my_password" to secret "TYLER_PASSWORD"
   And I tap to continue
   And I tap to continue
-  And I set the variable "case_search.docket_number_from_user" to "2018SC241"
+  And I set the variable "x.docket_number_from_user" to "2018SC241"
   And I tap to continue
   And I wait 50 seconds
   And I tap to continue
