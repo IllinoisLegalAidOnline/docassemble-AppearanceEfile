@@ -36,7 +36,7 @@ code: |
   is_initial_filing = False
 ---
 objects:
-  - case_search: EFCaseSearch.using(court_id=court_id)
+  - case_search: EFCaseSearch.using(court_id=court_id, do_what_choice="docket_lookup")
 ---
 code: |
   target_case = case_search
@@ -252,6 +252,8 @@ subquestion: |
   * Probate, or a case involving a will or an estate
   * Juvenile abuse and neglect
   * Criminal (misdemeanor or felony)
+
+  Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
 ---
 id: kickout_self_reported_case_type
 event: kickout_self_reported_case_type
