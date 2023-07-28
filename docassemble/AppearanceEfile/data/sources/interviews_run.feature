@@ -21,6 +21,7 @@ Some good stage cases to test with:
 * Lake: 78D00000056
 * DuPage: Mary Smith: 2020D000033
   * shouldn't see is_unused_party error
+* Stephenson: 2018SC241 for SC, John Brown
 
 
 @appearance @start @fast @a0
@@ -78,6 +79,7 @@ Scenario: appearance.yml attempting but failing e-filing
   And I set the variable "my_username" to secret "TYLER_EMAIL"
   And I set the variable "my_password" to secret "TYLER_PASSWORD"
   And I tap to continue
+  And I tap to continue
   And I set the variable "case_search.docket_number_from_user" to "BBBBBBB"
   And I tap to continue
   And I wait 30 seconds
@@ -127,10 +129,10 @@ Scenario: appearance.yml with e-filing, search by party name
   And I set the variable "my_username" to secret "TYLER_EMAIL"
   And I set the variable "my_password" to secret "TYLER_PASSWORD"
   And I tap to continue
+  And I tap to continue
   And I set the variable "case_search.docket_number_from_user" to "2018SC241"
   And I tap to continue
   And I wait 50 seconds
-  And I set the variable "x.case_choice" to "case_search.found_cases[0]"
   And I tap to continue
   And I get to the question id "get-docs-screen" with this data:
     | var | value | trigger |

@@ -73,8 +73,9 @@ continue button field: warning_no_appearance_type
 ---
 code: |
   if court_id == 'tazewell' or court_id == 'kane' or court_id == 'stephenson':
+    efile_case_category_name = case_category_map.get(efile_case_category, {}).get('name', '').lower().strip()
     if trial_with == "judge_and_6_jury":
-      if efile_case_category == "117503": # small claims
+      if efile_case_category_name == "small claims" or efile_case_category == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20774"),
@@ -84,7 +85,7 @@ code: |
           "Jury Demand"
         ]]
       # if not probate or guardianship
-      elif efile_case_category != "7420" and efile_case_category != "200545":
+      elif efile_case_category_name != "probate" and efile_case_category_name != "guardianship":
         default_list = [None]
         filter_list = [[
           CodeType("124679"),
@@ -98,17 +99,18 @@ code: |
         default_list = []
         filter_list = []
     elif trial_with == "judge_and_12_jury":
-      if efile_case_category == "117503":
+      if efile_case_category_name == "small claims" or efile_case_category_name == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20773"),
           "SC - Jury Demand - 12 Person",
+          "SC - Jury Demand - 6 Person (12 Person Jury - where 6 person paid by other party)",
           ["SC", "Jury Demand", "12 Person"],
           ["Jury Demand", "12 Person"],
           "Jury Demand"
         ]]
       # if not probate or guardianship
-      elif efile_case_category != "7420" and efile_case_category != "200545":
+      elif efile_case_category_name != "probate" and efile_case_category_name != "guardianship":
         default_list = [None]
         filter_list = [[
           CodeType("124678"),
