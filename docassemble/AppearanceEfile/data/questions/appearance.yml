@@ -226,7 +226,7 @@ code: |
       return True
     # Case categories determine a lot of things, I'm not comfortable with contining
     # if it's not there.
-    if case.category not in case_category_map:
+    if case.category not in case_category_map and case.case_type not in case_type_map:
       return True
     case_category_name = (case_category_map.get(case.category) or {}).get('name', '').lower()
     if case_category_name in ['probate', 'guardianship', 'juvenile abuse', 'criminal misdemeanor', 'quasi-criminal', 'criminal felony']:
