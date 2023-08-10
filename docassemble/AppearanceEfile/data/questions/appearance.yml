@@ -275,7 +275,7 @@ subquestion: |
 id: kickout_self_reported_case_type
 continue button field: kickout_self_reported_case_type
 question: |
-  You will not be able to e-file this document
+  You will not be able to e-file with this program
 subquestion: |
   Unfortunately, you cannot e-file an Appearance into these case types through this program.
   
@@ -285,6 +285,7 @@ subquestion: |
   * Juvenile abuse and neglect
 
   You can still make and download a completed Appearance, and file or e-file the form elsewhere.
+  Find a list of Electronic Filing Service Providers on the [**Illinois Courts' website**](https://www.illinoiscourts.gov/eservices/efileil/).
 
   This Appearance form is not for use in criminal cases.
  
@@ -330,6 +331,13 @@ question: |
 subquestion: |
   If you are paying for this appearance with a fee waiver,
   the next screens will help you make a Fee waiver.
+
+  The circuit clerk charges filing fees for an Appearance and Jury demand. There may also be a payment processing fee.
+  The amount depends on the location and type of case.
+
+  If you cannot afford the fee, you may be eligible for a full or partial waiver.
+  This depends on your income and if you receive public benefits.
+  Read ILAO's article about [filing court papers for free](https://www.illinoislegalaid.org/node/32226).
 fields:
   - Do you want to file a fee waiver?: user_wants_fee_waiver
     datatype: yesnoradio
@@ -426,7 +434,7 @@ subquestion: |
   After you download your **{Appearance}**, you must file it with the court. This program does not file your ${ form_name } for you.
   % else:
   You can e-file your forms at the end of this program. You will
-  get email when your forms are received and accepted by the circuit clerk. If they
+  get emails when your forms are received and accepted by the circuit clerk. If they
   are rejected, you will have to refile. If you run into an unexpected error, you can also file it with the court yourself.
   % endif
 
@@ -707,6 +715,9 @@ question: |
 subquestion: |
   If you do not add your e-signature, you can sign your paper form later.
 
+  Your signature will appear on your form as "/s/ ${ users[0].name.full(middle="full") }."
+  This is as effective as signing by hand.
+
   ${ collapse_template(signature_help) }
 fields:
   - "Add e-signature?": e_signature
@@ -728,6 +739,11 @@ question: |
   Signing your forms
 subquestion: |
   Since you are e-filing, your name will be added as an e-signature to your forms.
+
+  Your signature will appear on your form as "/s/ ${ users[0].name.full(middle="full") }."
+  This is as effective as signing by hand.
+
+  ${ collapse_template(signature_help) }
 continue button field: inform_of_efile_e_signature
 ---
 reconsider: True
@@ -1116,7 +1132,7 @@ subquestion: |
   
   ##### E-file
 
-  Click **E-file your forms** to e-file your form with the clerk of the ${ trial_court }.
+  Click **E-file your forms** to e-file your form with the circuit clerk of the ${ trial_court }.
   
   % endif
 
