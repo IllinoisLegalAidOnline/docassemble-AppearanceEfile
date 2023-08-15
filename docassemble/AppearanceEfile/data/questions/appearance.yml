@@ -181,7 +181,6 @@ code: |
   nav.set_section('review_IL_fee_waiver')
   if user_wants_fee_waiver:
     interview_order_IL_fee_waiver
-
   setup_esignature
   set_progress(100)
   nav.set_section('download_and_efile')
@@ -203,6 +202,7 @@ code: |
   IL_fee_waiver_supplement.completed
   IL_fee_waiver_full_for_court.completed
   IL_fee_waiver_order.completed
+  nav.set_section('download_and_efile')
   tyler_payment_id
   all_required_screens_shown
   ready_to_efile_user_hook = True
@@ -239,7 +239,7 @@ code: |
 ---
 code: |
   def will_kickout(case):
-    if case.category.upper() == "CONFIDENTIAL":
+    if case.category and case.category.upper() == "CONFIDENTIAL":
       return True
     # Case categories determine a lot of things, I'm not comfortable with contining
     # if it's not there.
@@ -333,7 +333,7 @@ subquestion: |
   the next screens will help you make a Fee waiver.
 
   The circuit clerk charges filing fees for an Appearance and Jury demand. There may also be a payment processing fee.
-  The amount depends on the location and type of case.
+  The amount depends on the location and type of case. You can review the fees before e-filing.
 
   If you cannot afford the fee, you may be eligible for a full or partial waiver.
   This depends on your income and if you receive public benefits.
