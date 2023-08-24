@@ -13,8 +13,9 @@ code: |
   illinois_appearance_bundle.filing_action = 'efile'
   illinois_appearance_bundle.has_courtesy_copies = False
 ---
+if: user_wants_fee_waiver
 code: |
-  # TODO(brycew): If there is a jury optional service, use It
+  # TODO(brycew): If there is a jury optional service, use it
   # otherwise, select the jury service
   illinois_appearance_bundle.filing_type_filters = [
     CodeType('142566'),
@@ -23,6 +24,16 @@ code: |
     ['Appearance', 'No Fee'],
     'Appearance'
   ]
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel"])
+---
+if: not user_wants_fee_waiver
+code: |
+  illinois_appearance_bundle.filing_type_filters = [
+    'Appearance'
+  ]
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "No Fee"])
+---
+code: |
   illinois_appearance_bundle.filing_type_default = 'none available'
 ---
 generic object: DAObject
@@ -34,7 +45,7 @@ only sets:
   - x.filtered_filing_type_options
 code: |
   x.filtered_filing_type_options, x.filing_type = \
-      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default)
+      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default, x.filing_type_exclude)
   if x.filing_type is None and check_duplicate_codes(x.filtered_filing_type_options):
     # choices are the same from the user's view
     x.filing_type = x.filtered_filing_type_options[0][0]
@@ -53,7 +64,7 @@ only sets:
   - IL_fee_waiver_order.filtered_filing_type_options
 code: |
   IL_fee_waiver_order.filtered_filing_type_options, IL_fee_waiver_order.filing_type = \
-      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default)
+      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default, IL_fee_waiver_order.filing_type_exclude)
   if IL_fee_waiver_order.filing_type is None and check_duplicate_codes(IL_fee_waiver_order.filtered_filing_type_options):
     # choices are the same from the user's view
     IL_fee_waiver_order.filing_type = IL_fee_waiver_order.filtered_filing_type_options[0][0]
