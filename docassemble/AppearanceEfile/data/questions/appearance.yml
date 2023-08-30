@@ -63,6 +63,8 @@ code: |
   ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/appearance-e-filing"
   form_name = "Appearance"
   filing_basis = 'filing_self'
+  # TODO(brycew): We aren't handling "In Re" forms really yet with e-filing
+  in_re_check = False
 ---
 # backup for non-indexed: can be anything
 code: |
@@ -743,7 +745,7 @@ content: |
   By signing your *Appearance*, you are certifying that:
 
   * Everything on the form is true and correct, and
-  * You understand that making a false statement on the form is perjury.
+  * You understand that making a false statement on the form is perjury, which can result in criminal penalties.
 
   See the **[Code of Civil Procedure, 735 ILCS 5/1-109](https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm)**, for more information.
 ---
