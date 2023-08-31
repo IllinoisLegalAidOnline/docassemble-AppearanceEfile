@@ -6,6 +6,7 @@ include:
   - docassemble.ILAOEfile:shared-basic-questions.yml
   - docassemble.EFSPIntegration:efiling_integration.yml
   - docassemble.EFSPIntegration:case_search.yml
+  - docassemble.EFSPIntegration:toga_payments.yml
   - efile_ports.yml
 ---
 metadata:
