@@ -543,11 +543,35 @@ fields:
       - Bank account: BankAccount
         help: |
           The bank account can be a checking or savings account. This is also known as an eCheck or an ACH transfer.
-      - Credit Card: CC
+      - Credit or debit card: CC
   - note: |
       On the next screen, you'll be sent to a secure payments site to enter your information.
   - note: |
-      Note: For payments using a credit card or bank account, the following convenience fees apply:
+      Note: ${ fees_explain.content }
+---
+template: convenience_fees_help
+subject: |
+  What are these fees for?
+content: |
+  The circuit clerk changes a filing fee for some documents such as a Complaint, Summons, Jury Demand, or Appearance.
 
-      * Credit card: $1.00 or 2.89% of the total fees, whichever is greater.
-      * Bank account: $0.25 flat fee for each submissions (also called an envelope).
+  There is usually a fee for a Jury Demand. Some counties charge this as an Optional or Additional Service Fee.
+
+  ${ fees_explain.content }
+---
+question: |
+  Temporary charge on payment method
+subquestion: |
+  You may see a temporary charge on your method of payment while the court clerk reviews your filing.
+  The account will be charged only if your filing is accepted.
+  If the filing is not accepted it can take up to 10 business days for the temporary charges to be removed.
+continue: review_fees_info
+---
+code: |
+  if fees_resp.is_ok():
+    review_fees_screen
+    review_fees_info
+  else:
+    bad_fees
+  review_fees = True
+---

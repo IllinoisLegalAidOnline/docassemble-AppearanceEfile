@@ -711,11 +711,11 @@ code: |
 ---
 id: e-signature
 question: |
-  Do you want to add your e-signature to your ${ form_name }?
+  Do you want to add your e-signature to your forms?
 subquestion: |
   If you do not add your e-signature, you can sign your paper form later.
 
-  Your signature will appear on your form as "/s/ ${ users[0].name.full(middle="full") }."
+  Your signature will appear on your forms as "/s/ ${ users[0].name.full(middle="full") }."
   This is as effective as signing by hand.
 
   ${ collapse_template(signature_help) }
@@ -725,11 +725,11 @@ fields:
 ---
 template: signature_help
 subject: |
-  **What does it mean to sign the *Appearance*?**
+  **What does it mean to sign the forms?**
 content: |
-  By signing your *Appearance*, you are certifying that:
+  By signing your forms, you are certifying that:
 
-  * Everything on the form is true and correct, and
+  * Everything on the forms is true and correct, and
   * You understand that making a false statement on the form is perjury, which can result in criminal penalties.
 
   See the **[Code of Civil Procedure, 735 ILCS 5/1-109](https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm)**, for more information.
@@ -740,7 +740,7 @@ question: |
 subquestion: |
   Since you are e-filing, your name will be added as an e-signature to your forms.
 
-  Your signature will appear on your form as "/s/ ${ users[0].name.full(middle="full") }."
+  Your signature will appear on your forms as "/s/ ${ users[0].name.full(middle="full") }."
   This is as effective as signing by hand.
 
   ${ collapse_template(signature_help) }
@@ -1035,7 +1035,7 @@ validation code: |
 template: efiling_help
 subject: |
   **What if I need help?**
-content: |  
+content: |
   If you need help delivering by email or using the e-filing service provider, you can visit a [**Legal Self-Help Center**](https://www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call or text [Illinois Court Help](https://www.ilcourthelp.gov) at 833-411-1121.
 ---
 if: not can_check_efile
@@ -1687,8 +1687,13 @@ review:
       ${ word(yesno(e_signature)) }
     show if: not can_check_efile
   - note: |
-      If you want to change the court or case you are filing into, you will have to
-      restart the interview from the beginning.
+      If you want to change:
+
+      * the country,
+      * the case you are filing into, or
+      * if you are payment with a fee waiver,
+      
+      you will have to restart the interview from the beginning.
       
       ${ action_button_html(url_of('new_session'), label='Start again', color='warning', size='md') }
     show if: can_check_efile
