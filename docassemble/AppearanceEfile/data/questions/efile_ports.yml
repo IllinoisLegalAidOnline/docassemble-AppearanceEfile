@@ -159,7 +159,7 @@ code: |
 ---
 if: illinois_jury_demand_bundle.enabled
 code: |
-  illinois_jury_demand_bundle.filing_description = ''
+  illinois_jury_demand_bundle.filing_description = 'Jury Demand: the jury demand is included in the Appearance form, which is why this same form is used in the Appearance filing- Note from Suffolk LIT Lab EFSP'
   illinois_jury_demand_bundle.reference_number = None
   illinois_jury_demand_bundle.filing_parties = ['users[0]']
   illinois_jury_demand_bundle.filing_action = 'efile'
