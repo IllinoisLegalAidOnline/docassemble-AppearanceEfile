@@ -84,7 +84,8 @@ continue button field: warning_no_appearance_type
 ---
 code: |
   # courts that want jury demands to be done through optional service
-  courts_wanting_optserv = ['dekalb', 'mchenry', 'mclean', 'stclair', 'tazewell', 'will', 'stephenson', 'madison']
+  courts_wanting_optserv = ['dekalb', 'mchenry', 'mclean', 'stclair', 'tazewell', 'will', 'stephenson', 'madison',
+      'champaign', 'dupage', 'kane', 'kankakee', 'lake', 'lasalle', 'lee', 'peoria', 'sangamon', 'vermillion', 'winnebago']
 ---
 code: |
   if court_id in courts_wanting_optserv:
