@@ -83,7 +83,11 @@ subquestion: |
 continue button field: warning_no_appearance_type
 ---
 code: |
-  if court_id == 'tazewell' or court_id == 'kane' or court_id == 'stephenson':
+  # courts that want jury demands to be done through optional service
+  courts_wanting_optserv = ['dekalb', 'mchenry', 'mclean', 'stclair', 'tazewell', 'will', 'stephenson', 'madison']
+---
+code: |
+  if court_id in courts_wanting_optserv:
     efile_case_category_name = case_category_map.get(efile_case_category, {}).get('name', '').lower().strip()
     if trial_with == "judge_and_6_jury":
       if efile_case_category_name == "small claims" or efile_case_category == "117503":
@@ -150,7 +154,7 @@ code: |
 ---
 code: |
   if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
-    if court_id != "tazewell" and court_id != "kane" and court_id != "stephenson":
+    if court_id not in courts_wanting_optserv:
       illinois_jury_demand_bundle.enabled = True
     else:
       illinois_jury_demand_bundle.enabled = False
