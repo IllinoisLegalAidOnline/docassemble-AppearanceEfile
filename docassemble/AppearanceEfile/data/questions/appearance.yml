@@ -312,7 +312,7 @@ subquestion: |
   * Probate, or a case involving a will or an estate
   * Juvenile abuse and neglect
   * Criminal (misdemeanor or felony)
-  * a confidential case that is sealed or redacted
+  * A confidential case that is sealed or redacted
 
 fields:
   - no label: case_is_invalid_type
@@ -1144,7 +1144,7 @@ subquestion: |
   
   ##### E-file
 
-  Click **E-file your forms** to e-file your form with the circuit clerk of the ${ trial_court }.
+  Click **E-file your forms** to e-file your forms with the circuit clerk of the ${ trial_court }.
   
   % endif
 
@@ -1703,9 +1703,9 @@ review:
 
       * The county,
       * The case you are filing into, or
-      * If you are payment with a fee waiver,
+      * If you are paying with a fee waiver,
       
-      you will have to restart the interview from the beginning.
+      You will have to restart the interview from the beginning.
       
       ${ action_button_html(url_of('new_session'), label='Start again', color='warning', size='md') }
     show if: can_check_efile
