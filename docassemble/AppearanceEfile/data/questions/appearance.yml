@@ -345,10 +345,11 @@ code: |
 ---
 code: |
   other_parties[i].party_type_filters = is_other_party_filters
-  if not user_started_case: 
+  if not user_started_case:
     other_parties[i].party_type_default = '20646'
   else:
     other_parties[i].party_type_default = '20641'
+  other_parties[i].party_type_exclude = None
 ---
 code: |
   users[i].party_type_filters = is_user_filters
@@ -356,6 +357,7 @@ code: |
     users[i].party_type_default = '20641'
   else:
     users[i].party_type_default = '20646'
+  users[i].party_type_exclude = None
 ---
 id: welcome
 question: |
