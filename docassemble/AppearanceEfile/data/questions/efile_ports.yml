@@ -24,14 +24,14 @@ code: |
     ['Appearance', 'No Fee'],
     'Appearance'
   ]
-  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel"])
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "Entry of Appearance"])
 ---
 if: not user_wants_fee_waiver
 code: |
   illinois_appearance_bundle.filing_type_filters = [
     'Appearance'
   ]
-  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "No Fee"])
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "No Fee", "Entry of Appearance"])
 ---
 code: |
   illinois_appearance_bundle.filing_type_default = 'none available'
