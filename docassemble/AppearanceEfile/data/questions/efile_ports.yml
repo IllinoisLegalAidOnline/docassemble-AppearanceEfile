@@ -91,7 +91,7 @@ code: |
   if court_id in courts_wanting_optserv:
     efile_case_category_name = case_category_map.get(efile_case_category, {}).get('name', '').lower().strip()
     if trial_with == "judge_and_6_jury":
-      if efile_case_category_name == "small claims" or efile_case_category == "117503":
+      if efile_case_category_name.startswith("small claims") or efile_case_category == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20774"),
@@ -115,7 +115,7 @@ code: |
         default_list = []
         filter_list = []
     elif trial_with == "judge_and_12_jury":
-      if efile_case_category_name == "small claims" or efile_case_category_name == "117503":
+      if efile_case_category_name.startswith("small claims") or efile_case_category_name == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20773"),
@@ -578,7 +578,8 @@ continue button field: review_fees_info
 code: |
   if fees_resp.is_ok():
     review_fees_screen
-    review_fees_info
+    if not user_wants_fee_waiver:
+      review_fees_info
   else:
     bad_fees
   review_fees = True
