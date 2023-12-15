@@ -7,11 +7,32 @@ code: |
   x.optional_services.there_are_any = False
 ---
 code: |
-  illinois_appearance_bundle.filing_description = ''
+  illinois_appearance_bundle.filing_description
   illinois_appearance_bundle.reference_number = None
   illinois_appearance_bundle.filing_parties = ['users[0]']
   illinois_appearance_bundle.filing_action = 'efile'
   illinois_appearance_bundle.has_courtesy_copies = False
+---
+id: filing description
+question: |
+  Is there anything you would like to tell the Clerk about your forms?
+subquestion: |
+  These comments will not appear on your cont forms.
+
+  % if not filing_description_datafield.get('isrequired'):
+  This is optional. You can click **Next** to skip.
+  % endif
+fields:
+  - label: |
+      Note to clerk
+      % if not filing_description_datafield.get('isrequired'):
+      (optional)
+      % endif
+    field: illinois_appearance_bundle.filing_description
+    datatype: text
+    maxlength: 50
+    required: |
+      filing_description_datafield.get('isrequired', False)
 ---
 if: user_wants_fee_waiver
 code: |
