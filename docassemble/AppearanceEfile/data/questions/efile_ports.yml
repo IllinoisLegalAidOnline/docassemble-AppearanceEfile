@@ -17,7 +17,7 @@ id: filing description
 question: |
   Is there anything you would like to tell the Clerk about your forms?
 subquestion: |
-  These comments will not appear on your cont forms.
+  These comments will not appear on your court forms.
 
   % if not filing_description_datafield.get('isrequired'):
   This is optional. You can click **Next** to skip.
@@ -532,8 +532,10 @@ code: |
   # DuPage's Attorney/Firm Number / SRL Number. The SRL number is 99500.
   if len(cross_ref_type_map) == 1:
     cross_references.new_item_name = next(iter(cross_ref_type_map))
-    if cross_references.new_item_name == "136524":
+    if cross_references.new_item_name == "136524" or cross_references.new_item_name == "134531":
       cross_references.new_item_value = "99500"
+    else:
+      del cross_references.new_item_name
 ---
 code: |
   if len(cross_ref_type_map) == 1:
