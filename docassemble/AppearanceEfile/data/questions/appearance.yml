@@ -1903,3 +1903,16 @@ content: |
   </body>
   </html>
 ---
+
+### Customized from login_qs.yml in docassemble.EFSPIntegration
+---
+id: check efile possibility
+sets:
+  - can_check_efile
+code: |
+  if efile_setup and trial_court.address.county not in ["Cook", "DuPage"]:
+    # Ask the user if they want to efile
+    can_check_efile = user_wants_efile
+  else:
+    show_no_efile
+    can_check_efile = False
