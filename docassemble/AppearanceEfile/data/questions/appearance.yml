@@ -1143,7 +1143,7 @@ under: |
   % endif 
 
   &nbsp;
-  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 if: not ready_to_efile
 id: get docs screen
@@ -1156,7 +1156,7 @@ subquestion: |
 
   ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
 
-  This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/efileil/).
+  This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
   
   ${ al_user_bundle.download_list_html() }
 
@@ -1164,7 +1164,7 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
-  **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/efileil/).
+  **Note:** This program does not file your Appearance with the court or deliver it to other parties in your case. Learn about [e-filing in Illinois](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -1173,7 +1173,7 @@ under: |
   % endif 
 
   &nbsp;
-  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 # old email forms functionality
 #id: email forms
@@ -1216,7 +1216,7 @@ under: |
 #
 #  &nbsp;
 #  
-#  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+#  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 generic object: ALDocumentBundle
 template: x.send_email_template
@@ -1267,7 +1267,7 @@ under: |
 
   &nbsp;
   
-  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAOEfile:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 objects:
   - illinois_appearance_attachment: ALDocument.using(title="Appearance Form", filename="appearance.pdf", has_addendum=False)
@@ -1698,6 +1698,8 @@ review:
       **Do you want to add your e-signature?**
       ${ word(yesno(e_signature)) }
     show if: not can_check_efile
+  - note: |
+      [**Review your Fee waiver answers**](${url_action('review_IL_fee_waiver')})
   - note: |
       If you want to change the court or case you are filing into, you will have to
       restart the interview from the beginning.

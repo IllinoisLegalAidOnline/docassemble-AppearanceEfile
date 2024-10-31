@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.AppearanceEfile',
-      version='1.0.13',
+      version='1.0.15',
       description=('Appearance'),
       long_description='# docassemble.AppearanceEfile\r\n\r\nAppearance, with E-filing.\r\n\r\nA complete duplicate of https://github.com/IllinoisLegalAidOnline/docassemble-Appearance,\r\nbut with e-filing added. This is a pilot project, and separated so the original Appearance\r\ncan stay stable as experimental features are added to this e-filing version.\r\n\r\n## Author\r\n\r\nMatt Newsted, mnewsted@illinoislegalaid.org\r\nBryce Willey, bwilley@suffolk.edu\r\n',
       long_description_content_type='text/markdown',
@@ -54,7 +54,7 @@ setup(name='docassemble.AppearanceEfile',
       url='https://www.illinoislegalaid.org',
       packages=find_packages(),
       namespace_packages=['docassemble'],
-      install_requires=['docassemble.AssemblyLine>=2.19.0', 'docassemble.EFSPIntegration>=1.1.0', 'docassemble.ILAOEfile>=1.0.0'],
+      install_requires=['docassemble.AssemblyLine>=3.1.0', 'docassemble.EFSPIntegration>=1.5.0', 'docassemble.ILAOEfile>=1.0.4'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/AppearanceEfile/', package='docassemble.AppearanceEfile'),
      )

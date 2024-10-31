@@ -311,7 +311,7 @@ subquestion: |
   % else:
 
   Here are the forms that we could not deliver. You should save and e-file them elsewhere.
-  Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/efileil/).
+  Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
 
   % endif
   
@@ -327,7 +327,7 @@ under: |
   % endif
   
   &nbsp;
-  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 code: |
   def yes_no_confidential(opts):
@@ -382,7 +382,7 @@ subquestion: |
 
   **Keep track of this e-filing account.** You can use it to e-file other forms or make corrections.
 
-  % if hasattr(user_info(), 'email'):
+  % if hasattr(current_context(), 'email'):
   This might **not** be the same login information for ${ get_config('external hostname') } (that you are currently logged into).
   % endif
 fields:
