@@ -155,7 +155,7 @@ Scenario: appearance.yml with e-filing, search by party name
     | users[0].email | example@example.com | |
     | user_benefits['TA'] | True | |
     | users[0].birth_year | 2000 | |
-    | x.document_type | 5766 | illinois_appearance_bundle.document_type |
+    | x.document_type | 273947 | illinois_appearance_bundle.document_type |
   And I tap the "#efile" element
   #And I tap to continue
   #Then I should see the phrase "form was submitted"
