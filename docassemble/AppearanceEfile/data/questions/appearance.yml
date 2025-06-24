@@ -83,6 +83,7 @@ code: |
 mandatory: True
 code: |
   sees_nav_bar
+  snapshot_start
   set_progress(5)
   nav.set_section('start')
   is_initial_filing
@@ -216,8 +217,53 @@ code: |
   set_progress(100)
   nav.set_section('download_and_efile')
   forms_assembling
+  snapshot_forms
   get_docs_screen
   ending_screen
+---
+code: |
+  stuff_to_snapshot = {
+  	'start_time': str(current_datetime()),
+  	'started_interview': True, 
+  	}
+
+  try:
+    stuff_to_snapshot['ip_address'] = device(ip=True)
+  except:
+    pass
+
+  stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
+
+  stuff_to_snapshot['filing_county'] = showifdef('trial_court')
+
+  stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
+
+  try:
+    stuff_to_snapshot['efiled_forms'] = (showifdef('efile_resp.response_code') == 200)
+  except:
+    pass
+  
+  try:
+    stuff_to_snapshot['session_id'] = current_context().session
+  except:
+    pass
+  
+  store_variables_snapshot(
+  	data=stuff_to_snapshot, persistent=True
+  	)
+  snapshot_interview_state = True
+---
+code: |
+  snapshot_interview_state
+  snapshot_start = True  
+---
+code: |
+  reconsider('snapshot_interview_state')
+  snapshot_forms = True
+---
+code: |
+  reconsider('snapshot_interview_state')
+  snapshot_efile = True
 ---
 code: |
   def will_kickout(case):
@@ -741,7 +787,7 @@ subquestion: |
 
   ${ collapse_template(contact_info_help) }  
 fields:
-  - "Email?": users[0].email_notice
+  - "Do you have an email address?": users[0].email_notice
     datatype: yesnoradio
 ---
 if: not users[0].is_form_filler
@@ -1494,8 +1540,8 @@ under: |
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 objects:
-  - illinois_appearance_attachment: ALDocument.using(title="Appearance Form", filename="appearance.pdf", has_addendum=False)
-  - illinois_appearance_instructions: ALDocument.using(title="Appearance Instructions", filename="appearance_instructions.pdf", has_addendum=False)
+  - illinois_appearance_attachment: ALDocument.using(title="Appearance", filename="appearance.pdf", has_addendum=False)
+  - illinois_appearance_instructions: ALDocument.using(title="Appearance instructions", filename="appearance_instructions.pdf", has_addendum=False)
   - jury_request: ALDocument.using(title="Jury Request", filename="jury_request.pdf", has_addendum=False)
   - illinois_appearance_additional: ALDocument.using(title="Additional Proof of Delivery", filename="appearance_additional_proof_delivery.pdf", has_addendum=False)
   - illinois_appearance_additional_2: ALDocument.using(title="Additional Proof of Delivery 2", filename="appearance_additional_proof_delivery_2.pdf", has_addendum=False)
@@ -2205,6 +2251,14 @@ review:
       % for my_var in other_parties:
         * ${ my_var.name_full() }
       % endfor
+  - Edit: in_re_check
+    button: |
+      **Does the court case have "In re:" in the name?**
+      ${word(yesno(in_re_check))}
+  - Edit: in_re_label
+    button: |
+      **In re:** ${in_re_label}
+    show if: in_re_check      
   - Edit: case_number
     button: |
       **Case number:**
@@ -2229,7 +2283,7 @@ review:
       ${ phone_number_formatted(users[0].phone_number) }
   - Edit: users[0].email_notice
     button: |
-      **Do you want to receive court notices by email?**
+      **Do you have an email address?**
       ${ word(yesno(users[0].email_notice)) }
   - Edit: users[0].email
     button: |
