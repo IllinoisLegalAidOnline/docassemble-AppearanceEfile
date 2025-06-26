@@ -127,8 +127,20 @@ code: |
     filter_list = []
   illinois_appearance_bundle.optional_services_defaults = default_list
   illinois_appearance_bundle.optional_services_filters = filter_list
-  illinois_appearance_bundle.document_type_filters = ['public']
-  illinois_appearance_bundle.document_type_default = "273947"
+  illinois_appearance_bundle.document_type_filters = public_document_type_filter(court_id)
+  illinois_appearance_bundle.document_type_default = public_document_type(court_id)
+---
+code: |
+  def public_document_type(active_court_id):
+    # Always use None for the default: more resilient
+    return None
+---
+code: |
+  def public_document_type_filter(active_court_id):
+    if active_court_id in ['kankakee', 'KankakeeCR', 'KankakeeCV', 'KankakeeTR', 'KankakeeFAM']:
+      return ["public"]
+    else:
+      return ["non-confidential"]
 ---
 code: |
   if illinois_appearance_bundle.optional_services[i].code in ["124679", "20774", "20773", "257784"]:
@@ -181,35 +193,35 @@ if: illinois_jury_demand_bundle.enabled
 code: |
   illinois_jury_demand_bundle.optional_services_defaults = []
   illinois_jury_demand_bundle.optional_services_filters = []
-  illinois_jury_demand_bundle.document_type_filters = ['public']
-  illinois_jury_demand_bundle.document_type_default = "273947"
+  illinois_jury_demand_bundle.document_type_filters = public_document_type_filter(court_id)
+  illinois_jury_demand_bundle.document_type_default = public_document_type(court_id)
 ---
 code: |
   illinois_appearance_attachment.filing_component_default = '332'
   illinois_appearance_attachment.filing_component_filters = ['Lead Document']
   illinois_appearance_attachment.document_description = 'Appearance'
-  illinois_appearance_attachment.document_type_default = "273947"
-  illinois_appearance_attachment.document_type_filters = ['public']
+  illinois_appearance_attachment.document_type_default = public_document_type(court_id)
+  illinois_appearance_attachment.document_type_filters = public_document_type_filter(court_id)
   illinois_appearance_additional.filing_component_default = '331'
   illinois_appearance_additional.filing_component_filters = ['Attachment']
   illinois_appearance_additional.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional.document_type_default = "273947"
-  illinois_appearance_additional.document_type_filters = ['public']
+  illinois_appearance_additional.document_type_default = public_document_type(court_id)
+  illinois_appearance_additional.document_type_filters = public_document_type_filter(court_id)
   illinois_appearance_additional_2.filing_component_default = '331'
   illinois_appearance_additional_2.filing_component_filters = ['Attachment']
-  illinois_appearance_additional_2.document_type_default = "273947"
-  illinois_appearance_additional_2.document_type_filters = ['public']
+  illinois_appearance_additional_2.document_type_default = public_document_type(court_id)
+  illinois_appearance_additional_2.document_type_filters = public_document_type_filter(court_id)
   illinois_appearance_additional_2.document_description = 'Appearance Additional Proof of Delivery'
   illinois_appearance_additional_3.filing_component_default = '331'
   illinois_appearance_additional_3.filing_component_filters = ['Attachment']
   illinois_appearance_additional_3.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_3.document_type_default = "273947"
-  illinois_appearance_additional_3.document_type_filters = ['public']
+  illinois_appearance_additional_3.document_type_default = public_document_type(court_id)
+  illinois_appearance_additional_3.document_type_filters = public_document_type_filter(court_id)
   illinois_appearance_additional_blank.filing_component_default = '331'
   illinois_appearance_additional_blank.filing_component_filters = ['Attachment']
   illinois_appearance_additional_blank.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_blank.document_type_default = "273947"
-  illinois_appearance_additional_blank.document_type_filters = ['public']
+  illinois_appearance_additional_blank.document_type_default = public_document_type(court_id)
+  illinois_appearance_additional_blank.document_type_filters = public_document_type_filter(court_id)
 ---
 ############# Overide some wording #########
 generic object: DAObject
@@ -249,7 +261,7 @@ fields:
     input type: radio
     code: |
       list(reversed(yes_no_confidential(x.filtered_document_type_options)))
-    default: ${ matching_tuple_option('public', x.filtered_document_type_options) }
+    default: ${ matching_tuple_option('non-confidential', x.filtered_document_type_options) }
 ---
 need:
   - ready_to_efile
@@ -333,9 +345,9 @@ code: |
   def yes_no_confidential(opts):
     new_opts = []
     for opt in opts:
-      if opt[0] in ['5766', '141579', '133166', '273947'] or opt[1].lower() == 'non-confidential' or opt[1].lower() == 'public': # public / non-confidential
+      if opt[0] in ['5766', '141579', '133166', '273947', '302243'] or opt[1].lower() in ['non-confidential', 'public']: # public / non-confidential
         new_opts.append([opt[0], "No"])
-      elif opt[0] == "5767" or opt[0] == "273946" or opt[1].lower() == 'confidential' or opt[1].lower() == 'non-public': # confidential / non-public
+      elif opt[0] in ["5767", "273946", "302242"] or opt[1].lower() in ['confidential', 'non-public']: # confidential / non-public
         new_opts.append([opt[0], "Yes"])
       else:
         new_opts.append([opt[0], f"Something else ({opt[1]})"])
