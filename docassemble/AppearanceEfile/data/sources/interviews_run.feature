@@ -33,11 +33,12 @@ Scenario: appearance.yml without e-filing
   Given I start the interview at "appearance.yml"
   And the maximum seconds for each Step in this Scenario is 40
   And I check all pages for accessibility issues
+  # trial_court_index 97 is Tazewell
   And I get to the question id "get-docs-screen" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
     | case_is_invalid_type | False | |
-    | trial_court_index | 0 | |
+    | trial_court_index | 97 | |
     | user_wants_efile | False | |
     | user_ask_role | defendant | |
     | users.target_number | 1 | |
@@ -45,7 +46,7 @@ Scenario: appearance.yml without e-filing
     | users[0].name.last | Ma | |
     | other_parties.target_number | 1 | |
     | trial_with | judge_only | |
-    | case_number | 2022AC123 | |
+    | case_number | 2022-SC-000005 | |
     | users[0].phone_number | 4094567890 | |
     | users[0].email | example@example.com | |
     | other_parties[0].person_type | ALIndividual | |
@@ -98,7 +99,7 @@ Scenario: appearance.yml attempting but failing e-filing
     | other_parties[0].name.first | Tame | |
     | other_parties[0].name.last | Impala | |
     | x.is_represented | False | other_parties[0].is_represented |
-    | case_number | 2022AC123 | |
+    | case_number | 2022-SC-000005 | |
     | x.is_represented | False | other_parties[0].is_represented |
     | x.address.address | 123 Fake St | other_parties[0].address.address |
     | x.address.city | Boston | other_parties[0].address.address |
@@ -120,11 +121,12 @@ Scenario: appearance.yml with e-filing, search by party name
   Given I start the interview at "appearance.yml"
   And the maximum seconds for each Step in this Scenario is 60
   And I check all pages for accessibility issues
+  # trial_court_index 97 is Tazewell
   And I get to the question id "eFile Login" with this data:
     | var | value | trigger |
     | accept["I accept the terms of use."] | True | |
     | case_is_invalid_type | False | |
-    | trial_court_index | 0 | |
+    | trial_court_index | 97 | |
     | user_wants_efile | True | |
   And I set the variable "my_username" to secret "TYLER_EMAIL"
   And I set the variable "my_password" to secret "TYLER_PASSWORD"

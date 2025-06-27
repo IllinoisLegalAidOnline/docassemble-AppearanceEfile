@@ -1687,7 +1687,7 @@ review:
         - IL_fee_waiver_supplement.document_type
         - IL_fee_waiver_order.document_type
     button: |
-      % if illinois_appearance_attachment.document_type == '5766' or illinois_appearance_attachment.document_type == '141579' or illinois_appearance_attachment.document_type == '133166':
+      % if illinois_appearance_attachment.document_type in ['5766', '141579', '133166', '273947', '302243']:
       The judge **did not order the case to be sealed**.
       % else:
       The judge **did order the case to be sealed**.
