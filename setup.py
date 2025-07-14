@@ -1,6 +1,6 @@
 import os
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 
@@ -44,17 +44,16 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.AppearanceEfile',
-      version='1.2.1',
+      version='1.2.2',
       description=('Appearance'),
-      long_description='# docassemble.AppearanceEfile\r\n\r\nAppearance, with E-filing.\r\n\r\nA complete duplicate of https://github.com/IllinoisLegalAidOnline/docassemble-Appearance,\r\nbut with e-filing added. This is a pilot project, and separated so the original Appearance\r\ncan stay stable as experimental features are added to this e-filing version.\r\n\r\n## Author\r\n\r\nMatt Newsted, mnewsted@illinoislegalaid.org\r\nBryce Willey, bwilley@suffolk.edu\r\n',
+      long_description='# docassemble.AppearanceEfile\r\n\r\nAppearance, with E-filing.\r\n\r\nA duplicate of https://github.com/IllinoisLegalAidOnline/docassemble-Appearance,\r\nbut with e-filing added. This is a pilot project, and separated so the original Appearance\r\ncan stay stable as experimental features are added to this e-filing version.\r\n\r\n## Author\r\n\r\nMatt Newsted, mnewsted@illinoislegalaid.org\r\nBryce Willey, bwilley@suffolk.edu\r\n',
       long_description_content_type='text/markdown',
       author='Matt Newsted',
       author_email='66691956+mnewsted@users.noreply.github.com',
       license='The MIT License (MIT)',
       url='https://www.illinoislegalaid.org',
-      packages=find_packages(),
-      namespace_packages=['docassemble'],
-      install_requires=['docassemble.AssemblyLine>=3.1.0', 'docassemble.EFSPIntegration>=1.5.0', 'docassemble.ILAOEfile>=1.0.4', 'docassemble.ILFeeWaiver @ git+https://github.com/IllinoisLegalAidOnline/docassemble-IlFeeWaiver.git@main'],
+      packages=find_namespace_packages(),
+      install_requires=['docassemble.AssemblyLine @ git+https://github.com/SuffolkLITLab/docassemble-AssemblyLine.git@main', 'docassemble.EFSPIntegration @ git+https://github.com/SuffolkLITLab/docassemble-EFSPIntegration.git@main', 'docassemble.ILAOEfile @ git+https://github.com/SuffolkLITLab/docassemble-ILAOEfile.git@main'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/AppearanceEfile/', package='docassemble.AppearanceEfile'),
      )
