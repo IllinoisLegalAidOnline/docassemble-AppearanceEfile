@@ -433,6 +433,26 @@ subquestion: |
 continue button field: x.warn_no_results
 ---
 generic object: EFCaseSearch
+if: |
+ jurisdiction_id == 'illinois'
+template: x.case_number_format_template
+subject: |
+  **How to enter your case number**
+content: |
+  Case numbers are usually in the following format: "YYYYxx###": where "YYYY" is the 4 digit year,
+  "xx" is are the category letters of your case category, and "###" are the 3 digit sequence number of the case.
+  [See more information here](https://odysseyfileandservecloud.zendesk.com/hc/en-us/articles/360054658131-ILLINOIS-What-is-the-Correct-Case-Number-Format-to-Search-for-eFiling-Excluding-Cook-County).
+---
+generic object: EFCaseSearch
+if: |
+  jurisdiction_id == 'illinois' and 'cook' in x.court_id
+template: x.case_number_format_template
+subject: |
+  **How to enter your case number**
+content: |
+  [See information here](https://www.illinoislegalaid.org/legal-information/e-filing-common-questions#howdoifindmycase)
+---
+generic object: EFCaseSearch
 template: x.not_actually_case
 subject: |
   **This isn't my case!**
