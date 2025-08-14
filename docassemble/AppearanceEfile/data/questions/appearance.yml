@@ -420,12 +420,11 @@ subquestion: |
  
   ${ collapse_template(help_example) }
 
-  Click on **{green words}** to learn what they mean. Some questions have a
-  question mark in a circle ${ fa_icon("question-circle", color_css="#0dcaf0") } that also gives help.
+  Click on **{green words}** to learn what they mean. Some pages have a question mark in a circle ${ fa_icon("question-circle", color_css="#0dcaf0" ) } that helps explain things.
 ---
 template: help_example
 subject: |
-  **You can expand sections like this to show more information.**
+  **You can click sections like this to show more information.**
 content: |
   This is an example of help. Click again to hide.
 ---

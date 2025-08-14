@@ -53,7 +53,7 @@ setup(name='docassemble.AppearanceEfile',
       license='The MIT License (MIT)',
       url='https://www.illinoislegalaid.org',
       packages=find_namespace_packages(),
-      install_requires=['docassemble.AssemblyLine @ git+https://github.com/SuffolkLITLab/docassemble-AssemblyLine.git@main', 'docassemble.EFSPIntegration @ git+https://github.com/SuffolkLITLab/docassemble-EFSPIntegration.git@main', 'docassemble.ILAOEfile @ git+https://github.com/SuffolkLITLab/docassemble-ILAOEfile.git@main'],
+      install_requires=['docassemble.AssemblyLine @ git+https://github.com/SuffolkLITLab/docassemble-AssemblyLine.git@main', 'docassemble.EFSPIntegration @ git+https://github.com/SuffolkLITLab/docassemble-EFSPIntegration.git@main', 'docassemble.ILAO @ git+https://github.com/IllinoisLegalAidOnline/docassemble-ILAO.git@main', 'docassemble.ILAOEfile @ git+https://github.com/IllinoisLegalAidOnline/docassemble-ILAOEfile.git@main'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/AppearanceEfile/', package='docassemble.AppearanceEfile'),
      )
