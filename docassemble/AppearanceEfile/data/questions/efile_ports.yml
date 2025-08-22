@@ -221,31 +221,25 @@ code: |
   illinois_jury_demand_bundle.document_type_default = public_document_type(court_id)
 ---
 code: |
-  illinois_appearance_attachment.filing_component_default = '332'
+  illinois_appearance_attachment.filing_component_default = None
   illinois_appearance_attachment.filing_component_filters = ['Lead Document']
   illinois_appearance_attachment.document_description = 'Appearance'
   illinois_appearance_attachment.document_type_default = public_document_type(court_id)
   illinois_appearance_attachment.document_type_filters = public_document_type_filter(court_id)
-  illinois_appearance_additional.filing_component_default = '331'
-  illinois_appearance_additional.filing_component_filters = ['Attachment']
-  illinois_appearance_additional.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional.document_type_default = public_document_type(court_id)
-  illinois_appearance_additional.document_type_filters = public_document_type_filter(court_id)
-  illinois_appearance_additional_2.filing_component_default = '331'
-  illinois_appearance_additional_2.filing_component_filters = ['Attachment']
-  illinois_appearance_additional_2.document_type_default = public_document_type(court_id)
-  illinois_appearance_additional_2.document_type_filters = public_document_type_filter(court_id)
-  illinois_appearance_additional_2.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_3.filing_component_default = '331'
-  illinois_appearance_additional_3.filing_component_filters = ['Attachment']
-  illinois_appearance_additional_3.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_3.document_type_default = public_document_type(court_id)
-  illinois_appearance_additional_3.document_type_filters = public_document_type_filter(court_id)
-  illinois_appearance_additional_blank.filing_component_default = '331'
-  illinois_appearance_additional_blank.filing_component_filters = ['Attachment']
-  illinois_appearance_additional_blank.document_description = 'Appearance Additional Proof of Delivery'
-  illinois_appearance_additional_blank.document_type_default = public_document_type(court_id)
-  illinois_appearance_additional_blank.document_type_filters = public_document_type_filter(court_id)
+---
+code: |
+  additional_delivery_bundle.filing_component_default = None
+  additional_delivery_bundle.filing_component_filters = ['Attachment']
+  additional_delivery_bundle.document_description = "Additional Proof of Delivery"
+  additional_delivery_bundle.document_type_default = public_document_type(court_id)
+  additional_delivery_bundle.document_type_filters = public_document_type_filter(court_id)
+---
+code: |
+  jury_request.filing_component_default = None
+  jury_request.filing_component_filters = ['Lead Document']
+  jury_request.document_description = "Jury Request"
+  jury_request.document_type_default = public_document_type(court_id)
+  jury_request.document_type_filters = public_document_type_filter(court_id)
 ---
 ############# Overide some wording #########
 generic object: DAObject
