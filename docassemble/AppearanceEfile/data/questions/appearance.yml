@@ -1349,7 +1349,7 @@ subquestion: |
   
   ##### E-file
 
-  Click **E-file your forms** to e-file your form with the clerk of the ${ trial_court }.
+  Click **E-file your forms** to e-file your forms with the circuit clerk of the ${ trial_court }.
   
   ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-file your forms', icon='file-export', size="md", id_tag="efile")}
   % endif
@@ -2191,14 +2191,13 @@ content: |
   <p><strong>Your Appearance and Fee Waiver forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
   <p>A person in the clerk's office has to accept the forms before they are officially filed.</p>
   <p><strong>What's next?</strong></p>
-  <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, which will be used to track your filing.</p>
+  <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, {{ envelope_id }} which will be used to track your filing.</p>
   <p>The clerk will review what you filed.</p>
   <ul>
-    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a copy of your court forms with the clerk's stamp.</li>
+    <li>If it looks good, they will <strong>accept</strong> it. You will receive another email from Odyssey eFileIL explaining that the envelope was accepted. The email will include a link to a copy of your court forms with the clerk's stamp. Read this email closely. It might contain important information from the clerk.</li>
     <li>If there is something wrong with the filing, they will <strong>reject</strong> it. You should receive another email from Odyssey eFileIL with an explanation of what needs to be fixed.</li>
   </ul>
-  <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case.</p>
-  <p>Make sure you record how you delivered the Appearance to the other parties in the Proof of Delivery forms.</p>
+  <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case. Make sure you deliver the Appearance by the method, date, and time you listed in your Proof of Delivery.</p>
   <p><strong>Where to go for help</strong></p>
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
@@ -2223,11 +2222,15 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}, envelope {{ envelope_id }}.</strong></p>
 
-  <p><q>{{ status }}</q></p>
+  <hr>
 
-  <p>{{ message_text }}</p>
+  <p><q>Status: {{ status }}</q></p>
+
+  <p>Message through eFileIL: {{ message_text }}</p>
+  
+  <hr>
 
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
@@ -2254,11 +2257,15 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}, envelope {{ envelope_id }}</strong></p>
 
-  <p><q>{{ status }}</q></p>
+  <hr>
 
-  <p>{{ message_text }}</p>
+  <p><q>Status: {{ status }}</q></p>
+
+  <p>Message through eFileIL: {{ message_text }}</p>
+  
+  <hr>
 
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
@@ -2285,11 +2292,15 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
-  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}.</strong></p>
+  <p><strong>The Circuit Clerk of ${ trial_court } County has sent a response to your filing in {{ case_title }}, envelope {{ envelope_id }}</strong></p>
 
-  <p><q>{{ status }}</q></p>
+  <hr>
 
-  <p>{{ message_text }}</p>
+  <p><q>Status: {{ status }}</q></p>
+
+  <p>Message through eFileIL: {{ message_text }}</p>
+  
+  <hr>
 
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 

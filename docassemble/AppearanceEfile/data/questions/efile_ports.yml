@@ -68,7 +68,7 @@ subquestion: |
   You will need to ask the circuit clerk at ${ trial_court }
   which form to use and how to file it.
 
-  You can continue to download your forms and you can call the clerk at ${ trial_court.phone }.
+  You can continue to download your forms and you can call the circuit clerk at ${ trial_court.phone }.
 continue button field: warning_no_appearance_type
 ---
 code: |
@@ -245,7 +245,7 @@ code: |
 generic object: DAObject
 id: eserve
 question: |
-  Would you like to e-file this document, or serve to the desginated party?
+  Would you like to e-file this document, or serve to the designated party?
 fields:
   - Efile or serve?: x.filing_action
     choices:
@@ -290,7 +290,7 @@ subquestion: |
   
   % if ready_to_efile:
   Below is your ${comma_and_list(al_court_bundle.get_titles())} ${ noun_plural('form', al_court_bundle.get_titles()) } 
-  that we will deliver to the clerk of the ${trial_court}.
+  that we will deliver to the circuit clerk of the ${trial_court}.
 
   We will deliver it securely. Please allow up to 15 minutes for the filing to
   arrive. We will email you a confirmation that it was delivered and additional
@@ -302,10 +302,10 @@ subquestion: |
 
   Click **Send to court** to deliver it.
   
-  Here is what the clerk of the ${trial_court} will get:
+  Here is what the circuit clerk of the ${trial_court} will get:
   % else:
 
-  We ran into some technical problems and there was a problem delivering this to the ${trial_court} clerk.
+  We ran into some technical problems and there was a problem delivering this to the circuit clerk of the ${trial_court}.
   You can download the form below to print and submit.
 
   % endif
@@ -331,7 +331,7 @@ subquestion: |
   about your next steps. [**Mass Access at Suffolk University**](https://courtformsonline.org/) is our technology partner with this e-filing program.
   
   Within 15 minutes, you should receive confirmation emails from Odyssey eFileIL.
-  In the next 48 hours, you should receive an update from the clerk of the ${ trial_court } on your filing.
+  In the next 48 hours, you should receive an update from the circuit clerk of the ${ trial_court } on your filing.
 
   We recommend you download the forms for your own records.
   Click **Back to download screen** to get a copy of your forms and instructions.
