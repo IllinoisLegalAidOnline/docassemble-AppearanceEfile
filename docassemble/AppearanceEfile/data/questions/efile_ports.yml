@@ -583,6 +583,8 @@ code: |
     cross_references.new_item_name = next(iter(cross_ref_type_map))
     if cross_references.new_item_name == "136524" or cross_references.new_item_name == "134531":
       cross_references.new_item_value = "99500"
+    else:
+      del cross_references.new_item_name
 ---
 code: |
   if len(cross_ref_type_map) == 1:
@@ -602,7 +604,6 @@ fields:
     datatype: dropdown
     code: |
       sorted(x.filtered_filing_type_options, key=lambda y: y[1])
----
 ---
 ####################### Payments stuff
 id: new payment method

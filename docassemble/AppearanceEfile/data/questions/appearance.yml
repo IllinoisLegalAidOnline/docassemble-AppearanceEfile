@@ -175,7 +175,7 @@ code: |
     docket_number
 
   nav.set_section('review_IL_fee_waiver')
-  if user_wants_efile:
+  if user_wants_fee_waiver:
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
 
@@ -348,7 +348,7 @@ buttons:
   - Exit: exit
 ---
 id: kickout_self_reported_case_type
-event: kickout_self_reported_case_type
+continue button field: kickout_self_reported_case_type
 question: |
   You will not be able to e-file with this Easy Form
 subquestion: |
@@ -364,9 +364,10 @@ subquestion: |
   * Mental Health
   * A confidential case that is sealed or redacted
 
-  Try the the [Appearance Easy Form](https://www.illinoislegalaid.org/node/90166) to make the forms you need.
+  You can still make and download a completed Appearance, and file or e-file the form elsewhere.
+  Find a list of Electronic Filing Service Providers on the [**Illinois Courts' website**](https://www.illinoiscourts.gov/eservices/efileil/).
 
-  You can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
+  This Appearance form is not for use in criminal cases.
 buttons:
   - Exit: exit
 ---
@@ -403,13 +404,22 @@ code: |
 ---
 id: next-step-fee-waiver
 question: |
-  Next Step: Fee Waiver
+  Are you paying for the Appearance filing with a Fee Waiver?
 subquestion: |
-  To e-file with this program, you must file a Fee waiver.
-  The next screens will help you make a Fee waiver.
-continue button field: fee_waiver_introduction_screen
+  If you are paying for this appearance with a fee waiver,
+  the next screens will help you make a Fee waiver.
+
+  The circuit clerk charges filing fees for an Appearance and Jury demand. There may also be a payment processing fee.
+  The amount depends on the location and type of case. You can review the fees before e-filing.
+
+  If you cannot afford the fee, you may be eligible for a full or partial waiver.
+  This depends on your income and if you receive public benefits.
+  Read ILAO's article about [filing court papers for free](https://www.illinoislegalaid.org/node/32226).
+fields:
+  - Do you want to file a fee waiver?: user_wants_fee_waiver
+    datatype: yesnoradio
 ---
-if: user_wants_efile
+if: user_wants_fee_waiver
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = True
   IL_fee_waiver_attachment.enabled = True
@@ -420,7 +430,7 @@ code: |
   else:
     IL_fee_waiver_supplement.enabled = False
 ---
-if: not user_wants_efile
+if: not user_wants_fee_waiver
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = False
   IL_fee_waiver_attachment.enabled = False
@@ -745,25 +755,6 @@ content: |
   
   [FILE case_number_example.png, 100%, Summons form showing case number]
 ---
-if: not user_wants_efile
-id: trial by jury
-question: |
-  Who do you want to decide your case?
-subquestion: |
-  Jury trials are more complicated and can take more time than if the case is decided by the judge alone.
-
-  ${ collapse_template(jury_trial_help) }  
-
-  **Note:** You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial.
-
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
-field: trial_with
-choices:
-  - A judge: judge_only
-  - A judge and a 6-person jury: judge_and_6_jury
-  - A judge and a 12-person jury: judge_and_12_jury
----
-if: user_wants_efile
 id: trial by jury - already fee waiver
 question: |
   Who do you want to decide your case?
@@ -772,7 +763,7 @@ subquestion: |
 
   ${ collapse_template(jury_trial_help) }  
 
-  **Note:** You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial.
+  **Note:** You do not have a right to a jury trial in every case. If you aren't filing with a fee waiver, there can be an additional fee for a jury trial.
 
   To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
@@ -2215,7 +2206,11 @@ confirm: True
 ---
 template: email_confirmation
 subject: |
+  % if user_wants_fee_waiver:
   Important Appearance and Fee waiver e-filing information
+  % else:
+  Important Appearance e-filing information
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2224,7 +2219,11 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
+  % if user_wants_fee_waiver:
   <p><strong>Your Appearance and Fee Waiver forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  % else:
+  <p><strong>Your Appearance form was sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  % endif
   <p>A person in the clerk's office has to accept the forms before they are officially filed.</p>
   <p><strong>What's next?</strong></p>
   <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, {{ envelope_id }} which will be used to track your filing.</p>
