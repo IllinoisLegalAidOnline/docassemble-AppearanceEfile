@@ -13,8 +13,29 @@ code: |
   illinois_appearance_bundle.filing_action = 'efile'
   illinois_appearance_bundle.has_courtesy_copies = False
 ---
+id: filing description
+question: |
+  Is there anything you would like to tell the Clerk about your forms?
+subquestion: |
+  These comments will not appear on your court forms.
+
+  % if not filing_comment_datafield.get('isrequired'):
+  This is optional. You can click **Next** to skip.
+  % endif
+fields:
+  - label: |
+      Note to clerk
+      % if not filing_comment_datafield.get('isrequired'):
+      (optional)
+      % endif
+    field: illinois_appearance_bundle.filing_comment
+    datatype: text
+    maxlength: 50
+    required: |
+      filing_comment_datafield.get('isrequired', False)
+---
 code: |
-  # TODO(brycew): If there is a jury optional service, use It
+  # TODO(brycew): If there is a jury optional service, use it
   # otherwise, select the jury service
   illinois_appearance_bundle.filing_type_filters = [
     CodeType('142566'),
@@ -72,10 +93,15 @@ subquestion: |
 continue button field: warning_no_appearance_type
 ---
 code: |
-  if court_id == 'tazewell' or court_id == 'kane' or court_id == 'stephenson':
+  # courts that want jury demands to be done through optional service
+  courts_wanting_optserv = ['dekalb', 'mchenry', 'mclean', 'stclair', 'tazewell', 'will', 'stephenson', 'madison',
+    'champaign', 'dupage', 'kane', 'kankakee', 'lake', 'lasalle', 'lee', 'peoria', 'sangamon', 'vermillion', 'winnebago']
+---
+code: |
+  if court_id in courts_wanting_optserv:
     efile_case_category_name = case_category_map.get(efile_case_category, {}).get('name', '').lower().strip()
     if trial_with == "judge_and_6_jury":
-      if efile_case_category_name == "small claims" or efile_case_category == "117503":
+      if efile_case_category_name.startswith("small claims") or efile_case_category == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20774"),
@@ -107,7 +133,7 @@ code: |
         default_list = []
         filter_list = []
     elif trial_with == "judge_and_12_jury":
-      if efile_case_category_name == "small claims" or efile_case_category_name == "117503":
+      if efile_case_category_name.startswith("small claims") or efile_case_category_name == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20773"),
@@ -168,7 +194,7 @@ code: |
 ---
 code: |
   if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
-    if court_id != "tazewell" and court_id != "kane" and court_id != "stephenson":
+    if court_id not in courts_wanting_optserv:
       illinois_jury_demand_bundle.enabled = True
     else:
       illinois_jury_demand_bundle.enabled = False
@@ -391,16 +417,18 @@ fields:
     code: |
       all_case_parties
 ---
-id: are-you-using-fee-waiver
+id: do-you-want-efile
 question: |
-  Are you paying for the Appearance filing with a Fee waiver?
+  Do you want to e-file your forms directly with the court?
 subquestion: |
-  If you are paying for this appearance with a fee waiver, you can fill out and
-  electronically file (e-file) both forms at the same time in this program.
-  This means you don’t have to print out the forms. The court will communicate
-  with you by email. You will have to provide your email to e-file your Appearance and Fee waiver.
+  You can fill out your forms and electronically file (e-file) them at the same time with this program.
+  This means you don’t have to print out the forms.
+  
+  You will need an email address and an eFileIL account to e-file. This program can help you make an eFileIL account if needed.
+  
+  If you do not want to e-file your forms now, you can still use this program to make your forms.
 fields:
-  - Do you want to file a fee waiver?: user_wants_efile
+  - Do you want to e-file?: user_wants_efile
     datatype: yesnoradio
 ---
 id: eFile Login
@@ -541,7 +569,7 @@ code: |
   # DuPage's Attorney/Firm Number / SRL Number. The SRL number is 99500.
   if len(cross_ref_type_map) == 1:
     cross_references.new_item_name = next(iter(cross_ref_type_map))
-    if cross_references.new_item_name == "136524":
+    if cross_references.new_item_name == "136524" or cross_references.new_item_name == "134531":
       cross_references.new_item_value = "99500"
 ---
 code: |

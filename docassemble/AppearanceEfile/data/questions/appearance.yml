@@ -51,8 +51,8 @@ code: |
 sections:
   - start: Start
   - review_appearance: Appearance
-  - review_IL_fee_waiver: Fee waiver
-  - review_efiling: E-filing info
+  - review_IL_fee_waiver: Fee waiver (optional)
+  - review_efiling: E-filing info (optional)
   - download_and_efile: Download and e-file forms
 ---
 code: |
@@ -90,7 +90,8 @@ code: |
   how_to_use
   accept_terms
   lawsuit_information
-  if case_is_invalid_type:
+  if user_wants_efile and case_is_invalid_type:
+    can_check_efile = False
     kickout_self_reported_case_type
   if can_check_efile:
     tyler_login
@@ -150,7 +151,8 @@ code: |
     if person.knows_delivery_method:
       person.email_delivery
       person.delivery_date
-  hand_delivery_info
+  if not can_check_efile:
+    hand_delivery_info
   set_progress(75)
      
   users[0].address.address
@@ -177,48 +179,57 @@ code: |
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
 
-  if can_check_efile:
-    nav.set_section('review_efiling')
-    illinois_appearance_bundle.has_courtesy_copies = False
-    illinois_appearance_bundle.completed
-    illinois_jury_demand_bundle.has_courtesy_copies = False
-    illinois_jury_demand_bundle.completed
-    IL_fee_waiver_order.has_courtesy_copies = False
-    IL_fee_waiver_full_for_court.has_courtesy_copies = False
-    IL_fee_waiver_supplement.has_courtesy_copies = False
-    IL_fee_waiver_supplement.completed
-    IL_fee_waiver_full_for_court.completed
-    IL_fee_waiver_order.completed
-    tyler_payment_id = default_jurisdiction_waiver
-    all_required_screens_shown
-    ready_to_efile
-  else:
-    ready_to_efile = False
-
-  if ready_to_efile:
-    signature_choice = 'add name'
-    e_signature = True
-    # if e-filing, just use the e-signature to keep things simple
-    inform_of_efile_e_signature
-    # TODO(brycew): redo HTML emailing
-    email_confirmation_subject = email_confirmation.subject
-    email_confirmation_contents = email_confirmation.content
-    acceptance_subject = acceptance_email.subject
-    acceptance_contents = acceptance_email.content
-    rejected_subject = rejection_email.subject
-    rejected_contents = rejection_email.content
-    neutral_subject = neutral_email.subject
-    neutral_contents = neutral_email.content
-    # Don't show the review screen to the user before efiling
-    efile_user_reviewed = True
-  else:
-    e_signature
+  setup_esignature
   set_progress(100)
-  nav.set_section('download_and_efile')
   forms_assembling
   snapshot_forms
   get_docs_screen
+  if can_check_efile:
+    efile
   ending_screen
+---
+if: can_check_efile
+code: |
+  nav.set_section('review_efiling')
+  illinois_appearance_bundle.has_courtesy_copies = False
+  illinois_appearance_bundle.completed
+  illinois_jury_demand_bundle.has_courtesy_copies = False
+  illinois_jury_demand_bundle.completed
+  IL_fee_waiver_order.has_courtesy_copies = False
+  IL_fee_waiver_full_for_court.has_courtesy_copies = False
+  IL_fee_waiver_supplement.has_courtesy_copies = False
+  IL_fee_waiver_supplement.completed
+  IL_fee_waiver_full_for_court.completed
+  IL_fee_waiver_order.completed
+  nav.set_section('download_and_efile')
+  tyler_payment_id = default_jurisdiction_waiver
+  all_required_screens_shown
+  ready_to_efile_user_hook = True
+---
+if: can_check_efile
+id: setup esignature
+code: |
+  signature_choice = 'add name'
+  e_signature = True
+  # if e-filing, just use the e-signature to keep things simple
+  inform_of_efile_e_signature
+  # TODO(brycew): redo HTML emailing
+  email_confirmation_subject = email_confirmation.subject
+  email_confirmation_contents = email_confirmation.content
+  acceptance_subject = acceptance_email.subject
+  acceptance_contents = acceptance_email.content
+  rejected_subject = rejection_email.subject
+  rejected_contents = rejection_email.content
+  neutral_subject = neutral_email.subject
+  neutral_contents = neutral_email.content
+  # Don't show the review screen to the user before efiling
+  #efile_user_reviewed = True
+  setup_esignature = True
+---
+if: not can_check_efile
+code: |
+  e_signature
+  setup_esignature = True
 ---
 code: |
   stuff_to_snapshot = {
@@ -1087,6 +1098,7 @@ code: |
     if hasattr(x.lawyer.address, 'zip'):
       x.address.zip = x.lawyer.address.zip
 ---
+if: not can_check_efile
 id: knows delivery method
 generic object: ALIndividual
 question: |
@@ -1103,6 +1115,11 @@ field: x.knows_delivery_method
 choices:
   - Yes: True
   - No. I do not know this now. I will add it to my forms later.: False
+---
+generic object: ALIndividual
+if: can_check_efile
+code: |
+  x.knows_delivery_method = True
 ---
 template: delivery_method_help
 subject: |
@@ -1142,11 +1159,15 @@ question: |
   How will you send your forms to ${ x.name_full() }?
   % endif
 subquestion: |
+  % if can_check_efile:
   You must send your forms electronically (by email or through the e-filing system) if you and the person you are sending forms to have an email address. If you or the person you are sending to do not have an email address, or if you have permission from the judge, you may send forms by mail, through a delivery company, or by hand-delivery.
 
+  % endif
   For best results, complete the Proof of Delivery section and send the forms today.
 
+  % if not can_check_efile:
   **Note:** If you do not know this now, be sure to add it to the Proof of Delivery section of your forms later.
+  % endif
 
   ${ collapse_template(efiling_help) }  
 fields:
@@ -1156,7 +1177,7 @@ fields:
     datatype: email
     js show if: 
       val("x.email_delivery") == true
-    required: False
+    required: can_check_efile
   - E-filing system: x.efm_delivery
     datatype: yesnowide
     help: |
@@ -1265,7 +1286,12 @@ fields:
     js show if: 
       val("x.physical_delivery") == true && val("x.jail_delivery") == true
     required: False
+validation code: |
+  if can_check_efile:
+    if not (x.email_delivery or x.mail_delivery or x.hand_delivery):
+      validation_error(f"You need to say how you will deliver your forms")
 ---
+if: not can_check_efile
 id: delivery time
 generic object: ALIndividual
 question: |
@@ -1296,6 +1322,27 @@ validation code: |
   else:
     x.knows_delivery_time = True
 ---
+if: can_check_efile
+id: delivery time
+generic object: ALIndividual
+question: |
+  % if x.is_represented:
+  When will you send your ${ form_name } to ${ x.lawyer.name.full(middle="full") }?
+  % else:
+  When will you send your ${ form_name } to ${ x.name.full(middle="full") }?
+  % endif
+subquestion: |
+  If you do not know this now, take your best guess. Make sure to give yourself enough time to deliver your forms.
+fields:
+  - Date: x.delivery_date
+    datatype: date
+    min: ${ today().format("yyyy-MM-dd") }
+  - Time: x.delivery_time
+    datatype: time
+validation code: |
+  x.knows_delivery_time = True
+  x.knows_delivery_date = True
+---
 id: hand delivery info
 continue button field: hand_delivery_info
 #generic object: ALIndividual
@@ -1322,9 +1369,10 @@ subquestion: |
   
   [NEWLINE]
 ---
-if: ready_to_efile
+if: can_check_efile 
 id: get docs screen
-event: get_docs_screen
+continue button field: get_docs_screen
+continue button label: ":file-export: E-file your forms"
 question: |
   % if not (defined('efile') and efile):
   Download and e-file
@@ -1345,21 +1393,18 @@ subquestion: |
 
   ${ al_user_bundle.download_list_html() }
   % if not (defined('efile') and efile):
-  &nbsp;
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox = False)}
   
   ##### E-file
 
   Click **E-file your forms** to e-file your forms with the circuit clerk of the ${ trial_court }.
   
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-file your forms', icon='file-export', size="md", id_tag="efile")}
   % endif
-  &nbsp;
 
-  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-  &nbsp;
-  
-  Thank you for using ILAO Easy Forms!
 under: |
+  Thank you for using ILAO Easy Forms!
+
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif 
@@ -1367,7 +1412,7 @@ under: |
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
-if: not ready_to_efile
+if: not can_check_efile 
 id: get docs screen
 event: get_docs_screen
 question: |
@@ -1392,7 +1437,7 @@ subquestion: |
 under: |
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} **Sign-in**](${url_of('login', next=interview_url())}) or [**create**](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-  % endif 
+  % endif
 
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
@@ -1419,26 +1464,6 @@ under: |
 #  Thanks for using ILAO Easy Forms!
 #  
 #  [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
-#---
-#id: ending screen
-#event: ending_screen
-#question: |
-#  All done
-#subquestion: |
-#  Thank you for using ILAO Easy Forms!
-#  
-#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-##buttons:
-##  - Delete answers and restart: restart
-##  - Exit: exit
-#under: |
-#  % if not user_logged_in():
-#  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-#  % endif 
-#
-#  &nbsp;
-#  
-#  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 generic object: ALDocumentBundle
 template: x.send_email_template
@@ -1474,15 +1499,22 @@ code: |
 id: ending screen
 event: ending_screen
 question: |
-  All done
+  Download
 subquestion: |
-  Thank you for using ILAO Easy Forms!
+  View and download your forms below. Click **Make changes** to fix any mistakes.
+
+  **You need to deliver your Appearance to the other parties in your case.**
+
+  **Note:** You already e-filed your forms. Any changes you make will not appear in the e-filed forms.
   
-  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-#buttons:
-#  - Delete answers and restart: restart
-#  - Exit: exit
+  ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
+
+  ${ al_user_bundle.download_list_html() }
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 under: |
+  Thank you for using ILAO Easy Forms!
+
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif 
@@ -2071,8 +2103,12 @@ review:
   - note: |
       [**Review your Fee waiver answers**](${url_action('review_IL_fee_waiver')})
   - note: |
-      If you want to change the court or case you are filing into, you will have to
-      restart the interview from the beginning.
+      If you want to change:
+
+      * The county,
+      * The case you are filing into
+      
+      You will have to restart the interview from the beginning.
       
       ${ action_button_html(url_of('new_session'), label='Start again', color='warning', size='md') }
     show if: can_check_efile
