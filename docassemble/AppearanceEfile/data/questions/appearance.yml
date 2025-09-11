@@ -20,10 +20,10 @@ metadata:
 objects:
   - users: ALPeopleList.using(there_are_any=True)
   - users[i].lawyer: ALIndividual
-  - users[i].hand_delivery_address: ALAddress
+  - users[i].jail_delivery_address: ALAddress
   - other_parties: ALPeopleList.using(there_are_any=True)
   - other_parties[i].lawyer: ALIndividual
-  - other_parties[i].hand_delivery_address: ALAddress
+  - other_parties[i].jail_delivery_address: ALAddress
   - delivery_parties: ALPeopleList.using(there_are_any=True)
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
   - delivery_parties[i].lawyer: ALIndividual  
@@ -147,9 +147,8 @@ code: |
   for person in delivery_parties:
     if person.is_represented:
       person.lawyer.name.first
-    person.address.address
     if person.knows_delivery_method:
-      person.mail_delivery
+      person.email_delivery
       person.delivery_date
   hand_delivery_info
   set_progress(75)
@@ -888,7 +887,7 @@ subquestion: |
     <p>By signing your <i>Appearance</i> and <i>Jury Request</i> (if any) forms, you are certifying that:</p>
     <p><ul>
       <li>You read the documents,</li>
-      <li>You believe they are true and correct, and</li>
+      <li>You have been informed and believe they are true and correct, and</li>
       <li>You are not filing them to cause delay or for another bad reason.</li>
     </ul></p>
     <p>See the <a href="https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/9ce1fce9-895f-463e-b87d-f9b7631f8fde/Rule%20137.pdf"><b>Illinois Supreme Court Rule 137</b></a> for more information.</p>
@@ -917,7 +916,7 @@ subquestion: |
     <p>By signing your <i>Appearance</i> and <i>Jury Request</i> (if any) forms, you are certifying that:</p>
     <p><ul>
       <li>You read the documents,</li>
-      <li>You believe they are true and correct, and</li>
+      <li>You have been informed and believe they are true and correct, and</li>
       <li>You are not filing them to cause delay or for another bad reason.</li>
     </ul></p>
     <p>See the <a href="https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/9ce1fce9-895f-463e-b87d-f9b7631f8fde/Rule%20137.pdf"><b>Illinois Supreme Court Rule 137</b></a> for more information.</p>
@@ -943,7 +942,7 @@ subquestion: |
   These are the other parties in this case: ${delivery_parties.full_names()}.
 
   You must send a copy of your ${ form_name } to each of them.
-  If someone in the case has a lawyer, you must send it to the lawyer.
+  If someone in the case has a lawyer, you must send the forms to the lawyer.
 
   % if can_check_efile and case_search.found_case.attorneys:
   % if len(lawyered_parties) > 1:
@@ -982,15 +981,11 @@ id: add lawyer
 generic object: ALIndividual
 question: |
   Who is  ${ x.name_full() }'s lawyer?
+subquestion: |
+  If the court papers list a law firm instead of a person's name, select **Business or organization** and enter the law firm name. Otherwise, select **Person** and enter the name of the lawyer.
 fields:
-  - First name: x.lawyer.name.first
-  - Middle name: x.lawyer.name.middle
-    required: False
-  - Last name: x.lawyer.name.last
-  - Suffix: x.lawyer.name.suffix
-    code: |
-      name_suffix()
-    required: False  
+  - code: |
+      x.lawyer.name_fields(person_or_business='unsure')
 ---
 generic object: ALIndividual
 code: |
@@ -1096,12 +1091,12 @@ subject: |
 content: |  
   You can deliver the forms by:
   
-  * The court's **{e-filing system}**,
   * Email,
+  * The court's **{e-filing system}**,
   * US mail or a delivery company (like UPS or FedEx), or
   * Hand delivery to the party, the party's family member over 13 at their residence, the party's lawyer, or their lawyer's office.
 
-  If the other party listed an email address on the court documents, you must send the forms to them by email or through the e-filing system. You may use US mail or a delivery company, or hand delivery if you or the other party **does not** have an email address.
+  You must send your forms electronically (by email or through the e-filing system) if you and the person you are sending forms to have an email address. If you or the person you are sending to do not have an email address, or if you have permission from the judge, you may send forms by mail, through a delivery company, or by hand-delivery.
   
   If you are in a prison or jail, you can deliver by mail.
 terms:
@@ -1109,119 +1104,26 @@ terms:
       The court's e-filing system could be any approved electronic filing service provider (EFSP).
       **Note:** This Easy Form does not currently handle delivery through the e-filing system.
 ---
-id: user party delivery method
-#changed from generic object to users to allow for changing answers via Back
-#generic object: ALIndividual
-question: |
-  % if users[i].is_represented:
-  How will you send your ${ form_name } to ${ users[i].lawyer.name_full() }?
-  % else:
-  How will you send your ${ form_name } to ${ users[i].name_full() }?
-  % endif
-subquestion: |  
-  If the other party listed an email address on the court documents, you must send the forms to them by email or through the e-filing system. You may use US mail or a delivery company, or hand delivery if you or the other party **does not** have an email address. If you are in a prison or jail, you can deliver by mail.
-
-  For best results, complete the Proof of Delivery section and send the forms today.
-
-  **Note:** If you do not know this now, be sure to add it to the Proof of Delivery section of your forms later.
-
-  ${ collapse_template(efiling_help) }
-fields:
-  - E-filing system: users[i].efm_delivery
-    datatype: yesnowide
-    help: |
-      The court's e-filing system could be any approved electronic filing service provider (EFSP).
-    show if:
-      code: |
-        not can_check_efile
-  - Email: users[i].email_delivery
-    datatype: yesnowide
-  - Email address (for e-filing system or email delivery): users[i].delivery_email
-    datatype: email
-    js show if: 
-      val("users[i].efm_delivery") == true || val("users[i].email_delivery") == true
-    required: False
-  - US mail or delivery company (like UPS or FedEx): users[i].mail_delivery
-    datatype: yesnowide
-  - Address or intersection of mailbox or delivery company: users[i].delivery_mail_address
-    maxlength: 40
-    show if: 
-      variable: users[i].mail_delivery
-      is: True
-    required: False
-  - City of mailbox or delivery company: users[i].delivery_mail_city
-    maxlength: 30
-    show if: 
-      variable: users[i].mail_delivery
-      is: True
-    required: False
-  - State of mailbox or delivery company: users[i].delivery_mail_state
-    code: |
-      states_list()
-    default: IL
-    show if: 
-      variable: users[i].mail_delivery
-      is: True
-    required: False
-  - Hand delivery: users[i].hand_delivery
-    datatype: yesnowide
-    help: |
-      You can only deliver to the party, the party's family member over 13 at their residence, the party's lawyer, or their lawyer's office.
-  - Street address: users[i].hand_delivery_address.address
-    address autocomplete: True
-    show if: 
-      variable: users[i].hand_delivery
-      is: True
-    required: False
-  - Address line 2: users[i].hand_delivery_address.unit
-    show if: 
-      variable: users[i].hand_delivery
-      is: True
-    required: False
-  - City: users[i].hand_delivery_address.city
-    show if: 
-      variable: users[i].hand_delivery
-      is: True
-    required: False
-  - State: users[i].hand_delivery_address.state
-    code: |
-      states_list()
-    default: IL      
-    show if: 
-      variable: users[i].hand_delivery
-      is: True
-    required: False
-  - ZIP code: users[i].hand_delivery_address.zip
-    show if: 
-      variable: users[i].hand_delivery
-      is: True
-    required: False
-  - By mail from a prison or jail: users[i].jail_delivery
-    datatype: yesnowide
-  - Name of prison or jail: users[i].delivery_jail_name
-    maxlength: 40
-    show if: 
-      variable: users[i].jail_delivery
-      is: True
-    required: False
----
 template: efiling_help
 subject: |
-  **What if I need help?**
+  **What if I need help sending my forms electronically?**
 content: |  
-  If you need help delivering by email or using the e-filing service provider, you can visit a [**Legal Self-Help Center**](https://www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call or text [**Illinois Court Help**](https://www.ilcourthelp.gov) at 833-411-1121.
+  If you need help delivering by email or using the e-filing system, you can visit a [**Legal Self-Help Center**](https://www.illinoislegalaid.org/get-legal-help/lshc-directory) or you can call, chat, or text a Court Guide at [**Illinois Court Help**](https://www.ilcourthelp.gov) or 833-411-1121.
 ---
-id: other party delivery method
-# generic object: ALIndividual
-#changed from generic object to other_parties to allow for changing answers via Back
+id: all party delivery method
+sets:
+  - x.email_delivery
+  - x.efm_delivery
+  - x.physical_delivery
+generic object: ALIndividual
 question: |
-  % if other_parties[i].is_represented:
-  How will you send your ${ form_name } to ${ other_parties[i].lawyer.name_full() }?
+  % if x.is_represented:
+  How will you send your forms to ${ x.lawyer.name_full() }?
   % else:
-  How will you send your ${ form_name } to ${ other_parties[i].name_full() }?
+  How will you send your forms to ${ x.name_full() }?
   % endif
-subquestion: |  
-  If the other party listed an email address on the court documents, you must send the forms to them by email or through the e-filing system. You may use US mail or a delivery company, or hand delivery if you or the other party **does not** have an email address. If you are in a prison or jail, you can deliver by mail.
+subquestion: |
+  You must send your forms electronically (by email or through the e-filing system) if you and the person you are sending forms to have an email address. If you or the person you are sending to do not have an email address, or if you have permission from the judge, you may send forms by mail, through a delivery company, or by hand-delivery.
 
   For best results, complete the Proof of Delivery section and send the forms today.
 
@@ -1229,83 +1131,121 @@ subquestion: |
 
   ${ collapse_template(efiling_help) }  
 fields:
-  - E-filing system: other_parties[i].efm_delivery
+  - Email: x.email_delivery
+    datatype: yesnowide
+  - Email address (for direct email delivery): x.delivery_email
+    datatype: email
+    js show if: 
+      val("x.email_delivery") == true
+    required: False
+  - E-filing system: x.efm_delivery
     datatype: yesnowide
     help: |
       The court's e-filing system could be any approved electronic filing service provider (EFSP).
-    show if:
-      code: |
-        not can_check_efile
-  - Email: other_parties[i].email_delivery
-    datatype: yesnowide
-  - Email address (for e-filing system or email delivery): other_parties[i].delivery_email
+  - Email address (for delivery thru the e-filing system): x.delivery_efsp_email
     datatype: email
     js show if: 
-      val("other_parties[i].efm_delivery") == true || val("other_parties[i].email_delivery") == true
+      val("x.efm_delivery") == true
     required: False
-  - US mail or delivery company (like UPS or FedEx): other_parties[i].mail_delivery
+  - "US mail, a delivery company (like UPS or FedEX), or in-person by hand-delivery": x.physical_delivery
     datatype: yesnowide
-  - Address or intersection of mailbox or delivery company: other_parties[i].delivery_mail_address
-    maxlength: 40
-    show if: 
-      variable: other_parties[i].mail_delivery
-      is: True
-    required: False
-  - City of mailbox or delivery company: other_parties[i].delivery_mail_city
-    maxlength: 30
-    show if: 
-      variable: other_parties[i].mail_delivery
-      is: True
-    required: False
-  - State of mailbox or delivery company: other_parties[i].delivery_mail_state
-    code: |
-      states_list()
-    default: IL
-    show if: 
-      variable: other_parties[i].mail_delivery
-      is: True
-    required: False
-  - Hand delivery: other_parties[i].hand_delivery
-    datatype: yesnowide
-    help: |
-      You can only deliver to the party, the party's family member over 13 at their residence, the party's lawyer, or their lawyer's office.
-  - Street address: other_parties[i].hand_delivery_address.address
+  - note: |
+      Where will you deliver the paper forms to?
+    js show if: 
+      val("x.physical_delivery") == true
+  - Street address: x.address.address
     address autocomplete: True
-    show if: 
-      variable: other_parties[i].hand_delivery
-      is: True
+    js show if: 
+      val("x.physical_delivery") == true
     required: False
-  - Address line 2: other_parties[i].hand_delivery_address.unit
-    show if: 
-      variable: other_parties[i].hand_delivery
-      is: True
+  - Address line 2: x.address.unit
+    js show if: 
+      val("x.physical_delivery") == true
     required: False
-  - City: other_parties[i].hand_delivery_address.city
-    show if: 
-      variable: other_parties[i].hand_delivery
-      is: True
+  - City: x.address.city
+    js show if: 
+      val("x.physical_delivery") == true
     required: False
-  - State: other_parties[i].hand_delivery_address.state
+  - State: x.address.state
     code: |
       states_list()
     default: IL      
-    show if: 
-      variable: other_parties[i].hand_delivery
-      is: True
+    js show if: 
+      val("x.physical_delivery") == true
     required: False
-  - ZIP code: other_parties[i].hand_delivery_address.zip
-    show if: 
-      variable: other_parties[i].hand_delivery
-      is: True
+  - ZIP code: x.address.zip
+    js show if: 
+      val("x.physical_delivery") == true
     required: False
-  - By mail from a prison or jail: other_parties[i].jail_delivery
+  - note: |
+      How will you deliver the paper forms? **Choose an option below.**  
+    js show if: 
+      val("x.physical_delivery") == true
+  - I will send by **US mail or a delivery company** (like UPS or FedEx).: x.mail_delivery
     datatype: yesnowide
-  - Name of prison or jail: other_parties[i].delivery_jail_name
+    js show if:
+      val("x.physical_delivery") == true
+    required: False
+  - Address or intersection of mailbox or delivery company: x.delivery_mail_address
     maxlength: 40
-    show if: 
-      variable: other_parties[i].jail_delivery
-      is: True
-    required: False  
+    js show if: 
+      val("x.physical_delivery") == true && val("x.mail_delivery") == true
+    required: False
+  - City of mailbox or delivery company: x.delivery_mail_city
+    maxlength: 30
+    js show if: 
+      val("x.physical_delivery") == true && val("x.mail_delivery") == true
+    required: False
+  - State of mailbox or delivery company: x.delivery_mail_state
+    code: |
+      states_list()
+    default: IL
+    js show if: 
+      val("x.physical_delivery") == true && val("x.mail_delivery") == true
+    required: False
+  - "I will **hand-deliver** paper forms. **Note:** You can only deliver to the party, the party's family member over 13 at their residence, the party's lawyer, or their lawyer's office.": x.hand_delivery
+    datatype: yesnowide
+    js show if: 
+      val("x.physical_delivery") == true      
+    required: False
+  - I will send the forms by mail from a **prison or jail**.: x.jail_delivery
+    datatype: yesnowide
+    js show if: 
+      val("x.physical_delivery") == true
+    required: False
+  - note: |
+      Enter prison or jail information
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+  - Name of prison or jail: x.delivery_jail_name
+    maxlength: 40
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+    required: False
+  - Street address: x.jail_delivery_address.address
+    address autocomplete: True
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+    required: False
+  - Address line 2: x.jail_delivery_address.unit
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+    required: False
+  - City: x.jail_delivery_address.city
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+    required: False
+  - State: x.jail_delivery_address.state
+    code: |
+      states_list()
+    default: IL      
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+    required: False
+  - ZIP code: x.jail_delivery_address.zip
+    js show if: 
+      val("x.physical_delivery") == true && val("x.jail_delivery") == true
+    required: False
 ---
 id: delivery time
 generic object: ALIndividual
@@ -1345,7 +1285,7 @@ question: |
 subquestion: |
   **Don't forget!** Make sure you review and complete the Proof of Delivery section of your forms. 
   
-  [FILE proof_of_delivery_snip_2025.png, 100%, Proof of Delivery section of forms]
+  [FILE proof_of_delivery_snip_sep_2025.png, 100%, Proof of Delivery section of forms]
 
   **Instructions when delivering your forms by hand:**
 
@@ -1545,6 +1485,7 @@ objects:
 objects:
   - additional_delivery_bundle: ALDocumentBundle.using(elements=[], title= "Additional Proof of Delivery", filename="additional_proof_of_delivery.pdf", has_addendum=False)
 ---
+# updated for Sep 2025 forms
 reconsider: True
 code: |
   #deliveries_to_bundle will be used as the elements for the additional_delivery_bundle object created in the above block. This is its initial definition for the Appearance.
@@ -1553,23 +1494,15 @@ code: |
 
   #enumerate allows us to reference the index in a for loop. This for loop appends each additional proof template to the deliveries_to_bundle object and sets the enabled trait for those templates.
   for index, party in enumerate(delivery_parties):
-    #If the index is 0 or 1, the party is included on the motion and notice forms, and thus does not need to be added to additional proof of delivery
-    if index == 0 or index == 1:
+    #If the index is 0, the party is included on the main form, and thus does not need to be added to additional proof of delivery
+    if index == 0:
       party.additional_proof.enabled = False
-    #Because the additional delivery form can list two parties, we don't need a form for each delivery party beyond the first two. Instead, we only append party.additional_proof if party's index is an even number, as a party with an odd number will be included on the previous party.additional_proof
-    elif (index % 2) == 0:
+    #Sep 2025 update: Any index > 0 must go to an additional proof of delivery form
+    elif index > 0:
       party.additional_proof.enabled = True
       additional_delivery_bundle.enabled = True
-      #We only need to append the party.additional proof objects that we include.
       deliveries_to_bundle.append(party.additional_proof)
-      #This if statement prevents an out of index range error. If we created the party.second_person without it, an out of index range would occur if party is the last entry in the delivery_parties list.
-      if (index + 1) < delivery_parties.number_gathered():
-        #This line creates an object associated with party that points to the item immediately after party in delivery_parties. Why? So we can refer to it in the party.additional_delivery attachment block even though there we can't refer to the index as we do in this for loop.
-        party.second_person = delivery_parties[index + 1]
-    #This else statement should catch all parties with an index divisible by 2, excluding index 0.
-    else:
-      party.additional_proof.enabled = False
- 
+
   additional_delivery_bundle.elements = deliveries_to_bundle
   refresh_delivery_bundle = True
 
@@ -1663,12 +1596,8 @@ attachment:
           
       - "user_first": ${ users[0].name.first }
       - "user_middle": ${ users[0].name.middle }
-      - "user_last": |
-          % if users[0].name.suffix == "":
-          ${ users[0].name.last }
-          % else:
-          ${ users[0].name.last }, ${ users[0].name.suffix }
-          % endif
+      - "user_last": ${ users[0].name.last }
+        # Note: e-filing version of program does not include suffix since it is pulled from EFM
 
       - "user__2": ${ users[0].name_full() }
       - "user__3": ${ users[0].name_full() }
@@ -1705,17 +1634,17 @@ attachment:
           % endif
       - "delivery_party1_mail_address_on_one_line": ${ delivery_parties[0].address.on_one_line(bare=True) }
       - "delivery_party1_email": ${ delivery_parties[0].delivery_email if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_hand_yes": ${ delivery_parties[0].hand_delivery if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_mail_yes": ${ delivery_parties[0].mail_delivery if delivery_parties[0].knows_delivery_method else '' }
+      - "delivery_party1_email_efsp": ${ delivery_parties[0].delivery_efsp_email if delivery_parties[0].knows_delivery_method else '' }
+      - "is_delivery_party1_hand_yes": ${ delivery_parties[0].hand_delivery if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery else '' }
+      - "is_delivery_party1_mail_yes": ${ delivery_parties[0].mail_delivery if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery else '' }
       - "is_delivery_party1_efm_yes": ${ delivery_parties[0].efm_delivery if delivery_parties[0].knows_delivery_method else '' }
       - "is_delivery_party1_email_yes": ${ delivery_parties[0].email_delivery if delivery_parties[0].knows_delivery_method else '' }
       - "delivery_party1_date": ${ delivery_parties[0].delivery_date if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_date else '' }
       - "delivery_party1_time": ${ format_time(delivery_parties[0].delivery_time, format='h:mm a') if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_time else '' }
       
-      - "is_delivery_party1_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].efm_delivery or delivery_parties[0].email_delivery ) else '' }
-      - "is_delivery_party1_not_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].mail_delivery or delivery_parties[0].hand_delivery or delivery_parties[0].jail_delivery ) else '' }
+      - "is_delivery_party1_not_electronic": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery else '' }
       - "delivery_party1_mail_location": |
-          % if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery:
+          % if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery and delivery_parties[0].mail_delivery:
           % if delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "" and delivery_parties[0].delivery_mail_state != "":
           ${delivery_parties[0].delivery_mail_address }, ${delivery_parties[0].delivery_mail_city}, ${ state_name(delivery_parties[0].delivery_mail_state) }
           % elif delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "":
@@ -1734,55 +1663,24 @@ attachment:
           % else:
           ${ "" }
           % endif
-      - "delivery_party1_hand_address": ${ delivery_parties[0].hand_delivery_address.on_one_line(bare=True) if delivery_parties[0].knows_delivery_method and delivery_parties[0].hand_delivery else '' }
-      - "is_delivery_party1_jail_yes": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].jail_delivery else '' }
-      - "delivery_party1_jail_name": ${ delivery_parties[0].delivery_jail_name if delivery_parties[0].knows_delivery_method and delivery_parties[0].jail_delivery else '' }
-      - "is_delivery_party1_end": ${ delivery_parties.number() == 1 }
-      - "is_delivery_party2": ${ delivery_parties.number() > 1 }
+      - "is_delivery_party1_jail_yes": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery and delivery_parties[0].jail_delivery else '' }
+      - "delivery_party1_jail_name": |
+          % if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery and delivery_parties[0].jail_delivery:
+          % if delivery_parties[0].delivery_jail_name != "" and delivery_parties[0].jail_delivery_address.address != "" and delivery_parties[0].jail_delivery_address.city != "" and delivery_parties[0].jail_delivery_address.state != "":
+          ${ delivery_parties[0].delivery_jail_name }, ${ delivery_parties[0].jail_delivery_address.on_one_line(bare=True)}
+          % elif delivery_parties[0].delivery_jail_name == "":
+          ${ delivery_parties[0].jail_delivery_address.on_one_line(bare=True)}
+          % else:
+          ${ delivery_parties[0].delivery_jail_name }
+          % endif
+          % else:
+          ${""}
+          % endif
+      - "myself": ${True}
+      - "for_self": ${True}
+      - "for_self_2": ${True}
 
-      - "delivery_party2_name_full": | 
-          % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name_full() } (lawyer for ${ delivery_parties[1].name_full() })
-          % else:
-          ${ delivery_parties[1].name_full() }
-          % endif
-      - "delivery_party2_mail_address_on_one_line": ${ delivery_parties[1].address.on_one_line(bare=True) }
-      - "delivery_party2_email": ${ delivery_parties[1].delivery_email if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_hand_yes": ${ delivery_parties[1].hand_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_mail_yes": ${ delivery_parties[1].mail_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_efm_yes": ${ delivery_parties[1].efm_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_email_yes": ${ delivery_parties[1].email_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "delivery_party2_date": ${ delivery_parties[1].delivery_date if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_date else '' }
-      - "delivery_party2_time": ${ format_time(delivery_parties[1].delivery_time, format='h:mm a') if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_time else '' }
-      
-      - "is_delivery_party2_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].efm_delivery or delivery_parties[1].email_delivery ) else '' }
-      - "is_delivery_party2_not_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].mail_delivery or delivery_parties[1].hand_delivery or delivery_parties[1].jail_delivery ) else '' }
-      - "delivery_party2_mail_location": |
-          % if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery:
-          % if delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
-          ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
-          % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "":
-          ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}
-          % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_state != "":
-          ${delivery_parties[1].delivery_mail_address }, ${ state_name(delivery_parties[1].delivery_mail_state) }
-          % elif delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
-          ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
-          % elif delivery_parties[1].delivery_mail_address != "":
-          ${delivery_parties[1].delivery_mail_address}
-          % elif delivery_parties[1].delivery_mail_city != "":
-          ${delivery_parties[1].delivery_mail_city}
-          % else:
-          ${state_name(delivery_parties[1].delivery_mail_state)}
-          % endif
-          % else:
-          ${ "" }
-          % endif
-        
-      - "delivery_party2_hand_address": ${ delivery_parties[1].hand_delivery_address.on_one_line(bare=True) if delivery_parties[1].knows_delivery_method and delivery_parties[1].hand_delivery else '' }
-      - "is_delivery_party2_jail_yes": ${ True if delivery_parties[1].knows_delivery_method and delivery_parties[1].jail_delivery else '' }
-      - "delivery_party2_jail_name": ${ delivery_parties[1].delivery_jail_name if delivery_parties[1].knows_delivery_method and delivery_parties[1].jail_delivery else '' }
-
-      - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 2 }
+      - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 1 }
 ---
 generic object: ALIndividual
 attachment:
@@ -1793,113 +1691,12 @@ attachment:
   editable: False
   pdf template file: additional_proof_of_delivery.pdf
   fields:
-      - "user__1": ${ users[0].name_full() }
-      - "user_mail_address_one_line__1": ${ users[0].address.on_one_line(bare=True) }
-      - "user_phone_number__1": ${ phone_number_formatted(users[0].phone_number) }
-      - "user_email": ${ users[0].email if users[0].has_email_address else '' }
-      - "case_number__1": ${ case_number }
-      - "e_sign_name__1": ${ users[0].name_full() if e_signature else '' }
-
-      - "delivery_party1_name_full": | 
-          % if x.is_represented:
-          ${ x.lawyer.name_full() } (lawyer for ${ x.name_full() })
-          % else:
-          ${ x.name_full() }
-          % endif
-      - "delivery_party1_mail_address_on_one_line": ${ x.address.on_one_line(bare=True) }
-      - "delivery_party1_email": ${ x.delivery_email if x.knows_delivery_method else '' }
-      - "is_delivery_party1_hand_yes": ${ x.hand_delivery if x.knows_delivery_method else '' }
-      - "is_delivery_party1_mail_yes": ${ x.mail_delivery if x.knows_delivery_method else '' }
-      - "is_delivery_party1_efm_yes": ${ x.efm_delivery if x.knows_delivery_method else '' }
-      - "is_delivery_party1_email_yes": ${ x.email_delivery if x.knows_delivery_method else '' }
-      - "delivery_party1_date": ${ x.delivery_date if x.knows_delivery_method and x.knows_delivery_date else '' }
-      - "delivery_party1_time": ${ format_time(x.delivery_time, format='h:mm a') if x.knows_delivery_method and x.knows_delivery_time else '' }
-      
-      - "is_delivery_party1_electronic": ${ True if x.knows_delivery_method and ( x.efm_delivery or x.email_delivery ) else '' }
-      - "is_delivery_party1_not_electronic": ${ True if x.knows_delivery_method and ( x.mail_delivery or x.hand_delivery or x.jail_delivery ) else '' }
-      - "delivery_party1_mail_location": |
-          % if x.knows_delivery_method and x.mail_delivery:
-          % if x.delivery_mail_address != "" and x.delivery_mail_city != "" and x.delivery_mail_state != "":
-          ${x.delivery_mail_address }, ${x.delivery_mail_city}, ${ state_name(x.delivery_mail_state) }
-          % elif x.delivery_mail_address != "" and x.delivery_mail_city != "":
-          ${x.delivery_mail_address }, ${x.delivery_mail_city}
-          % elif x.delivery_mail_address != "" and x.delivery_mail_state != "":
-          ${x.delivery_mail_address }, ${ state_name(x.delivery_mail_state) }
-          % elif x.delivery_mail_city != "" and x.delivery_mail_state != "":
-          ${x.delivery_mail_city}, ${ state_name(x.delivery_mail_state) }
-          % elif x.delivery_mail_address != "":
-          ${x.delivery_mail_address}
-          % elif x.delivery_mail_city != "":
-          ${x.delivery_mail_city}
-          % else:
-          ${state_name(x.delivery_mail_state)}
-          % endif
-          % else:
-          ${ "" }
-          % endif
-        
-      - "delivery_party1_hand_address": ${ x.hand_delivery_address.on_one_line(bare=True) if x.knows_delivery_method and x.hand_delivery else '' }
-      - "is_delivery_party1_jail_yes": ${ True if x.knows_delivery_method and x.jail_delivery else '' }
-      - "delivery_party1_jail_name": ${ x.delivery_jail_name if x.knows_delivery_method and x.jail_delivery else '' }
-      - "is_delivery_party1_end": ${ (delivery_parties.index(x) + 1) == delivery_parties.number() } # true if this is the last delivery party
-      - "is_delivery_party2": ${ (delivery_parties.index(x) + 1) < delivery_parties.number() } # true if there are more delivery parties
-
-      - "delivery_party2_name_full": | 
-          % if x.second_person.is_represented:
-          ${ x.second_person.lawyer.name_full() } (lawyer for ${ x.second_person.name_full() })
-          % else:
-          ${ x.second_person.name_full() }
-          % endif
-      - "delivery_party2_mail_address_on_one_line": ${ x.second_person.address.on_one_line(bare=True) }
-      - "delivery_party2_email": ${ x.second_person.delivery_email if x.second_person.knows_delivery_method else '' }
-      - "is_delivery_party2_hand_yes": ${ x.second_person.hand_delivery if x.second_person.knows_delivery_method else '' }
-      - "is_delivery_party2_mail_yes": ${ x.second_person.mail_delivery if x.second_person.knows_delivery_method else '' }
-      - "is_delivery_party2_efm_yes": ${ x.second_person.efm_delivery if x.second_person.knows_delivery_method else '' }
-      - "is_delivery_party2_email_yes": ${ x.second_person.email_delivery if x.second_person.knows_delivery_method else '' }
-      - "delivery_party2_date": ${ x.second_person.delivery_date if x.second_person.knows_delivery_method and x.second_person.knows_delivery_date else '' }
-      - "delivery_party2_time": ${ format_time(x.second_person.delivery_time, format='h:mm a') if x.second_person.knows_delivery_method and x.second_person.knows_delivery_time else '' }
-      
-      - "is_delivery_party2_electronic": ${ True if x.second_person.knows_delivery_method and ( x.second_person.efm_delivery or x.second_person.email_delivery ) else '' }
-      - "is_delivery_party2_not_electronic": ${ True if x.second_person.knows_delivery_method and ( x.second_person.mail_delivery or x.second_person.hand_delivery or x.second_person.jail_delivery ) else '' }
-      - "delivery_party2_mail_location": |
-          % if x.second_person.knows_delivery_method and x.second_person.mail_delivery:
-          % if x.second_person.delivery_mail_address != "" and x.second_person.delivery_mail_city != "" and x.second_person.delivery_mail_state != "":
-          ${x.second_person.delivery_mail_address }, ${x.second_person.delivery_mail_city}, ${ state_name(x.second_person.delivery_mail_state) }
-          % elif x.second_person.delivery_mail_address != "" and x.second_person.delivery_mail_city != "":
-          ${x.second_person.delivery_mail_address }, ${x.second_person.delivery_mail_city}
-          % elif x.second_person.delivery_mail_address != "" and x.second_person.delivery_mail_state != "":
-          ${x.second_person.delivery_mail_address }, ${ state_name(x.second_person.delivery_mail_state) }
-          % elif x.second_person.delivery_mail_city != "" and x.second_person.delivery_mail_state != "":
-          ${x.second_person.delivery_mail_city}, ${ state_name(x.second_person.delivery_mail_state) }
-          % elif x.second_person.delivery_mail_address != "":
-          ${x.second_person.delivery_mail_address}
-          % elif x.second_person.delivery_mail_city != "":
-          ${x.second_person.delivery_mail_city}
-          % else:
-          ${state_name(x.second_person.delivery_mail_state)}
-          % endif
-          % else:
-          ${ "" }
-          % endif
-      
-      - "delivery_party2_hand_address": ${ x.second_person.hand_delivery_address.on_one_line(bare=True) if x.second_person.knows_delivery_method and x.second_person.hand_delivery else '' }
-      - "is_delivery_party2_jail_yes": ${ True if x.second_person.knows_delivery_method and x.second_person.jail_delivery else '' }
-      - "delivery_party2_jail_name": ${ x.second_person.delivery_jail_name if x.second_person.knows_delivery_method and x.second_person.jail_delivery else '' }
----
-attachment:
-  variable name: jury_request[i]
-  name: jury_request
-  filename: jury_request
-  skip undefined: True
-  editable: False
-  pdf template file: jury_request.pdf
-  fields:
       - "trial_court_county": ${ trial_court.address.county }
       - "plaintiffs": |
           % if in_re_check:
           ${ in_re_label }
           % else:
-          % if user_started_case:
+          % if user_ask_role == 'plaintiff':
           % if users.number() > 1:
           ${ users[0].name_full() }, et al.
           % else:
@@ -1918,13 +1715,119 @@ attachment:
           % if in_re_check:
           ${ "" }
           % else:
-          % if user_started_case:
+          % if user_ask_role == 'plaintiff':
+          ${ other_parties.full_names() } 
+          % else:
+          ${ users.full_names() }
+          % endif
+          % endif      
+      - "user__1": ${ users[0].name_full() }
+      - "user__2": ${ users[0].name_full() }
+      - "user_mail_address_one_line__1": ${ users[0].address.on_one_line(bare=True) }
+      - "user_phone_number__1": ${ phone_number_formatted(users[0].phone_number) }
+      - "user_email": ${ users[0].email if users[0].has_email_address else '' }
+      - "case_number__1": ${ case_number }
+      - "case_number__2": ${ case_number }
+      - "e_sign_name__1": ${ users[0].name_full() if e_signature else '' }
+      - "for_self": ${True}
+      - "document_name": |
+          % if trial_with == "Judge only":
+          ${"Appearance"}
+          % else:
+          ${"Appearance and Jury Request"}
+          % endif
+
+      - "delivery_party1_name_full": | 
+          % if x.is_represented:
+          ${ x.lawyer.name_full() } (lawyer for ${ x.name_full() })
+          % else:
+          ${ x.name_full() }
+          % endif
+      - "delivery_party1_mail_address_on_one_line": ${ x.address.on_one_line(bare=True) }
+      - "delivery_party1_email": ${ x.delivery_email if x.knows_delivery_method else '' }
+      - "delivery_party1_email_efsp": ${ x.delivery_efsp_email if x.knows_delivery_method else '' }
+      - "is_delivery_party1_hand_yes": ${ x.hand_delivery if x.knows_delivery_method and x.physical_delivery else '' }
+      - "is_delivery_party1_mail_yes": ${ x.mail_delivery if x.knows_delivery_method and x.physical_delivery else '' }
+      - "is_delivery_party1_efm_yes": ${ x.efm_delivery if x.knows_delivery_method else '' }
+      - "is_delivery_party1_email_yes": ${ x.email_delivery if x.knows_delivery_method else '' }
+      - "delivery_party1_date": ${ x.delivery_date if x.knows_delivery_method and x.knows_delivery_date else '' }
+      - "delivery_party1_time": ${ format_time(x.delivery_time, format='h:mm a') if x.knows_delivery_method and x.knows_delivery_time else '' }
+      
+      - "is_delivery_party1_not_electronic": ${ True if x.knows_delivery_method and x.physical_delivery else '' }
+      - "delivery_party1_mail_location": |
+          % if x.knows_delivery_method and x.physical_delivery and x.mail_delivery:
+          % if x.delivery_mail_address != "" and x.delivery_mail_city != "" and x.delivery_mail_state != "":
+          ${x.delivery_mail_address }, ${x.delivery_mail_city}, ${ state_name(x.delivery_mail_state) }
+          % elif x.delivery_mail_address != "" and x.delivery_mail_city != "":
+          ${x.delivery_mail_address }, ${x.delivery_mail_city}
+          % elif x.delivery_mail_address != "" and x.delivery_mail_state != "":
+          ${x.delivery_mail_address }, ${ state_name(x.delivery_mail_state) }
+          % elif x.delivery_mail_city != "" and x.delivery_mail_state != "":
+          ${x.delivery_mail_city}, ${ state_name(x.delivery_mail_state) }
+          % elif x.delivery_mail_address != "":
+          ${x.delivery_mail_address}
+          % elif x.delivery_mail_city != "":
+          ${x.delivery_mail_city}
+          % else:
+          ${state_name(x.delivery_mail_state)}
+          % endif
+          % else:
+          ${ "" }
+          % endif
+      - "is_delivery_party1_jail_yes": ${ True if x.knows_delivery_method and x.physical_delivery and x.jail_delivery else '' }
+      - "delivery_party1_jail_name": |
+          % if x.knows_delivery_method and x.physical_delivery and x.jail_delivery:
+          % if x.delivery_jail_name != "" and x.jail_delivery_address.address != "" and x.jail_delivery_address.city != "" and x.jail_delivery_address.state != "":
+          ${ x.delivery_jail_name }, ${ x.jail_delivery_address.on_one_line(bare=True)}
+          % elif x.delivery_jail_name == "":
+          ${ x.jail_delivery_address.on_one_line(bare=True)}
+          % else:
+          ${ x.delivery_jail_name }
+          % endif
+          % else:
+          ${""}
+          % endif
+
+---
+attachment:
+  variable name: jury_request[i]
+  name: jury_request
+  filename: jury_request
+  skip undefined: True
+  editable: False
+  pdf template file: jury_request.pdf
+  fields:
+      - "trial_court_county": ${ trial_court.address.county }
+      - "plaintiffs": |
+          % if in_re_check:
+          ${ in_re_label }
+          % else:
+          % if user_ask_role == 'plaintiff':
+          % if users.number() > 1:
+          ${ users[0].name_full() }, et al.
+          % else:
+          ${ users[0].name_full() }
+          % endif
+          % else:
+          % if other_parties.number() > 1:
+          ${ other_parties[0].name_full() }, et al.
+          % else:
+          ${ other_parties[0].name_full() }
+          % endif
+          % endif
+          % endif
+      
+      - "defendants": |
+          % if in_re_check:
+          ${ "" }
+          % else:
+          % if user_ask_role == 'plaintiff':
           ${ other_parties.full_names() } 
           % else:
           ${ users.full_names() }
           % endif
           % endif
-          
+
       - "user__1": ${ users[0].name_full() }
       - "user__2": ${ users[0].name_full() }
       - "user__3": ${ users[0].name_full() }
@@ -1932,12 +1835,11 @@ attachment:
       - "user_mail_address_one_line__2": ${ users[0].address.on_one_line(bare=True) }
       - "user_phone_number__1": ${ phone_number_formatted(users[0].phone_number) }
       - "user_phone_number__2": ${ phone_number_formatted(users[0].phone_number) }
-      - "user_email": ${ users[0].email if users[0].email_notice else '' }
-      - "user_email__2": ${ users[0].email if users[0].email_notice else '' }
+      - "user_email": ${ users[0].email if users[0].has_email_address else '' }
+      - "user_email__2": ${ users[0].email if users[0].has_email_address else '' }
       - "case_number__1": ${ case_number }
       - "case_number__2": ${ case_number }
       - "case_number__3": ${ case_number }
-      - "case_number__4": ${ case_number }
 
       - "plaintiff_cb": ${ user_ask_role == 'plaintiff' }
       - "defendant_cb": ${ user_ask_role == 'defendant' }
@@ -1957,17 +1859,17 @@ attachment:
           % endif
       - "delivery_party1_mail_address_on_one_line": ${ delivery_parties[0].address.on_one_line(bare=True) }
       - "delivery_party1_email": ${ delivery_parties[0].delivery_email if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_hand_yes": ${ delivery_parties[0].hand_delivery if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_mail_yes": ${ delivery_parties[0].mail_delivery if delivery_parties[0].knows_delivery_method else '' }
+      - "delivery_party1_email_efsp": ${ delivery_parties[0].delivery_efsp_email if delivery_parties[0].knows_delivery_method else '' }
+      - "is_delivery_party1_hand_yes": ${ delivery_parties[0].hand_delivery if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery else '' }
+      - "is_delivery_party1_mail_yes": ${ delivery_parties[0].mail_delivery if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery else '' }
       - "is_delivery_party1_efm_yes": ${ delivery_parties[0].efm_delivery if delivery_parties[0].knows_delivery_method else '' }
       - "is_delivery_party1_email_yes": ${ delivery_parties[0].email_delivery if delivery_parties[0].knows_delivery_method else '' }
       - "delivery_party1_date": ${ delivery_parties[0].delivery_date if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_date else '' }
       - "delivery_party1_time": ${ format_time(delivery_parties[0].delivery_time, format='h:mm a') if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_time else '' }
       
-      - "is_delivery_party1_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].efm_delivery or delivery_parties[0].email_delivery ) else '' }
-      - "is_delivery_party1_not_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].mail_delivery or delivery_parties[0].hand_delivery or delivery_parties[0].jail_delivery ) else '' }
+      - "is_delivery_party1_not_electronic": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery else '' }
       - "delivery_party1_mail_location": |
-          % if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery:
+          % if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery and delivery_parties[0].mail_delivery:
           % if delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "" and delivery_parties[0].delivery_mail_state != "":
           ${delivery_parties[0].delivery_mail_address }, ${delivery_parties[0].delivery_mail_city}, ${ state_name(delivery_parties[0].delivery_mail_state) }
           % elif delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "":
@@ -1986,53 +1888,24 @@ attachment:
           % else:
           ${ "" }
           % endif
-      - "delivery_party1_hand_address": ${ delivery_parties[0].hand_delivery_address.on_one_line(bare=True) if delivery_parties[0].knows_delivery_method and delivery_parties[0].hand_delivery else '' }
-      - "is_delivery_party1_jail_yes": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].jail_delivery else '' }
-      - "delivery_party1_jail_name": ${ delivery_parties[0].delivery_jail_name if delivery_parties[0].knows_delivery_method and delivery_parties[0].jail_delivery else '' }
-      - "is_delivery_party1_end": ${ delivery_parties.number() == 1 }
-      - "is_delivery_party2": ${ delivery_parties.number() > 1 }
+      - "is_delivery_party1_jail_yes": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery and delivery_parties[0].jail_delivery else '' }
+      - "delivery_party1_jail_name": |
+          % if delivery_parties[0].knows_delivery_method and delivery_parties[0].physical_delivery and delivery_parties[0].jail_delivery:
+          % if delivery_parties[0].delivery_jail_name != "" and delivery_parties[0].jail_delivery_address.address != "" and delivery_parties[0].jail_delivery_address.city != "" and delivery_parties[0].jail_delivery_address.state != "":
+          ${ delivery_parties[0].delivery_jail_name }, ${ delivery_parties[0].jail_delivery_address.on_one_line(bare=True)}
+          % elif delivery_parties[0].delivery_jail_name == "":
+          ${ delivery_parties[0].jail_delivery_address.on_one_line(bare=True)}
+          % else:
+          ${ delivery_parties[0].delivery_jail_name }
+          % endif
+          % else:
+          ${""}
+          % endif
+      - "myself": ${True}
+      - "for_self": ${True}
+      - "for_self_2": ${True}
 
-      - "delivery_party2_name_full": | 
-          % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name_full() } (lawyer for ${ delivery_parties[1].name_full() })
-          % else:
-          ${ delivery_parties[1].name_full() }
-          % endif
-      - "delivery_party2_mail_address_on_one_line": ${ delivery_parties[1].address.on_one_line(bare=True) }
-      - "delivery_party2_email": ${ delivery_parties[1].delivery_email if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_hand_yes": ${ delivery_parties[1].hand_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_mail_yes": ${ delivery_parties[1].mail_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_efm_yes": ${ delivery_parties[1].efm_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_email_yes": ${ delivery_parties[1].email_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "delivery_party2_date": ${ delivery_parties[1].delivery_date if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_date else '' }
-      - "delivery_party2_time": ${ format_time(delivery_parties[1].delivery_time, format='h:mm a') if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_time else '' }
-      
-      - "is_delivery_party2_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].efm_delivery or delivery_parties[1].email_delivery ) else '' }
-      - "is_delivery_party2_not_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].mail_delivery or delivery_parties[1].hand_delivery or delivery_parties[1].jail_delivery ) else '' }
-      - "delivery_party2_mail_location": |
-          % if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery:
-          % if delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
-          ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
-          % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "":
-          ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}
-          % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_state != "":
-          ${delivery_parties[1].delivery_mail_address }, ${ state_name(delivery_parties[1].delivery_mail_state) }
-          % elif delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
-          ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
-          % elif delivery_parties[1].delivery_mail_address != "":
-          ${delivery_parties[1].delivery_mail_address}
-          % elif delivery_parties[1].delivery_mail_city != "":
-          ${delivery_parties[1].delivery_mail_city}
-          % else:
-          ${state_name(delivery_parties[1].delivery_mail_state)}
-          % endif
-          % else:
-          ${ "" }
-          % endif
-      - "delivery_party2_hand_address": ${ delivery_parties[1].hand_delivery_address.on_one_line(bare=True) if delivery_parties[1].knows_delivery_method and delivery_parties[1].hand_delivery else '' }
-      - "is_delivery_party2_jail_yes": ${ True if delivery_parties[1].knows_delivery_method and delivery_parties[1].jail_delivery else '' }
-      - "delivery_party2_jail_name": ${ delivery_parties[1].delivery_jail_name if delivery_parties[1].knows_delivery_method and delivery_parties[1].jail_delivery else '' }
-      - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 2 }
+      - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 1 }
 ---
 ############### Review page
 id: review screen
