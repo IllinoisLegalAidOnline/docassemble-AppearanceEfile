@@ -112,7 +112,7 @@ code: |
     #  efile_case_type
     #  efile_case_category
     else:
-      if will_kickout(case_search.found_case):
+      if why_kickout(case_search.found_case) is not None:
         kickout_case_type_screen
       needs_all_info = False
       previous_case_id
@@ -265,13 +265,13 @@ code: |
   snapshot_efile = True
 ---
 code: |
-  def will_kickout(case):
-    if case.category.upper() == "CONFIDENTIAL":
-      return True
+  def why_kickout(case):
+    if case.category and case.category.upper() == "CONFIDENTIAL":
+      return "Confidential case"
     # Case categories determine a lot of things, I'm not comfortable with continuing
     # if it's not defined.
     if case.category not in case_category_map and case.case_type not in case_type_map:
-      return True
+      return "Uncertain case type"
     case_category_name = (case_category_map.get(case.category) or {}).get('name', '').lower()
     # See https://efile-test.suffolklitlab.org/jurisdictions/illinois/codes/categories
     if case_category_name in [
@@ -295,12 +295,18 @@ code: |
         'conservation',
         'miscellaneous criminal',
       ]:
-      return True
+      return "Restricted case type"
     # case types change more, so okay with not being there
     case_type_name = (case_type_map.get(case.case_type) or {}).get('name', '').lower()
     if 'name change' in case_type_name or 'change of name' in case_type_name:
-      return True
-    return False
+      return "Restricted case type"
+    
+    # Also check if any of the participants are redacted at all
+    for party in case.participants:
+      if party.is_redacted:
+        return "Confidential case"
+
+    return None
 ---
 id: kickout_case_type_screen
 event: kickout_case_type_screen
@@ -310,6 +316,7 @@ subquestion: |
   This online form will not work in certain cases. You will need to ask the circuit clerk at ${ trial_court }
   which form to use and how to file it. You can call them at ${ trial_court.phone }.
 
+  % if why_kickout(case_search.found_case) in ["Restricted case type", "Uncertain case type"]:
   Your case type, ${ case_category_map.disp(case_search.found_case.category, 'name') }, ${ case_type_map.disp(case_search.found_case.case_type, 'name') } is in:
   
   * Name change for an adult or child
@@ -320,15 +327,18 @@ subquestion: |
   * Protective orders including Orders of Protection (OP), Stalking No Contact Orders (SNCO), and Civil No Contact Orders (CNCO)
   * Adoption
   * Mental Health
+  % elif why_kickout(case_search.found_case) == "Confidential case type":
+  Your case is confidential, and this program can't get all of the information it needs to help you.
+  % endif
 
   Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
 ---
 id: kickout_self_reported_case_type
 event: kickout_self_reported_case_type
 question: |
-  Sorry
+  You will not be able to e-file with this program
 subquestion: |
-  The Appearance form made by this program does not work with these case types.
+  Unfortunately, you cannot e-file an Appearance into these case types through this program.
 
   * Name change for an adult or a child
   * Guardianship for a minor or an adult
@@ -338,6 +348,15 @@ subquestion: |
   * Protective orders including Orders of Protection (OP), Stalking No Contact Orders (SNCO), and Civil No Contact Orders (CNCO)
   * Adoption
   * Mental Health
+  * A confidential case that is sealed or redacted
+
+  <!-- Later changes will allow users to continue making the form, but commenting this out now.
+
+  You can still make and download a completed Appearance, and file or e-file the form elsewhere.
+  Find a list of Electronic Filing Service Providers on the [**Illinois Courts' website**](https://www.illinoiscourts.gov/eservices/efileil/).
+
+  This Appearance form is not for use in criminal cases.
+  -->
 
   Contact your local circuit clerk, or you can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
 ---
@@ -354,6 +373,7 @@ subquestion: |
   * Protective orders including Orders of Protection (OP), Stalking No Contact Orders (SNCO), and Civil No Contact Orders (CNCO)
   * Adoption
   * Mental Health
+  * A confidential case that is sealed or redacted
 
 fields:
   - no label: case_is_invalid_type
