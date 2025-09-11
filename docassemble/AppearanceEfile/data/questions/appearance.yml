@@ -174,8 +174,8 @@ code: |
   if can_check_efile:
     docket_number
 
+  nav.set_section('review_IL_fee_waiver')
   if user_wants_efile:
-    nav.set_section('review_IL_fee_waiver')
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
 
@@ -2235,21 +2235,41 @@ content: |
   </ul>
   <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case. Make sure you deliver the Appearance by the method, date, and time you listed in your Proof of Delivery.</p>
   <p><strong>Where to go for help</strong></p>
+  % if not user_wants_fee_waiver:
+  <p>You may see a temporary charge on your account while the clerk reviews your filing. The account will be changed only if your filing is accepted. If the filing is not accepted it can take up to 10 business days for the temporary charge to be removed.</p>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
     <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
 ---
 template: neutral_email
 subject: |
+  % if user_wants_fee_waiver:
   Clerk response to your e-filed Appearance and Fee waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2271,20 +2291,39 @@ content: |
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
   <p><strong>Where to go for help</strong></p>
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
+    <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
+
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
 ---
 template: acceptance_email
 subject: |
+  % if user_wants_fee_waiver:
   Clerk response to your e-filed Appearance and Fee waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2306,20 +2345,39 @@ content: |
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
   <p><strong>Where to go for help</strong></p>
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
+    <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
+
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
 ---
 template: rejection_email
 subject: |
-  Clerk response to your e-filed Appearance and Fee waiver
+  % if user_wants_fee_waiver:
+  Clerk response to your e-filed Appearance and Fee Waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2347,8 +2405,13 @@ content: |
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
+
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>

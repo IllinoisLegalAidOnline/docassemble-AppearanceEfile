@@ -34,6 +34,7 @@ fields:
     required: |
       filing_comment_datafield.get('isrequired', False)
 ---
+if: user_wants_fee_waiver
 code: |
   # TODO(brycew): If there is a jury optional service, use it
   # otherwise, select the jury service
@@ -44,6 +45,16 @@ code: |
     ['Appearance', 'No Fee'],
     'Appearance'
   ]
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "Entry of Appearance"])
+---
+if: not user_wants_fee_waiver
+code: |
+  illinois_appearance_bundle.filing_type_filters = [
+    'Appearance'
+  ]
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "No Fee", "Entry of Appearance"])
+---
+code: |
   illinois_appearance_bundle.filing_type_default = 'none available'
 ---
 generic object: DAObject
@@ -55,7 +66,7 @@ only sets:
   - x.filtered_filing_type_options
 code: |
   x.filtered_filing_type_options, x.filing_type = \
-      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default)
+      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default, x.filing_type_exclude)
   if x.filing_type is None and check_duplicate_codes(x.filtered_filing_type_options):
     # choices are the same from the user's view
     x.filing_type = x.filtered_filing_type_options[0][0]
@@ -74,7 +85,7 @@ only sets:
   - IL_fee_waiver_order.filtered_filing_type_options
 code: |
   IL_fee_waiver_order.filtered_filing_type_options, IL_fee_waiver_order.filing_type = \
-      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default)
+      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default, IL_fee_waiver_order.filing_type_exclude)
   if IL_fee_waiver_order.filing_type is None and check_duplicate_codes(IL_fee_waiver_order.filtered_filing_type_options):
     # choices are the same from the user's view
     IL_fee_waiver_order.filing_type = IL_fee_waiver_order.filtered_filing_type_options[0][0]
@@ -289,6 +300,7 @@ subquestion: |
   elsewhere.
 continue button field: show_no_efile
 ---
+if: user_wants_fee_waiver
 ## User already knows there are no fees, so as long as there are, show no fees
 code: |
   review_fees_screen = True
@@ -582,6 +594,7 @@ question: |
   What type of filing will you be making?
 subquestion: |
   We found a few filing codes that could be used to file your **${ x.title }**. Choose the one that you think best fits your case.
+  You might find more information on your other court papers.
   
   If you need help, contact the ${ trial_court } circuit clerk${ " at " + trial_court.phone if hasattr(trial_court, 'phone') else ""}. You can also visit **[Illinois Court Help](https://www.ilcourthelp.gov/)**, or you can call or text (833) 411-1121 for assistance.
 fields:
@@ -590,3 +603,54 @@ fields:
     code: |
       sorted(x.filtered_filing_type_options, key=lambda y: y[1])
 ---
+---
+####################### Payments stuff
+id: new payment method
+question: |
+  What type of payment method do you want to make?
+subquestion: |
+fields:
+  - Name of payment method: new_account_name
+    help: |
+      You can name it anything. For example: "My Visa card", or "My bank". This name can help you identify the payment method on other screens.
+  - Type: new_account_type_code
+    datatype: radio
+    choices:
+      - Bank account: BankAccount
+        help: |
+          The bank account can be a checking or savings account. This is also known as an eCheck or an ACH transfer.
+      - Credit or debit card: CC
+  - note: |
+      On the next screen, you'll be sent to a secure payments site to enter your information.
+  - note: |
+      Note: ${ fees_explain.content }
+---
+template: convenience_fees_help
+subject: |
+  What are these fees for?
+content: |
+  The circuit clerk changes a filing fee for some documents such as a Complaint, Summons, Jury Demand, or Appearance.
+
+  There is usually a fee for a Jury Demand. Some counties charge this as an Optional or Additional Service Fee.
+
+  ${ fees_explain.content }
+---
+id: review fees info
+question: |
+  Temporary charge on payment method
+subquestion: |
+  You may see a temporary charge on your method of payment while the court clerk reviews your filing.
+  
+  The account will be charged only if your filing is accepted.
+  
+  If the filing is not accepted it can take up to 10 business days for the temporary charges to be removed.
+continue button field: review_fees_info
+---
+code: |
+  if fees_resp.is_ok():
+    review_fees_screen
+    if not user_wants_fee_waiver:
+      review_fees_info
+  else:
+    bad_fees
+  review_fees = True
