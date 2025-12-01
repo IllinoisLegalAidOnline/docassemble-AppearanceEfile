@@ -844,9 +844,6 @@ question: |
 subquestion: |
   On the *Appearance*, you can tell the court which pronouns you use.
 fields:
-  - I prefer not to answer.: pronouns_none
-    datatype: yesno
-    disable others: True
   - Pronouns (optional): pronouns
     datatype: checkboxes
     none of the above: False
@@ -861,9 +858,12 @@ fields:
     show if:
       variable: pronouns["Other"]
       is: True
-validation code: |
-  if pronouns_none == False and pronouns.all_false():
-    validation_error("Please select at least one.", field="pronouns")
+  - I prefer not to answer.: pronouns_none
+    datatype: yesno
+    disable others: True
+#validation code: |
+#  if pronouns_none == False and pronouns.all_false():
+#    validation_error("Please select at least one.", field="pronouns")
 ---
 id: prefix
 question: |
@@ -871,9 +871,6 @@ question: |
 subquestion: |
   On the *Appearance*, you can tell the court what prefix you use.
 fields:
-  - I prefer not to answer.: prefix_none
-    datatype: yesno
-    disable others: True
   - Prefix (optional): prefix
     datatype: checkboxes
     none of the above: False
@@ -889,9 +886,12 @@ fields:
     show if:
       variable: prefix["Other"]
       is: True
-validation code: |
-  if prefix_none == False and prefix.all_false():
-    validation_error("Please select at least one.", field="prefix")
+  - I prefer not to answer.: prefix_none
+    datatype: yesno
+    disable others: True
+#validation code: |
+#  if prefix_none == False and prefix.all_false():
+#    validation_error("Please select at least one.", field="prefix")
 ---
 id: e-signature
 question: |
@@ -915,7 +915,7 @@ subquestion: |
       <li>Everything on the forms is true and correct, or you have been informed or you believe it is true and correct, and</li>
       <li>You understand that making a false statement on the forms is perjury and has penalties provided by law.</li>
     </ul></p>
-  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
+  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Illinois Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
   </div>
 fields:
   - "Add e-signature?": e_signature
@@ -944,7 +944,7 @@ subquestion: |
       <li>Everything on the forms is true and correct, or you have been informed or you believe it is true and correct, and</li>
       <li>You understand that making a false statement on the forms is perjury and has penalties provided by law.</li>
     </ul></p>
-  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
+  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Illinois Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
   </div>  
 continue button field: inform_of_efile_e_signature
 ---
