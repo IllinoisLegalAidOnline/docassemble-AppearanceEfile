@@ -1,3 +1,27 @@
 [build-system]
-requires = ["setuptools"]
+requires = [
+    "setuptools==80.9.0",
+]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "docassemble.AppearanceEfile"
+version = "1.4.1"
+description = "Appearance with e-filing"
+readme = "README.md"
+authors = [
+    { name = "Matt Newsted", email = "mnewsted@illinoislegalaid.org" },
+]
+dependencies = []
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
+
+[project.urls]
+Homepage = "https://www.illinoislegalaid.org"
+
+[tool.setuptools.packages.find]
+where = [
+    ".",
+]
