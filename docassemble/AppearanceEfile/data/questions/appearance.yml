@@ -863,7 +863,7 @@ fields:
     disable others: True
 validation code: |
   if pronouns_none == False and pronouns.all_false():
-    validation_error("Please select at least one.", field="pronouns")
+    validation_error("Please select at least one.", field="pronouns_none")
 ---
 id: prefix
 question: |
@@ -891,7 +891,7 @@ fields:
     disable others: True
 validation code: |
   if prefix_none == False and prefix.all_false():
-    validation_error("Please select at least one.", field="prefix")
+    validation_error("Please select at least one.", field="prefix_none")
 ---
 id: e-signature
 question: |
