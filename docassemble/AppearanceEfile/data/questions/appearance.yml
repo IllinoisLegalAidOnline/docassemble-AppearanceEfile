@@ -861,9 +861,9 @@ fields:
   - I prefer not to answer.: pronouns_none
     datatype: yesno
     disable others: True
-validation code: |
-  if pronouns_none == False and pronouns.all_false():
-    validation_error("Please select at least one.", field="pronouns_none")
+#validation code: |
+#  if pronouns_none == False and pronouns.all_false():
+#    validation_error("Please select at least one.", field="pronouns")
 ---
 id: prefix
 question: |
@@ -889,9 +889,9 @@ fields:
   - I prefer not to answer.: prefix_none
     datatype: yesno
     disable others: True
-validation code: |
-  if prefix_none == False and prefix.all_false():
-    validation_error("Please select at least one.", field="prefix_none")
+#validation code: |
+#  if prefix_none == False and prefix.all_false():
+#    validation_error("Please select at least one.", field="prefix")
 ---
 id: e-signature
 question: |
