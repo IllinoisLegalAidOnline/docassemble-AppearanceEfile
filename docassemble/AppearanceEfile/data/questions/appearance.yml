@@ -51,8 +51,8 @@ code: |
 sections:
   - start: Start
   - review_appearance: Appearance
-  - review_IL_fee_waiver: Fee waiver
-  - review_efiling: E-filing info
+  - review_IL_fee_waiver: Fee waiver (optional)
+  - review_efiling: E-filing info (optional)
   - download_and_efile: Download and e-file forms
 ---
 code: |
@@ -90,7 +90,8 @@ code: |
   how_to_use
   accept_terms
   lawsuit_information
-  if case_is_invalid_type:
+  if user_wants_efile and case_is_invalid_type:
+    can_check_efile = False
     kickout_self_reported_case_type
   if can_check_efile:
     tyler_login
@@ -150,7 +151,8 @@ code: |
     if person.knows_delivery_method:
       person.email_delivery
       person.delivery_date
-  hand_delivery_info
+  if not can_check_efile:
+    hand_delivery_info
   set_progress(75)
      
   users[0].address.address
@@ -172,53 +174,62 @@ code: |
   if can_check_efile:
     docket_number
 
-  if user_wants_efile:
-    nav.set_section('review_IL_fee_waiver')
+  nav.set_section('review_IL_fee_waiver')
+  if user_wants_fee_waiver:
     fee_waiver_introduction_screen
     interview_order_IL_fee_waiver
 
-  if can_check_efile:
-    nav.set_section('review_efiling')
-    illinois_appearance_bundle.has_courtesy_copies = False
-    illinois_appearance_bundle.completed
-    illinois_jury_demand_bundle.has_courtesy_copies = False
-    illinois_jury_demand_bundle.completed
-    IL_fee_waiver_order.has_courtesy_copies = False
-    IL_fee_waiver_full_for_court.has_courtesy_copies = False
-    IL_fee_waiver_supplement.has_courtesy_copies = False
-    IL_fee_waiver_supplement.completed
-    IL_fee_waiver_full_for_court.completed
-    IL_fee_waiver_order.completed
-    tyler_payment_id = default_jurisdiction_waiver
-    all_required_screens_shown
-    ready_to_efile
-  else:
-    ready_to_efile = False
-
-  if ready_to_efile:
-    signature_choice = 'add name'
-    e_signature = True
-    # if e-filing, just use the e-signature to keep things simple
-    inform_of_efile_e_signature
-    # TODO(brycew): redo HTML emailing
-    email_confirmation_subject = email_confirmation.subject
-    email_confirmation_contents = email_confirmation.content
-    acceptance_subject = acceptance_email.subject
-    acceptance_contents = acceptance_email.content
-    rejected_subject = rejection_email.subject
-    rejected_contents = rejection_email.content
-    neutral_subject = neutral_email.subject
-    neutral_contents = neutral_email.content
-    # Don't show the review screen to the user before efiling
-    efile_user_reviewed = True
-  else:
-    e_signature
+  setup_esignature
   set_progress(100)
-  nav.set_section('download_and_efile')
   forms_assembling
   snapshot_forms
   get_docs_screen
+  if can_check_efile:
+    efile
   ending_screen
+---
+if: can_check_efile
+code: |
+  nav.set_section('review_efiling')
+  illinois_appearance_bundle.has_courtesy_copies = False
+  illinois_appearance_bundle.completed
+  illinois_jury_demand_bundle.has_courtesy_copies = False
+  illinois_jury_demand_bundle.completed
+  IL_fee_waiver_order.has_courtesy_copies = False
+  IL_fee_waiver_full_for_court.has_courtesy_copies = False
+  IL_fee_waiver_supplement.has_courtesy_copies = False
+  IL_fee_waiver_supplement.completed
+  IL_fee_waiver_full_for_court.completed
+  IL_fee_waiver_order.completed
+  nav.set_section('download_and_efile')
+  tyler_payment_id = default_jurisdiction_waiver
+  all_required_screens_shown
+  ready_to_efile_user_hook = True
+---
+if: can_check_efile
+id: setup esignature
+code: |
+  signature_choice = 'add name'
+  e_signature = True
+  # if e-filing, just use the e-signature to keep things simple
+  inform_of_efile_e_signature
+  # TODO(brycew): redo HTML emailing
+  email_confirmation_subject = email_confirmation.subject
+  email_confirmation_contents = email_confirmation.content
+  acceptance_subject = acceptance_email.subject
+  acceptance_contents = acceptance_email.content
+  rejected_subject = rejection_email.subject
+  rejected_contents = rejection_email.content
+  neutral_subject = neutral_email.subject
+  neutral_contents = neutral_email.content
+  # Don't show the review screen to the user before efiling
+  #efile_user_reviewed = True
+  setup_esignature = True
+---
+if: not can_check_efile
+code: |
+  e_signature
+  setup_esignature = True
 ---
 code: |
   stuff_to_snapshot = {
@@ -337,7 +348,7 @@ buttons:
   - Exit: exit
 ---
 id: kickout_self_reported_case_type
-event: kickout_self_reported_case_type
+continue button field: kickout_self_reported_case_type
 question: |
   You will not be able to e-file with this Easy Form
 subquestion: |
@@ -353,9 +364,10 @@ subquestion: |
   * Mental Health
   * A confidential case that is sealed or redacted
 
-  Try the the [Appearance Easy Form](https://www.illinoislegalaid.org/node/90166) to make the forms you need.
+  You can still make and download a completed Appearance, and file or e-file the form elsewhere.
+  Find a list of Electronic Filing Service Providers on the [**Illinois Courts' website**](https://www.illinoiscourts.gov/eservices/efileil/).
 
-  You can text or call [**IllinoisCourtHelp**](https://ilcourthelp.gov) at (833) 411-1121 for assistance.
+  This Appearance form is not for use in criminal cases.
 buttons:
   - Exit: exit
 ---
@@ -392,13 +404,22 @@ code: |
 ---
 id: next-step-fee-waiver
 question: |
-  Next Step: Fee Waiver
+  Are you paying for the Appearance filing with a Fee Waiver?
 subquestion: |
-  To e-file with this program, you must file a Fee waiver.
-  The next screens will help you make a Fee waiver.
-continue button field: fee_waiver_introduction_screen
+  If you are paying for this appearance with a fee waiver,
+  the next screens will help you make a Fee waiver.
+
+  The circuit clerk charges filing fees for an Appearance and Jury demand. There may also be a payment processing fee.
+  The amount depends on the location and type of case. You can review the fees before e-filing.
+
+  If you cannot afford the fee, you may be eligible for a full or partial waiver.
+  This depends on your income and if you receive public benefits.
+  Read ILAO's article about [filing court papers for free](https://www.illinoislegalaid.org/node/32226).
+fields:
+  - Do you want to file a fee waiver?: user_wants_fee_waiver
+    datatype: yesnoradio
 ---
-if: user_wants_efile
+if: user_wants_fee_waiver
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = True
   IL_fee_waiver_attachment.enabled = True
@@ -409,7 +430,7 @@ code: |
   else:
     IL_fee_waiver_supplement.enabled = False
 ---
-if: not user_wants_efile
+if: not user_wants_fee_waiver
 code: |
   IL_fee_waiver_Post_interview_instructions.enabled = False
   IL_fee_waiver_attachment.enabled = False
@@ -734,25 +755,6 @@ content: |
   
   [FILE case_number_example.png, 100%, Summons form showing case number]
 ---
-if: not user_wants_efile
-id: trial by jury
-question: |
-  Who do you want to decide your case?
-subquestion: |
-  Jury trials are more complicated and can take more time than if the case is decided by the judge alone.
-
-  ${ collapse_template(jury_trial_help) }  
-
-  **Note:** You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial.
-
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
-field: trial_with
-choices:
-  - A judge: judge_only
-  - A judge and a 6-person jury: judge_and_6_jury
-  - A judge and a 12-person jury: judge_and_12_jury
----
-if: user_wants_efile
 id: trial by jury - already fee waiver
 question: |
   Who do you want to decide your case?
@@ -761,7 +763,7 @@ subquestion: |
 
   ${ collapse_template(jury_trial_help) }  
 
-  **Note:** You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial.
+  **Note:** You do not have a right to a jury trial in every case. If you aren't filing with a fee waiver, there can be an additional fee for a jury trial.
 
   To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
@@ -1087,6 +1089,7 @@ code: |
     if hasattr(x.lawyer.address, 'zip'):
       x.address.zip = x.lawyer.address.zip
 ---
+if: not can_check_efile
 id: knows delivery method
 generic object: ALIndividual
 question: |
@@ -1103,6 +1106,11 @@ field: x.knows_delivery_method
 choices:
   - Yes: True
   - No. I do not know this now. I will add it to my forms later.: False
+---
+generic object: ALIndividual
+if: can_check_efile
+code: |
+  x.knows_delivery_method = True
 ---
 template: delivery_method_help
 subject: |
@@ -1142,11 +1150,15 @@ question: |
   How will you send your forms to ${ x.name_full() }?
   % endif
 subquestion: |
+  % if can_check_efile:
   You must send your forms electronically (by email or through the e-filing system) if you and the person you are sending forms to have an email address. If you or the person you are sending to do not have an email address, or if you have permission from the judge, you may send forms by mail, through a delivery company, or by hand-delivery.
 
+  % endif
   For best results, complete the Proof of Delivery section and send the forms today.
 
+  % if not can_check_efile:
   **Note:** If you do not know this now, be sure to add it to the Proof of Delivery section of your forms later.
+  % endif
 
   ${ collapse_template(efiling_help) }  
 fields:
@@ -1156,7 +1168,7 @@ fields:
     datatype: email
     js show if: 
       val("x.email_delivery") == true
-    required: False
+    required: can_check_efile
   - E-filing system: x.efm_delivery
     datatype: yesnowide
     help: |
@@ -1265,7 +1277,12 @@ fields:
     js show if: 
       val("x.physical_delivery") == true && val("x.jail_delivery") == true
     required: False
+validation code: |
+  if can_check_efile:
+    if not (x.email_delivery or x.mail_delivery or x.hand_delivery):
+      validation_error(f"You need to say how you will deliver your forms")
 ---
+if: not can_check_efile
 id: delivery time
 generic object: ALIndividual
 question: |
@@ -1296,6 +1313,27 @@ validation code: |
   else:
     x.knows_delivery_time = True
 ---
+if: can_check_efile
+id: delivery time
+generic object: ALIndividual
+question: |
+  % if x.is_represented:
+  When will you send your ${ form_name } to ${ x.lawyer.name.full(middle="full") }?
+  % else:
+  When will you send your ${ form_name } to ${ x.name.full(middle="full") }?
+  % endif
+subquestion: |
+  If you do not know this now, take your best guess. Make sure to give yourself enough time to deliver your forms.
+fields:
+  - Date: x.delivery_date
+    datatype: date
+    min: ${ today().format("yyyy-MM-dd") }
+  - Time: x.delivery_time
+    datatype: time
+validation code: |
+  x.knows_delivery_time = True
+  x.knows_delivery_date = True
+---
 id: hand delivery info
 continue button field: hand_delivery_info
 #generic object: ALIndividual
@@ -1322,9 +1360,10 @@ subquestion: |
   
   [NEWLINE]
 ---
-if: ready_to_efile
+if: can_check_efile 
 id: get docs screen
-event: get_docs_screen
+continue button field: get_docs_screen
+continue button label: ":file-export: E-file your forms"
 question: |
   % if not (defined('efile') and efile):
   Download and e-file
@@ -1345,21 +1384,18 @@ subquestion: |
 
   ${ al_user_bundle.download_list_html() }
   % if not (defined('efile') and efile):
-  &nbsp;
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox = False)}
   
   ##### E-file
 
   Click **E-file your forms** to e-file your forms with the circuit clerk of the ${ trial_court }.
   
-  ${ action_button_html(url_ask([{'recompute': ['efile']}]), label='E-file your forms', icon='file-export', size="md", id_tag="efile")}
   % endif
-  &nbsp;
 
-  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
-  &nbsp;
-  
-  Thank you for using ILAO Easy Forms!
 under: |
+  Thank you for using ILAO Easy Forms!
+
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif 
@@ -1367,7 +1403,7 @@ under: |
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
-if: not ready_to_efile
+if: not can_check_efile 
 id: get docs screen
 event: get_docs_screen
 question: |
@@ -1392,7 +1428,7 @@ subquestion: |
 under: |
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} **Sign-in**](${url_of('login', next=interview_url())}) or [**create**](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-  % endif 
+  % endif
 
   &nbsp;
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
@@ -1419,26 +1455,6 @@ under: |
 #  Thanks for using ILAO Easy Forms!
 #  
 #  [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
-#---
-#id: ending screen
-#event: ending_screen
-#question: |
-#  All done
-#subquestion: |
-#  Thank you for using ILAO Easy Forms!
-#  
-#  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-##buttons:
-##  - Delete answers and restart: restart
-##  - Exit: exit
-#under: |
-#  % if not user_logged_in():
-#  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
-#  % endif 
-#
-#  &nbsp;
-#  
-#  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 generic object: ALDocumentBundle
 template: x.send_email_template
@@ -1474,15 +1490,22 @@ code: |
 id: ending screen
 event: ending_screen
 question: |
-  All done
+  Download
 subquestion: |
-  Thank you for using ILAO Easy Forms!
+  View and download your forms below. Click **Make changes** to fix any mistakes.
+
+  **You need to deliver your Appearance to the other parties in your case.**
+
+  **Note:** You already e-filed your forms. Any changes you make will not appear in the e-filed forms.
   
-  This program does not file your Appearance with the court or deliver it to other parties in your case. You will need to do this yourself.
-#buttons:
-#  - Delete answers and restart: restart
-#  - Exit: exit
+  ${ action_button_html(url_action('review_appearance'), label=':edit: Make changes', color='success', size="md") }
+
+  ${ al_user_bundle.download_list_html() }
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 under: |
+  Thank you for using ILAO Easy Forms!
+
   % if not user_logged_in():
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif 
@@ -2071,8 +2094,12 @@ review:
   - note: |
       [**Review your Fee waiver answers**](${url_action('review_IL_fee_waiver')})
   - note: |
-      If you want to change the court or case you are filing into, you will have to
-      restart the interview from the beginning.
+      If you want to change:
+
+      * The county,
+      * The case you are filing into
+      
+      You will have to restart the interview from the beginning.
       
       ${ action_button_html(url_of('new_session'), label='Start again', color='warning', size='md') }
     show if: can_check_efile
@@ -2179,7 +2206,11 @@ confirm: True
 ---
 template: email_confirmation
 subject: |
+  % if user_wants_fee_waiver:
   Important Appearance and Fee waiver e-filing information
+  % else:
+  Important Appearance e-filing information
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2188,7 +2219,11 @@ content: |
   </head>
   <body>
   <p>Hello ${ users[0].name },</p>
+  % if user_wants_fee_waiver:
   <p><strong>Your Appearance and Fee Waiver forms were sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  % else:
+  <p><strong>Your Appearance form was sent to the Circuit Clerk of ${ trial_court.address.county } County. They will accept or reject your filing.</strong></p>
+  % endif
   <p>A person in the clerk's office has to accept the forms before they are officially filed.</p>
   <p><strong>What's next?</strong></p>
   <p>You should receive an email from Odyssey eFileIL (no-reply@efilingmail.tylertech.cloud). Your forms were given an Envelope Number, {{ envelope_id }} which will be used to track your filing.</p>
@@ -2199,21 +2234,41 @@ content: |
   </ul>
   <p>After your filing is accepted, it is your responsibility to deliver the Appearance to the other parties in your case. Make sure you deliver the Appearance by the method, date, and time you listed in your Proof of Delivery.</p>
   <p><strong>Where to go for help</strong></p>
+  % if not user_wants_fee_waiver:
+  <p>You may see a temporary charge on your account while the clerk reviews your filing. The account will be changed only if your filing is accepted. If the filing is not accepted it can take up to 10 business days for the temporary charge to be removed.</p>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
     <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
 ---
 template: neutral_email
 subject: |
+  % if user_wants_fee_waiver:
   Clerk response to your e-filed Appearance and Fee waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2235,20 +2290,39 @@ content: |
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
   <p><strong>Where to go for help</strong></p>
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
+    <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
+
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
 ---
 template: acceptance_email
 subject: |
+  % if user_wants_fee_waiver:
   Clerk response to your e-filed Appearance and Fee waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2270,20 +2344,39 @@ content: |
   <p>Contact the clerk at ${ trial_court.phone } if you have questions.</p>
 
   <p><strong>Where to go for help</strong></p>
+  % if user_wants_fee_waiver:
   <p>Contact the clerk at ${ trial_court.phone } to learn:</p>
   <ul>
+    <li>If your filing is accepted,</li>
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % else:
+  <p>Contact the clerk at ${ trial_court.phone } to:</p>
+  <ul>
+    <li>Learn if your filing is accepted,</li>
+    <li>Ask questions about payment, and</li>
+    <li>Find out what's next in your case.</li>
+  </ul>
+  % endif
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
+
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>
 ---
 template: rejection_email
 subject: |
-  Clerk response to your e-filed Appearance and Fee waiver
+  % if user_wants_fee_waiver:
+  Clerk response to your e-filed Appearance and Fee Waiver
+  % else:
+  Clerk response to your e-filed Appearance
+  % endif
 content: |
   <!DOCTYPE html>
   <html>
@@ -2311,8 +2404,13 @@ content: |
     <li>If you have a court date for your fee waiver, and</li>
     <li>What's next in your case.</li>
   </ul>
+  % if user_wants_fee_waiver:
   <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance and Fee waiver.</p>
-  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing and other court processes, court forms, and going to court.</p>
+  % else:
+  <p>Use <a href="https://efileil.tylertech.cloud/OfsEfsp/ui/landing" title="Odyssey eFileIL">Odyssey eFileIL</a> if you need to e-file other forms into your case or correct filings that the clerk rejected. You can use the same e-filing account you used to e-file your Appearance.</p>
+  % endif
+  <p>Visit <a href="https://www.ilcourthelp.gov" title="Illinois Court Help">Illinois Court Help</a> or call or text (833) 411-1121 to ask a trained court guide questions about e-filing, court forms, going to court, and other court processes.</p>
+
   <p>Thank you for using ILAO Easy Forms.<br /><a href="https://www.illinoislegalaid.org/" title="Illinois Legal Aid Online">Illinois Legal Aid Online</a></p>
   </body>
   </html>

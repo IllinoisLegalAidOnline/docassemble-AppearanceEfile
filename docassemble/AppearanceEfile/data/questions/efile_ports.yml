@@ -13,8 +13,30 @@ code: |
   illinois_appearance_bundle.filing_action = 'efile'
   illinois_appearance_bundle.has_courtesy_copies = False
 ---
+id: filing description
+question: |
+  Is there anything you would like to tell the Clerk about your forms?
+subquestion: |
+  These comments will not appear on your court forms.
+
+  % if not filing_comment_datafield.get('isrequired'):
+  This is optional. You can click **Next** to skip.
+  % endif
+fields:
+  - label: |
+      Note to clerk
+      % if not filing_comment_datafield.get('isrequired'):
+      (optional)
+      % endif
+    field: illinois_appearance_bundle.filing_comment
+    datatype: text
+    maxlength: 50
+    required: |
+      filing_comment_datafield.get('isrequired', False)
+---
+if: user_wants_fee_waiver
 code: |
-  # TODO(brycew): If there is a jury optional service, use It
+  # TODO(brycew): If there is a jury optional service, use it
   # otherwise, select the jury service
   illinois_appearance_bundle.filing_type_filters = [
     CodeType('142566'),
@@ -23,6 +45,16 @@ code: |
     ['Appearance', 'No Fee'],
     'Appearance'
   ]
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "Entry of Appearance"])
+---
+if: not user_wants_fee_waiver
+code: |
+  illinois_appearance_bundle.filing_type_filters = [
+    'Appearance'
+  ]
+  illinois_appearance_bundle.filing_type_exclude = ContainAny(["Limited Scope", "Limited Entry-Local Counsel", "No Fee", "Entry of Appearance"])
+---
+code: |
   illinois_appearance_bundle.filing_type_default = 'none available'
 ---
 generic object: DAObject
@@ -34,7 +66,7 @@ only sets:
   - x.filtered_filing_type_options
 code: |
   x.filtered_filing_type_options, x.filing_type = \
-      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default)
+      filter_codes(filing_type_options, x.filing_type_filters, x.filing_type_default, x.filing_type_exclude)
   if x.filing_type is None and check_duplicate_codes(x.filtered_filing_type_options):
     # choices are the same from the user's view
     x.filing_type = x.filtered_filing_type_options[0][0]
@@ -53,7 +85,7 @@ only sets:
   - IL_fee_waiver_order.filtered_filing_type_options
 code: |
   IL_fee_waiver_order.filtered_filing_type_options, IL_fee_waiver_order.filing_type = \
-      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default)
+      filter_codes(filing_type_options, IL_fee_waiver_order.filing_type_filters, IL_fee_waiver_order.filing_type_default, IL_fee_waiver_order.filing_type_exclude)
   if IL_fee_waiver_order.filing_type is None and check_duplicate_codes(IL_fee_waiver_order.filtered_filing_type_options):
     # choices are the same from the user's view
     IL_fee_waiver_order.filing_type = IL_fee_waiver_order.filtered_filing_type_options[0][0]
@@ -72,10 +104,15 @@ subquestion: |
 continue button field: warning_no_appearance_type
 ---
 code: |
-  if court_id == 'tazewell' or court_id == 'kane' or court_id == 'stephenson':
+  # courts that want jury demands to be done through optional service
+  courts_wanting_optserv = ['dekalb', 'mchenry', 'mclean', 'stclair', 'tazewell', 'will', 'stephenson', 'madison',
+    'champaign', 'dupage', 'kane', 'kankakee', 'lake', 'lasalle', 'lee', 'peoria', 'sangamon', 'vermillion', 'winnebago']
+---
+code: |
+  if court_id in courts_wanting_optserv:
     efile_case_category_name = case_category_map.get(efile_case_category, {}).get('name', '').lower().strip()
     if trial_with == "judge_and_6_jury":
-      if efile_case_category_name == "small claims" or efile_case_category == "117503":
+      if efile_case_category_name.startswith("small claims") or efile_case_category == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20774"),
@@ -107,7 +144,7 @@ code: |
         default_list = []
         filter_list = []
     elif trial_with == "judge_and_12_jury":
-      if efile_case_category_name == "small claims" or efile_case_category_name == "117503":
+      if efile_case_category_name.startswith("small claims") or efile_case_category_name == "117503":
         default_list = [None]
         filter_list = [[
           CodeType("20773"),
@@ -168,7 +205,7 @@ code: |
 ---
 code: |
   if trial_with == "judge_and_6_jury" or trial_with == "judge_and_12_jury":
-    if court_id != "tazewell" and court_id != "kane" and court_id != "stephenson":
+    if court_id not in courts_wanting_optserv:
       illinois_jury_demand_bundle.enabled = True
     else:
       illinois_jury_demand_bundle.enabled = False
@@ -263,6 +300,7 @@ subquestion: |
   elsewhere.
 continue button field: show_no_efile
 ---
+if: user_wants_fee_waiver
 ## User already knows there are no fees, so as long as there are, show no fees
 code: |
   review_fees_screen = True
@@ -391,16 +429,18 @@ fields:
     code: |
       all_case_parties
 ---
-id: are-you-using-fee-waiver
+id: do-you-want-efile
 question: |
-  Are you paying for the Appearance filing with a Fee waiver?
+  Do you want to e-file your forms directly with the court?
 subquestion: |
-  If you are paying for this appearance with a fee waiver, you can fill out and
-  electronically file (e-file) both forms at the same time in this program.
-  This means you don’t have to print out the forms. The court will communicate
-  with you by email. You will have to provide your email to e-file your Appearance and Fee waiver.
+  You can fill out your forms and electronically file (e-file) them at the same time with this program.
+  This means you don’t have to print out the forms.
+  
+  You will need an email address and an eFileIL account to e-file. This program can help you make an eFileIL account if needed.
+  
+  If you do not want to e-file your forms now, you can still use this program to make your forms.
 fields:
-  - Do you want to file a fee waiver?: user_wants_efile
+  - Do you want to e-file?: user_wants_efile
     datatype: yesnoradio
 ---
 id: eFile Login
@@ -541,8 +581,10 @@ code: |
   # DuPage's Attorney/Firm Number / SRL Number. The SRL number is 99500.
   if len(cross_ref_type_map) == 1:
     cross_references.new_item_name = next(iter(cross_ref_type_map))
-    if cross_references.new_item_name == "136524":
+    if cross_references.new_item_name == "136524" or cross_references.new_item_name == "134531":
       cross_references.new_item_value = "99500"
+    else:
+      del cross_references.new_item_name
 ---
 code: |
   if len(cross_ref_type_map) == 1:
@@ -554,6 +596,7 @@ question: |
   What type of filing will you be making?
 subquestion: |
   We found a few filing codes that could be used to file your **${ x.title }**. Choose the one that you think best fits your case.
+  You might find more information on your other court papers.
   
   If you need help, contact the ${ trial_court } circuit clerk${ " at " + trial_court.phone if hasattr(trial_court, 'phone') else ""}. You can also visit **[Illinois Court Help](https://www.ilcourthelp.gov/)**, or you can call or text (833) 411-1121 for assistance.
 fields:
@@ -562,3 +605,53 @@ fields:
     code: |
       sorted(x.filtered_filing_type_options, key=lambda y: y[1])
 ---
+####################### Payments stuff
+id: new payment method
+question: |
+  What type of payment method do you want to make?
+subquestion: |
+fields:
+  - Name of payment method: new_account_name
+    help: |
+      You can name it anything. For example: "My Visa card", or "My bank". This name can help you identify the payment method on other screens.
+  - Type: new_account_type_code
+    datatype: radio
+    choices:
+      - Bank account: BankAccount
+        help: |
+          The bank account can be a checking or savings account. This is also known as an eCheck or an ACH transfer.
+      - Credit or debit card: CC
+  - note: |
+      On the next screen, you'll be sent to a secure payments site to enter your information.
+  - note: |
+      Note: ${ fees_explain.content }
+---
+template: convenience_fees_help
+subject: |
+  What are these fees for?
+content: |
+  The circuit clerk changes a filing fee for some documents such as a Complaint, Summons, Jury Demand, or Appearance.
+
+  There is usually a fee for a Jury Demand. Some counties charge this as an Optional or Additional Service Fee.
+
+  ${ fees_explain.content }
+---
+id: review fees info
+question: |
+  Temporary charge on payment method
+subquestion: |
+  You may see a temporary charge on your method of payment while the court clerk reviews your filing.
+  
+  The account will be charged only if your filing is accepted.
+  
+  If the filing is not accepted it can take up to 10 business days for the temporary charges to be removed.
+continue button field: review_fees_info
+---
+code: |
+  if fees_resp.is_ok():
+    review_fees_screen
+    if not user_wants_fee_waiver:
+      review_fees_info
+  else:
+    bad_fees
+  review_fees = True
